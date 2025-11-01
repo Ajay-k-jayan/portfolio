@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { 
   Files, 
   Play, 
@@ -42,14 +43,19 @@ export function Sidebar() {
     <div className="flex h-full">
       {/* Icon Bar */}
       <div className="w-12 bg-vscode-sidebar border-r border-vscode-border flex flex-col items-center py-2">
-        {sidebarItems.map((item) => {
+        {sidebarItems.map((item, index) => {
           const Icon = item.icon
           const isActive = activeSidebarView === item.id
           return (
-            <button
+            <motion.button
               key={item.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ scale: 1.1, x: 2 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => openSidebarView(item.id)}
-              className={`w-10 h-10 flex items-center justify-center mb-1 rounded transition-colors ${
+              className={`w-10 h-10 flex items-center justify-center mb-1 rounded transition-colors relative ${
                 isActive
                   ? 'bg-vscode-active text-white'
                   : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
@@ -57,7 +63,14 @@ export function Sidebar() {
               title={item.label}
             >
               <Icon size={20} />
-            </button>
+              {isActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute left-0 top-0 bottom-0 w-1 bg-vscode-blue rounded-r"
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              )}
+            </motion.button>
           )
         })}
         <div className="flex-1" />

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ExternalLink, Github, ChevronDown, ChevronUp, Code2, Play } from 'lucide-react'
 import { CodePreview } from '@/components/code-preview'
 import { LiveDemo } from '@/components/live-demo'
+import { motion } from 'framer-motion'
 
 interface Project {
   id: string
@@ -58,12 +59,16 @@ export function ProjectsTab() {
         <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
           <h1 className="text-3xl font-bold text-vscode-text mb-6">Featured Projects</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((project) => {
+            {projects.map((project, index) => {
               const isExpanded = expandedProject === project.id
               return (
-                <div
+                <motion.div
                   key={project.id}
-                  className="bg-vscode-active border border-vscode-border rounded-lg overflow-hidden hover:border-vscode-blue transition-colors"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.4 }}
+                  whileHover={{ y: -5 }}
+                  className="bg-vscode-active border border-vscode-border rounded-lg overflow-hidden hover:border-vscode-blue transition-all duration-300 hover:shadow-lg hover:shadow-vscode-blue/20"
                 >
                   <div className="p-4">
                     <div className="flex items-start justify-between mb-3">
@@ -127,7 +132,7 @@ export function ProjectsTab() {
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               )
             })}
           </div>

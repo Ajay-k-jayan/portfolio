@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronRight, ChevronDown, Folder, File, Code, Image, FileText } from 'lucide-react'
+import { ChevronRight, ChevronDown, Folder, File, Code, FileText } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { ProjectsTab } from './tabs/projects-tab'
 import { AboutTab } from './tabs/about-tab'
@@ -55,7 +55,7 @@ const fileStructure: FileItem[] = [
         icon: <Folder size={16} />,
         children: [
           { name: 'resume.pdf', type: 'file', icon: <FileText size={16} /> },
-          { name: 'profile.jpg', type: 'file', icon: <Image size={16} /> },
+          { name: 'profile.jpg', type: 'file', icon: <File size={16} /> },
         ],
       },
       { name: 'README.md', type: 'file', icon: <FileText size={16} /> },

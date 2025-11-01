@@ -1,0 +1,248 @@
+export interface ThemeColors {
+  bg: string
+  sidebar: string
+  active: string
+  hover: string
+  border: string
+  text: string
+  textSecondary: string
+  blue: string
+  blueAccent: string
+  green: string
+  orange: string
+  purple: string
+  red: string
+  yellow: string
+}
+
+export interface Theme {
+  id: string
+  name: string
+  type: 'dark' | 'light'
+  colors: ThemeColors
+  description: string
+}
+
+export const themes: Theme[] = [
+  {
+    id: 'dark',
+    name: 'Dark',
+    type: 'dark',
+    colors: {
+      bg: '#1e1e1e',
+      sidebar: '#252526',
+      active: '#2d2d30',
+      hover: '#2a2d2e',
+      border: '#3e3e42',
+      text: '#cccccc',
+      textSecondary: '#858585',
+      blue: '#007acc',
+      blueAccent: '#569cd6',
+      green: '#4ec9b0',
+      orange: '#ce9178',
+      purple: '#c586c0',
+      red: '#f48771',
+      yellow: '#dcdcaa',
+    },
+    description: 'Visual Studio Dark theme',
+  },
+  {
+    id: 'light',
+    name: 'Light',
+    type: 'light',
+    colors: {
+      bg: '#ffffff',
+      sidebar: '#f3f3f3',
+      active: '#e8e8e8',
+      hover: '#f5f5f5',
+      border: '#d0d0d0',
+      text: '#1e1e1e',
+      textSecondary: '#6e6e6e',
+      blue: '#0078d4',
+      blueAccent: '#005a9e',
+      green: '#16825d',
+      orange: '#c19c00',
+      purple: '#5c2d91',
+      red: '#a1260d',
+      yellow: '#bf8803',
+    },
+    description: 'Visual Studio Light theme',
+  },
+  {
+    id: 'blue',
+    name: 'Blue',
+    type: 'dark',
+    colors: {
+      bg: '#1e3a5f',
+      sidebar: '#254e7a',
+      active: '#2d5a8f',
+      hover: '#2a5490',
+      border: '#3e6a9f',
+      text: '#e8f4f8',
+      textSecondary: '#a8c4d8',
+      blue: '#5dade2',
+      blueAccent: '#85c1e9',
+      green: '#52b788',
+      orange: '#ffa726',
+      purple: '#ba68c8',
+      red: '#ef5350',
+      yellow: '#fff176',
+    },
+    description: 'Visual Studio Blue theme',
+  },
+  {
+    id: 'monokai',
+    name: 'Monokai',
+    type: 'dark',
+    colors: {
+      bg: '#272822',
+      sidebar: '#2f3129',
+      active: '#383a32',
+      hover: '#353731',
+      border: '#49483e',
+      text: '#f8f8f2',
+      textSecondary: '#a6e22e',
+      blue: '#66d9ef',
+      blueAccent: '#89bdfd',
+      green: '#a6e22e',
+      orange: '#fd971f',
+      purple: '#ae81ff',
+      red: '#f92672',
+      yellow: '#e6db74',
+    },
+    description: 'Monokai theme',
+  },
+  {
+    id: 'dracula',
+    name: 'Dracula',
+    type: 'dark',
+    colors: {
+      bg: '#282a36',
+      sidebar: '#21222c',
+      active: '#343746',
+      hover: '#3a3d4f',
+      border: '#44475a',
+      text: '#f8f8f2',
+      textSecondary: '#6272a4',
+      blue: '#8be9fd',
+      blueAccent: '#bd93f9',
+      green: '#50fa7b',
+      orange: '#ffb86c',
+      purple: '#bd93f9',
+      red: '#ff5555',
+      yellow: '#f1fa8c',
+    },
+    description: 'Dracula theme',
+  },
+  {
+    id: 'github-dark',
+    name: 'GitHub Dark',
+    type: 'dark',
+    colors: {
+      bg: '#0d1117',
+      sidebar: '#161b22',
+      active: '#1c2128',
+      hover: '#1f2428',
+      border: '#30363d',
+      text: '#c9d1d9',
+      textSecondary: '#8b949e',
+      blue: '#58a6ff',
+      blueAccent: '#79c0ff',
+      green: '#3fb950',
+      orange: '#d29922',
+      purple: '#bc8cff',
+      red: '#f85149',
+      yellow: '#d29922',
+    },
+    description: 'GitHub Dark theme',
+  },
+  {
+    id: 'github-light',
+    name: 'GitHub Light',
+    type: 'light',
+    colors: {
+      bg: '#ffffff',
+      sidebar: '#f6f8fa',
+      active: '#f0f3f6',
+      hover: '#f6f8fa',
+      border: '#d0d7de',
+      text: '#24292f',
+      textSecondary: '#57606a',
+      blue: '#0969da',
+      blueAccent: '#218bff',
+      green: '#1a7f37',
+      orange: '#9a6700',
+      purple: '#8250df',
+      red: '#cf222e',
+      yellow: '#9a6700',
+    },
+    description: 'GitHub Light theme',
+  },
+  {
+    id: 'high-contrast',
+    name: 'High Contrast',
+    type: 'dark',
+    colors: {
+      bg: '#000000',
+      sidebar: '#1a1a1a',
+      active: '#2a2a2a',
+      hover: '#1f1f1f',
+      border: '#ffffff',
+      text: '#ffffff',
+      textSecondary: '#cccccc',
+      blue: '#0078d4',
+      blueAccent: '#4fc3f7',
+      green: '#00ff00',
+      orange: '#ffaa00',
+      purple: '#ff00ff',
+      red: '#ff0000',
+      yellow: '#ffff00',
+    },
+    description: 'High Contrast theme',
+  },
+  {
+    id: 'nord',
+    name: 'Nord',
+    type: 'dark',
+    colors: {
+      bg: '#2e3440',
+      sidebar: '#3b4252',
+      active: '#434c5e',
+      hover: '#4c566a',
+      border: '#5e81ac',
+      text: '#eceff4',
+      textSecondary: '#d8dee9',
+      blue: '#81a1c1',
+      blueAccent: '#88c0d0',
+      green: '#a3be8c',
+      orange: '#d08770',
+      purple: '#b48ead',
+      red: '#bf616a',
+      yellow: '#ebcb8b',
+    },
+    description: 'Nord theme',
+  },
+  {
+    id: 'one-dark',
+    name: 'One Dark',
+    type: 'dark',
+    colors: {
+      bg: '#282c34',
+      sidebar: '#21252b',
+      active: '#2c313c',
+      hover: '#282c34',
+      border: '#181a1f',
+      text: '#abb2bf',
+      textSecondary: '#5c6370',
+      blue: '#61afef',
+      blueAccent: '#528bff',
+      green: '#98c379',
+      orange: '#e5c07b',
+      purple: '#c678dd',
+      red: '#e06c75',
+      yellow: '#e5c07b',
+    },
+    description: 'One Dark theme',
+  },
+]
+

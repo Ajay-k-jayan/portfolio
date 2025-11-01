@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Mic, MicOff } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import toast from 'react-hot-toast'
@@ -9,6 +9,36 @@ export function VoiceAssistant() {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const { openSidebarView, addTab } = useAppStore()
+
+  const handleVoiceCommand = useCallback((command: string) => {
+    const lower = command.toLowerCase()
+    
+    if (lower.includes('open') || lower.includes('show')) {
+      if (lower.includes('project')) {
+        openSidebarView('run-debug')
+        toast.success('Opening projects')
+      } else if (lower.includes('about')) {
+        openSidebarView('explorer')
+        addTab({ id: 'about', label: 'about.tsx', content: <div>About content</div> })
+        toast.success('Opening about')
+      } else if (lower.includes('skill')) {
+        openSidebarView('explorer')
+        addTab({ id: 'skills', label: 'skills.tsx', content: <div>Skills content</div> })
+        toast.success('Opening skills')
+      } else if (lower.includes('blog')) {
+        openSidebarView('blog')
+        toast.success('Opening blog')
+      } else if (lower.includes('contact')) {
+        openSidebarView('contact')
+        toast.success('Opening contact')
+      }
+    } else if (lower.includes('close') || lower.includes('hide')) {
+      if (lower.includes('sidebar')) {
+        // Toggle sidebar
+        toast.success('Toggling sidebar')
+      }
+    }
+  }, [openSidebarView, addTab])
 
   useEffect(() => {
     let recognition: any = null
@@ -54,7 +84,7 @@ export function VoiceAssistant() {
         recognition.stop()
       }
     }
-  }, [])
+  }, [handleVoiceCommand])
 
   const startListening = () => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
@@ -98,36 +128,6 @@ export function VoiceAssistant() {
   const stopListening = () => {
     setIsListening(false)
     toast.success('Stopped listening')
-  }
-
-  const handleVoiceCommand = (command: string) => {
-    const lower = command.toLowerCase()
-    
-    if (lower.includes('open') || lower.includes('show')) {
-      if (lower.includes('project')) {
-        openSidebarView('run-debug')
-        toast.success('Opening projects')
-      } else if (lower.includes('about')) {
-        openSidebarView('explorer')
-        addTab({ id: 'about', label: 'about.tsx', content: <div>About content</div> })
-        toast.success('Opening about')
-      } else if (lower.includes('skill')) {
-        openSidebarView('explorer')
-        addTab({ id: 'skills', label: 'skills.tsx', content: <div>Skills content</div> })
-        toast.success('Opening skills')
-      } else if (lower.includes('blog')) {
-        openSidebarView('blog')
-        toast.success('Opening blog')
-      } else if (lower.includes('contact')) {
-        openSidebarView('contact')
-        toast.success('Opening contact')
-      }
-    } else if (lower.includes('close') || lower.includes('hide')) {
-      if (lower.includes('sidebar')) {
-        // Toggle sidebar
-        toast.success('Toggling sidebar')
-      }
-    }
   }
 
   return (
