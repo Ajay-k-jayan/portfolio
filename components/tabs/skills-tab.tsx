@@ -389,55 +389,57 @@ export function SkillsTab() {
     setSortOrder('desc')
   }
 
-  // Get skill image URL from Simple Icons CDN (SVG format)
+  // Get colorful skill image URL from CDN
   const getSkillImageUrl = (skillId: string) => {
+    // Using devicons CDN for colorful logos
     const skillLogoMap: Record<string, string> = {
-      'angular': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/angular.svg',
-      'typescript': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/typescript.svg',
-      'javascript': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/javascript.svg',
-      'd3': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/d3dotjs.svg',
-      'angular-material': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/angularmaterial.svg',
-      'html': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/html5.svg',
-      'css': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/css3.svg',
-      'scss': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/sass.svg',
-      'bootstrap': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/bootstrap.svg',
-      'python': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/python.svg',
-      'django': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/django.svg',
-      'mysql': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/mysql.svg',
-      'jquery': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/jquery.svg',
-      'php': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/php.svg',
-      'git': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/git.svg',
-      'figma': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/figma.svg',
-      'adobe-xd': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/adobexd.svg',
-      'jenkins': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/jenkins.svg',
-      'storybook': 'https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/storybook.svg',
+      'angular': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg',
+      'typescript': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg',
+      'javascript': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg',
+      'd3': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/d3js/d3js-original.svg',
+      'angular-material': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/angularjs/angularjs-original.svg',
+      'html': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg',
+      'css': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg',
+      'scss': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sass/sass-original.svg',
+      'bootstrap': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bootstrap/bootstrap-original.svg',
+      'python': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg',
+      'django': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/django/django-original.svg',
+      'mysql': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg',
+      'jquery': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jquery/jquery-original.svg',
+      'php': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg',
+      'git': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg',
+      'figma': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg',
+      'adobe-xd': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/xd/xd-line.svg',
+      'jenkins': 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jenkins/jenkins-original.svg',
+      'storybook': 'https://cdn.simpleicons.org/storybook/FF4785',
     }
     return skillLogoMap[skillId] || null
   }
 
-  // Skill Icon Component with SVG images
+  // Skill Icon Component with colorful SVG images
   const SkillIcon = ({ skillId, skillName }: { skillId: string; skillName: string }) => {
     const [imageError, setImageError] = useState(false)
     const imageUrl = getSkillImageUrl(skillId)
     
     if (imageUrl && !imageError) {
       return (
-        <div className="w-14 h-14 bg-white rounded flex items-center justify-center p-2.5 border border-vscode-border flex-shrink-0 shadow-sm">
+        <div className="w-full h-full bg-white rounded-lg flex items-center justify-center p-3 border border-vscode-border shadow-md">
           <img
             src={imageUrl}
             alt={`${skillName} logo`}
             className="w-full h-full object-contain"
             onError={() => setImageError(true)}
             loading="lazy"
+            style={{ filter: 'none' }} // Ensure colorful images aren't filtered
           />
         </div>
       )
     }
     
-    // Fallback to text icon if image fails
+    // Fallback to colorful text icon if image fails
     return (
-      <div className="w-14 h-14 bg-vscode-active border border-vscode-border rounded flex items-center justify-center flex-shrink-0">
-        <span className="text-xs font-bold text-vscode-blue">
+      <div className="w-full h-full bg-gradient-to-br from-vscode-blue to-vscode-blue-accent rounded-lg flex items-center justify-center shadow-md">
+        <span className="text-lg font-bold text-white">
           {skillName.substring(0, 2).toUpperCase()}
         </span>
       </div>
@@ -671,167 +673,55 @@ export function SkillsTab() {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="bg-vscode-sidebar border border-vscode-border rounded-lg divide-y divide-vscode-border">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                           {category.skills.map((skill, index) => {
                             const isSelected = selectedSkill === skill.id
-                            const proficiency = getProficiencyBadge(skill.level)
+                            const starsFilled = Math.floor(skill.level / 20)
 
                             return (
                               <motion.div
                                 key={skill.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
                                 transition={{ delay: index * 0.03 }}
                                 onClick={() => setSelectedSkill(isSelected ? null : skill.id)}
-                                className={`px-4 py-3 cursor-pointer transition-colors border-l-2 group ${
+                                className={`bg-vscode-sidebar border border-vscode-border rounded-lg p-4 cursor-pointer transition-all group hover:border-vscode-blue/50 hover:shadow-lg flex flex-col items-center text-center ${
                                   isSelected
-                                    ? 'bg-[#007acc]/10 border-vscode-blue'
-                                    : 'hover:bg-vscode-hover border-transparent'
+                                    ? 'border-vscode-blue bg-[#007acc]/10'
+                                    : ''
                                 }`}
                               >
-                                <div className="flex items-start gap-4">
-                                  {/* Skill Icon */}
-                                  <div className="flex-shrink-0 mt-1">
-                                    <div className="w-10 h-10">
-                                      <SkillIcon skillId={skill.id} skillName={skill.name} />
-                                    </div>
-                                  </div>
-
-                                  {/* Skill Content */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <h3 className="text-sm font-semibold text-vscode-text break-words">
-                                        {skill.name}
-                                      </h3>
-                                      {skill.verified && (
-                                        <CheckCircle2 size={14} className="text-vscode-blue flex-shrink-0" />
-                                      )}
-                                    </div>
-                                    
-                                    {/* Description */}
-                                    <p className="text-xs text-vscode-text-secondary line-clamp-1 mb-1">
-                                      {skill.description}
-                                    </p>
-                                    
-                                    {/* Category and Verified */}
-                                    <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="text-xs text-vscode-text-secondary">
-                                        {skill.category}
-                                      </span>
-                                      {skill.verified && (
-                                        <>
-                                          <span className="text-vscode-text-secondary">•</span>
-                                          <span className="text-xs text-vscode-blue">Verified</span>
-                                        </>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* Right Side - Metrics */}
-                                  <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                                    {/* Star and Percentage */}
-                                    <div className="flex items-center gap-1.5">
-                                      <StarIcon size={12} className="text-yellow-400 flex-shrink-0" />
-                                      <span className="text-xs text-vscode-text-secondary whitespace-nowrap">
-                                        {skill.level}%
-                                      </span>
-                                    </div>
-
-                                    {/* Years */}
-                                    {skill.years && (
-                                      <div className="flex items-center gap-1.5">
-                                        <Clock size={12} className="text-vscode-text-secondary opacity-60 flex-shrink-0" />
-                                        <span className="text-xs text-vscode-text-secondary whitespace-nowrap">
-                                          {skill.years}
-                                        </span>
-                                      </div>
-                                    )}
-
-                                    {/* Proficiency Badge */}
-                                    <span className={`text-xs font-medium px-2 py-0.5 rounded whitespace-nowrap ${proficiency.color} bg-opacity-10`}>
-                                      {proficiency.text}
-                                    </span>
-
-                                    {/* Settings Icon */}
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        // Handle settings click
-                                      }}
-                                      className="p-1.5 hover:bg-vscode-active rounded transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
-                                      title="Settings"
-                                    >
-                                      <Settings size={14} className="text-vscode-text-secondary" />
-                                    </button>
+                                {/* Skill Image */}
+                                <div className="mb-3">
+                                  <div className="w-16 h-16">
+                                    <SkillIcon skillId={skill.id} skillName={skill.name} />
                                   </div>
                                 </div>
 
-                                {/* Expanded Details (if selected) */}
-                                {isSelected && (
-                                  <motion.div
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="mt-3 pt-3 border-t border-vscode-border"
-                                  >
-                                    <div className="space-y-2">
-                                      {/* Full Description */}
-                                      <p className="text-xs text-vscode-text-secondary">
-                                        {skill.description}
-                                      </p>
-                                      
-                                      {/* Additional Info */}
-                                      <div className="flex items-center gap-4 flex-wrap">
-                                        {skill.publisher && (
-                                          <div className="flex items-center gap-1.5">
-                                            <span className="text-xs text-vscode-text-secondary">Publisher:</span>
-                                            <span className="text-xs text-vscode-text">{skill.publisher}</span>
-                                          </div>
-                                        )}
-                                        {skill.projects && (
-                                          <div className="flex items-center gap-1.5">
-                                            <Download size={12} className="text-vscode-text-secondary opacity-60" />
-                                            <span className="text-xs text-vscode-text-secondary">
-                                              {skill.projects} projects
-                                            </span>
-                                          </div>
-                                        )}
-                                      </div>
+                                {/* Skill Name */}
+                                <h3 className="text-sm font-semibold text-vscode-text mb-2 line-clamp-2 leading-tight">
+                                  {skill.name}
+                                </h3>
 
-                                      {/* Tags */}
-                                      {skill.tags && skill.tags.length > 0 && (
-                                        <div>
-                                          <div className="flex flex-wrap gap-1.5 mt-2">
-                                            {skill.tags.map((tag) => (
-                                              <span
-                                                key={tag}
-                                                className="text-xs px-2 py-0.5 bg-vscode-active border border-vscode-border rounded text-vscode-text-secondary"
-                                              >
-                                                {tag}
-                                              </span>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
+                                {/* 5 Star Rating */}
+                                <div className="flex items-center justify-center gap-0.5 mb-2">
+                                  {[...Array(5)].map((_, i) => (
+                                    <StarIcon
+                                      key={i}
+                                      size={14}
+                                      className={
+                                        i < starsFilled
+                                          ? 'text-orange-400 fill-orange-400'
+                                          : 'text-vscode-text-secondary opacity-30'
+                                      }
+                                    />
+                                  ))}
+                                </div>
 
-                                      {/* Proficiency Bar */}
-                                      <div className="mt-2">
-                                        <div className="flex items-center justify-between mb-1">
-                                          <span className="text-xs text-vscode-text-secondary">Proficiency Level</span>
-                                          <span className="text-xs text-vscode-text">{skill.level}%</span>
-                                        </div>
-                                        <div className="h-1.5 bg-vscode-active rounded-full overflow-hidden">
-                                          <motion.div
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${skill.level}%` }}
-                                            transition={{ duration: 0.5, delay: 0.2 }}
-                                            className="h-full bg-vscode-blue"
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </motion.div>
-                                )}
+                                {/* Category */}
+                                <div className="text-xs text-vscode-text-secondary line-clamp-1">
+                                  {skill.category}
+                                </div>
                               </motion.div>
                             )
                           })}
