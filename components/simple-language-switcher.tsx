@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Globe, ChevronDown, Check } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Tooltip } from './ui/tooltip'
 
 export function SimpleLanguageSwitcher() {
   const { language, setLanguage } = useLanguage()
@@ -36,17 +37,19 @@ export function SimpleLanguageSwitcher() {
 
   return (
     <div ref={dropdownRef} className="relative">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-vscode-active hover:bg-vscode-hover border border-vscode-border transition-colors"
-      >
-        <Globe size={16} className="text-vscode-text-secondary" />
-        <span className="text-sm text-vscode-text">{currentLang.name}</span>
-        <ChevronDown 
-          size={14} 
-          className={`text-vscode-text-secondary transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-        />
-      </button>
+      <Tooltip content="Change Language" position="bottom">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-1.5 px-2 py-1 h-7 rounded-sm hover:bg-vscode-hover transition-colors"
+        >
+          <Globe size={13} className="text-vscode-text-secondary" />
+          <span className="text-xs text-vscode-text">{currentLang.name}</span>
+          <ChevronDown 
+            size={11} 
+            className={`text-vscode-text-secondary transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+          />
+        </button>
+      </Tooltip>
 
       <AnimatePresence>
         {isOpen && (
@@ -59,7 +62,7 @@ export function SimpleLanguageSwitcher() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 mt-2 min-w-[180px] bg-vscode-sidebar border border-vscode-border rounded-lg shadow-xl z-50 overflow-hidden"
+              className="absolute top-full right-0 mt-1 min-w-[160px] bg-vscode-sidebar border border-vscode-border rounded shadow-xl z-50 overflow-hidden"
             >
               <div className="py-1">
                 {languages.map((lang) => (
@@ -69,7 +72,7 @@ export function SimpleLanguageSwitcher() {
                       setLanguage(lang.id)
                       setIsOpen(false)
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-2 text-sm hover:bg-vscode-active transition-colors ${
+                    className={`w-full flex items-center justify-between px-3 py-1.5 text-xs hover:bg-vscode-active transition-colors ${
                       language === lang.id
                         ? 'bg-vscode-active text-vscode-blue'
                         : 'text-vscode-text'
@@ -80,7 +83,7 @@ export function SimpleLanguageSwitcher() {
                       <span>{lang.name}</span>
                     </div>
                     {language === lang.id && (
-                      <Check size={14} className="text-vscode-blue" />
+                      <Check size={12} className="text-vscode-blue" />
                     )}
                   </button>
                 ))}
