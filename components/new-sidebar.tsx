@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Home,
@@ -24,6 +24,7 @@ import { ExperienceTab } from './tabs/experience-tab'
 import { BlogSystem } from './blog-system'
 import { SocialIntegrations } from './social-integrations'
 import { FileExplorer } from './file-explorer'
+import { Tooltip } from './ui/tooltip'
 
 // Menu items configuration
 const menuItems = [
@@ -47,22 +48,11 @@ export function NewSidebar() {
     sidebarCollapsed,
     toggleSidebar
   } = useAppStore()
+  const [mounted, setMounted] = useState(false)
 
-  // Load recently selected from localStorage on mount
+  // Handle SSR - only show recently selected after mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('recentlySelected')
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved)
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            // Will be handled by store initialization
-          }
-        } catch (e) {
-          console.error('Failed to load recently selected:', e)
-        }
-      }
-    }
+    setMounted(true)
   }, [])
 
   const handleMenuItemClick = (menuId: string) => {
@@ -76,29 +66,62 @@ export function NewSidebar() {
     return (
       <div className="w-12 bg-vscode-sidebar border-r border-vscode-border flex flex-col h-full">
         {/* Recently Selected (Top) - Compact Icons */}
-        {recentlySelected.length > 0 && (
-          <div className="py-1.5 border-b border-vscode-border">
-            <div className="px-2 mb-1 flex justify-center">
+        {mounted && recentlySelected.length > 0 && (
+          <div className="py-1.5 border-b border-vscode-border flex-shrink-0">
+            <div className="mb-1 flex justify-center items-center">
               <History size={10} className="text-vscode-text-secondary" />
             </div>
-            {recentlySelected.slice(0, 3).map((menuId) => {
-              const item = menuItems.find(m => m.id === menuId)
-              if (!item) return null
-              
-              const Icon = item.icon
-              const isActive = activeMenuItem === menuId
-              
-              return (
+            <div className="flex flex-col items-center space-y-0.5">
+              {recentlySelected.slice(0, 3).map((menuId) => {
+                const item = menuItems.find(m => m.id === menuId)
+                if (!item) return null
+                
+                const Icon = item.icon
+                const isActive = activeMenuItem === menuId
+                
+                return (
+                  <Tooltip key={menuId} content={item.label} position="right">
+                    <motion.button
+                      onClick={() => handleMenuItemClick(menuId)}
+                      className={`w-8 h-8 flex items-center justify-center rounded transition-colors relative ${
+                        isActive
+                          ? 'bg-vscode-blue text-white'
+                          : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                      }`}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Icon size={14} />
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeIndicatorCollapsed"
+                          className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
+                        />
+                      )}
+                    </motion.button>
+                  </Tooltip>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Main Menu Icons - Compact Grid */}
+        <div className="flex-1 pt-0 flex flex-col items-center gap-0.5">
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            const isActive = activeMenuItem === item.id
+            
+            return (
+              <Tooltip key={item.id} content={item.label} position="right">
                 <motion.button
-                  key={menuId}
-                  onClick={() => handleMenuItemClick(menuId)}
-                  className={`w-8 h-8 mx-auto mb-0.5 flex items-center justify-center rounded transition-colors relative group ${
+                  onClick={() => handleMenuItemClick(item.id)}
+                  className={`w-8 h-8 flex items-center justify-center rounded transition-colors relative ${
                     isActive
                       ? 'bg-vscode-blue text-white'
                       : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
                   }`}
-                  title={item.label}
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ scale: 1.1, x: 2 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <Icon size={14} />
@@ -108,47 +131,8 @@ export function NewSidebar() {
                       className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
                     />
                   )}
-                  {/* Tooltip */}
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-vscode-active border border-vscode-border rounded text-xs text-vscode-text whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity shadow-lg">
-                    {item.label}
-                  </div>
                 </motion.button>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Main Menu Icons - Compact Grid */}
-        <div className="flex-1 pt-0 grid grid-cols-1 gap-0.5 px-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon
-            const isActive = activeMenuItem === item.id
-            
-            return (
-              <motion.button
-                key={item.id}
-                onClick={() => handleMenuItemClick(item.id)}
-                className={`w-8 h-8 mx-auto flex items-center justify-center rounded transition-colors relative group ${
-                  isActive
-                    ? 'bg-vscode-blue text-white'
-                    : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
-                }`}
-                title={item.label}
-                whileHover={{ scale: 1.1, x: 2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Icon size={14} />
-                {isActive && (
-                  <motion.div
-                    layoutId="activeIndicatorCollapsed"
-                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
-                  />
-                )}
-                {/* Tooltip */}
-                <div className="absolute left-full ml-2 px-2 py-1 bg-vscode-active border border-vscode-border rounded text-xs text-vscode-text whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity shadow-lg">
-                  {item.label}
-                </div>
-              </motion.button>
+              </Tooltip>
             )
           })}
         </div>
@@ -163,12 +147,12 @@ export function NewSidebar() {
       {/* Left Icon Bar - Fixed Height, No Scroll */}
       <div className="w-12 bg-vscode-sidebar border-r border-vscode-border flex flex-col h-full">
         {/* Recently Selected (Top) - Compact */}
-        {recentlySelected.length > 0 && (
+        {mounted && recentlySelected.length > 0 && (
           <div className="pt-1 pb-0.5 border-b border-vscode-border flex-shrink-0">
-            <div className="px-2 mb-0.5 flex justify-center">
+            <div className="mb-0.5 flex justify-center items-center">
               <History size={10} className="text-vscode-text-secondary" />
             </div>
-            <div className="space-y-0.5">
+            <div className="flex flex-col items-center space-y-0.5">
               {recentlySelected.slice(0, 3).map((menuId) => {
                 const item = menuItems.find(m => m.id === menuId)
                 if (!item) return null
@@ -177,30 +161,26 @@ export function NewSidebar() {
                 const isActive = activeMenuItem === menuId
                 
                 return (
-                  <motion.button
-                    key={menuId}
-                    onClick={() => handleMenuItemClick(menuId)}
-                    className={`w-8 h-8 mx-auto flex items-center justify-center rounded transition-colors relative group ${
-                      isActive
-                        ? 'bg-vscode-blue text-white'
-                        : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
-                    }`}
-                    title={item.label}
-                    whileHover={{ scale: 1.1, x: 2 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Icon size={14} />
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeIndicatorExpanded"
-                        className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
-                      />
-                    )}
-                    {/* Tooltip */}
-                    <div className="absolute left-full ml-2 px-2 py-1 bg-vscode-active border border-vscode-border rounded text-xs text-vscode-text whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity shadow-lg">
-                      {item.label}
-                    </div>
-                  </motion.button>
+                  <Tooltip key={menuId} content={item.label} position="right">
+                    <motion.button
+                      onClick={() => handleMenuItemClick(menuId)}
+                      className={`w-8 h-8 flex items-center justify-center rounded transition-colors relative ${
+                        isActive
+                          ? 'bg-vscode-blue text-white'
+                          : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                      }`}
+                      whileHover={{ scale: 1.1, x: 2 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Icon size={14} />
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeIndicatorExpanded"
+                          className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
+                        />
+                      )}
+                    </motion.button>
+                  </Tooltip>
                 )
               })}
             </div>
@@ -208,36 +188,32 @@ export function NewSidebar() {
         )}
 
         {/* Main Menu Icons - Compact, No Scroll */}
-        <div className="flex-1 flex flex-col justify-start pt-0 space-y-0.5 px-1">
+        <div className="flex-1 flex flex-col items-center justify-start pt-0 space-y-0.5">
           {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = activeMenuItem === item.id
             
             return (
-              <motion.button
-                key={item.id}
-                onClick={() => handleMenuItemClick(item.id)}
-                className={`w-8 h-8 mx-auto flex items-center justify-center rounded transition-colors relative group ${
-                  isActive
-                    ? 'bg-vscode-blue text-white'
-                    : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
-                }`}
-                title={item.label}
-                whileHover={{ scale: 1.1, x: 2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Icon size={14} />
-                {isActive && (
-                  <motion.div
-                    layoutId="activeIndicatorExpanded"
-                    className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
-                  />
-                )}
-                {/* Tooltip */}
-                <div className="absolute left-full ml-2 px-2 py-1 bg-vscode-active border border-vscode-border rounded text-xs text-vscode-text whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity shadow-lg">
-                  {item.label}
-                </div>
-              </motion.button>
+              <Tooltip key={item.id} content={item.label} position="right">
+                <motion.button
+                  onClick={() => handleMenuItemClick(item.id)}
+                  className={`w-8 h-8 flex items-center justify-center rounded transition-colors relative ${
+                    isActive
+                      ? 'bg-vscode-blue text-white'
+                      : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                  }`}
+                  whileHover={{ scale: 1.1, x: 2 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Icon size={14} />
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeIndicatorExpanded"
+                      className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
+                    />
+                  )}
+                </motion.button>
+              </Tooltip>
             )
           })}
         </div>

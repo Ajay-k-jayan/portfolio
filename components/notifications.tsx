@@ -2,6 +2,7 @@
 
 import { Bell, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { Tooltip } from './ui/tooltip'
 
 interface Notification {
   id: string
@@ -33,18 +34,31 @@ export function Notifications() {
 
   return (
     <>
-      <button
-        onClick={() => setShowPanel(!showPanel)}
-        className="relative p-2 hover:bg-blue-600 rounded transition-colors"
-        title="Notifications"
+      <Tooltip 
+        content={
+          <div className="flex flex-col gap-1">
+            <span className="font-semibold">Notifications</span>
+            {notifications.length > 0 ? (
+              <span className="text-xs opacity-75">{notifications.length} unread notification{notifications.length !== 1 ? 's' : ''}</span>
+            ) : (
+              <span className="text-xs opacity-75">No new notifications</span>
+            )}
+          </div>
+        }
+        position="top"
       >
-        <Bell size={16} />
-        {notifications.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {notifications.length}
-          </span>
-        )}
-      </button>
+        <button
+          onClick={() => setShowPanel(!showPanel)}
+          className="relative p-2 hover:bg-blue-600 rounded transition-colors"
+        >
+          <Bell size={16} />
+          {notifications.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+              {notifications.length}
+            </span>
+          )}
+        </button>
+      </Tooltip>
       {showPanel && (
         <div className="absolute bottom-8 right-0 w-80 bg-vscode-sidebar border border-vscode-border rounded-lg shadow-2xl z-50">
           <div className="flex items-center justify-between p-4 border-b border-vscode-border">

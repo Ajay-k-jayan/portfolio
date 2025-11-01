@@ -9,15 +9,21 @@ export class ThemeManager {
   private scheduledThemeTimer: NodeJS.Timeout | null = null
 
   constructor() {
-    // Load custom themes from localStorage
-    this.loadCustomThemes()
+    // Initialize with default theme first (SSR safe)
+    this.currentTheme = this.themes[0]
     
-    // Get saved theme or default to dark
-    const savedThemeId = typeof window !== 'undefined' 
-      ? localStorage.getItem('selectedTheme') || 'dark'
-      : 'dark'
-    
-    this.currentTheme = this.getThemeById(savedThemeId) || this.themes[0]
+    // Load custom themes and apply saved theme only on client
+    if (typeof window !== 'undefined') {
+      this.loadCustomThemes()
+      
+      // Get saved theme or default to dark
+      const savedThemeId = localStorage.getItem('selectedTheme') || 'dark'
+      const savedTheme = this.getThemeById(savedThemeId)
+      if (savedTheme) {
+        this.currentTheme = savedTheme
+        this.applyTheme(savedTheme)
+      }
+    }
   }
 
   getAllThemes(): Theme[] {

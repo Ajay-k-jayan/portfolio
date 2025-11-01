@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Mic, MicOff } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import toast from 'react-hot-toast'
+import { Tooltip } from './ui/tooltip'
 
 export function VoiceAssistant() {
   const [isListening, setIsListening] = useState(false)
@@ -131,17 +132,18 @@ export function VoiceAssistant() {
   }
 
   return (
-    <button
-      onClick={isListening ? stopListening : startListening}
-      className={`fixed bottom-32 right-6 rounded-full p-4 shadow-lg transition-all z-50 ${
-        isListening
-          ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-          : 'bg-vscode-blue hover:bg-blue-600'
-      } text-white`}
-      title={isListening ? 'Stop listening' : 'Start voice assistant'}
-    >
-      {isListening ? <MicOff size={24} /> : <Mic size={24} />}
-    </button>
+    <Tooltip content={isListening ? 'Stop listening' : 'Start voice assistant'}>
+      <button
+        onClick={isListening ? stopListening : startListening}
+        className={`fixed bottom-32 right-6 rounded-full p-4 shadow-lg transition-all z-50 ${
+          isListening
+            ? 'bg-red-500 hover:bg-red-600 animate-pulse'
+            : 'bg-vscode-blue hover:bg-blue-600'
+        } text-white`}
+      >
+        {isListening ? <MicOff size={24} /> : <Mic size={24} />}
+      </button>
+    </Tooltip>
   )
 }
 

@@ -1,38 +1,53 @@
 'use client'
 
-import { GitBranch, Wifi, User } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { GitBranch } from 'lucide-react'
 import { Notifications } from './notifications'
+import { DateTimeWidget } from './widgets/date-time-widget'
+import { WeatherWidget } from './widgets/weather-widget'
+import { LocationWidget } from './widgets/location-widget'
+import { SocialLinksWidget } from './widgets/social-links-widget'
+import { SystemInfoWidget } from './widgets/system-info-widget'
+import { NetworkStatusWidget } from './widgets/network-status-widget'
 
 export function StatusBar() {
-  const [visitorCount, setVisitorCount] = useState(0)
-
-  useEffect(() => {
-    // Simulate visitor count (in production, connect to analytics)
-    setVisitorCount(Math.floor(Math.random() * 100) + 1)
-  }, [])
 
   return (
-    <div className="h-6 bg-vscode-blue text-white text-xs flex items-center justify-between px-2">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5">
-          <GitBranch size={12} />
-          <span>main</span>
+    <>
+      {/* Main Status Bar */}
+      <div className="h-7 bg-vscode-blue text-white text-xs flex items-center justify-between px-2 relative overflow-hidden">
+        {/* Left Section - System Info */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {/* Date/Time Widget */}
+          <DateTimeWidget />
+
+          {/* Weather Widget */}
+          <WeatherWidget />
+
+          {/* Location Widget */}
+          <LocationWidget />
+
+          {/* Divider */}
+          <div className="h-4 w-px bg-white/20" />
+
+          {/* Network Status */}
+          <NetworkStatusWidget />
         </div>
-        <div className="flex items-center gap-1.5">
-          <Wifi size={12} />
-          <span>Connected</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <User size={12} />
-          <span>{visitorCount} visitors</span>
+
+        {/* Right Section - Actions & Info */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* System Info Widget */}
+          <SystemInfoWidget />
+
+          {/* Social Links & Resume Download */}
+          <SocialLinksWidget />
+
+          {/* Divider */}
+          <div className="h-4 w-px bg-white/20" />
+
+          {/* Notifications */}
+          <Notifications />
         </div>
       </div>
-      <div className="flex items-center gap-4">
-        <Notifications />
-        <div>Portfolio v1.0.0</div>
-      </div>
-    </div>
+    </>
   )
 }
-

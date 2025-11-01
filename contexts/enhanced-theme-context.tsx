@@ -52,7 +52,7 @@ export function EnhancedThemeProvider({ children }: { children: ReactNode }) {
   const [transitionDuration, setTransitionDuration] = useState(300)
 
   useEffect(() => {
-    if (!themeManager) return
+    if (!themeManager || typeof window === 'undefined') return
 
     // Initialize theme
     const savedThemeId = localStorage.getItem('selectedTheme') || 'dark'

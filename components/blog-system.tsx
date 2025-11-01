@@ -92,9 +92,11 @@ export function BlogSystem() {
                     {post.title}
                   </h2>
                   {post.aiSummary && (
-                    <div className="flex items-center gap-1 text-vscode-purple" title="AI Summary Available">
-                      <Sparkles size={16} />
-                    </div>
+                    <Tooltip content="AI Summary Available">
+                      <div className="flex items-center gap-1 text-vscode-purple">
+                        <Sparkles size={16} />
+                      </div>
+                    </Tooltip>
                   )}
                 </div>
                 <p className="text-vscode-text-secondary text-sm mb-4">{post.excerpt}</p>
