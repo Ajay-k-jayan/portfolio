@@ -17,6 +17,7 @@ import { AchievementsView } from './sidebar-views/achievements-view'
 import { ExperienceTab } from './tabs/experience-tab'
 import { BlogSystem } from './blog-system'
 import { SocialIntegrations } from './social-integrations'
+import { RecommendationsTab } from './tabs/recommendations-tab'
 
 export function VSCodeLayout({ children }: { children: React.ReactNode }) {
   const { tabs, activeTabId, sidebarCollapsed, activeMenuItem } = useAppStore()
@@ -33,7 +34,7 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
       'certifications': <AchievementsView />,
       'blogs': <BlogSystem />,
       'social-medias': <SocialIntegrations />,
-      'recommendation': <div className="p-8"><h2 className="text-2xl font-bold text-vscode-text">Recommendations</h2><p className="text-vscode-text-secondary mt-4">Recommendations will be displayed here.</p></div>,
+      'recommendation': <RecommendationsTab />,
     }
     return contentMap[activeMenuItem] || <WelcomeTab />
   }
