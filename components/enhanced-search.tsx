@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Search, X, FileText, Code, BookOpen, User, Sparkles } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Search, X, FileText, Code, Briefcase, BookOpen, Trophy } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAppStore } from '@/lib/store'
 import { useLanguage } from '@/contexts/language-context'
 
 interface SearchResult {
@@ -24,10 +25,10 @@ const searchableContent: SearchResult[] = [
 ]
 
 const typeIcons = {
-  project: Code,
-  skill: Sparkles,
+  project: Briefcase,
+  skill: Code,
   blog: BookOpen,
-  page: User,
+  page: FileText,
 }
 
 const typeLabels = {
@@ -108,162 +109,139 @@ export function EnhancedSearch() {
 
   return (
     <div ref={searchRef} className="relative w-full max-w-2xl">
-      <div className="relative group">
-        {/* Acrylic Background with Gradient */}
+      {/* Search Input - Dark Theme Design matching the image */}
+      <div className="relative">
         <div
-          className={`absolute inset-0 rounded-xl transition-all duration-300 ${
+          className={`relative rounded-xl transition-all duration-300 ${
             isFocused
-              ? 'bg-gradient-to-r from-vscode-blue/20 via-vscode-blue/10 to-transparent backdrop-blur-md border border-vscode-blue/30 shadow-lg shadow-vscode-blue/20'
-              : 'bg-vscode-active/80 backdrop-blur-sm border border-vscode-border/50'
+              ? 'ring-2 ring-vscode-blue/50 shadow-lg shadow-vscode-blue/20'
+              : 'shadow-md'
           }`}
           style={{
-            background: isFocused
-              ? 'linear-gradient(135deg, rgba(0, 122, 204, 0.15) 0%, rgba(0, 122, 204, 0.05) 100%)'
-              : undefined,
+            backgroundColor: '#2D2D2D',
+            border: '1px solid #4A4A4A',
           }}
-        />
+        >
+          {/* Magnifying Glass Icon */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+            <Search
+              size={18}
+              style={{ 
+                color: isFocused ? '#007acc' : '#CCCCCC'
+              }}
+            />
+          </div>
 
-        {/* Search Icon */}
-        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-          <Search
-            size={18}
-            className={`transition-colors duration-300 ${
-              isFocused ? 'text-vscode-blue' : 'text-vscode-text-secondary'
-            }`}
-          />
-        </div>
-
-        {/* Input */}
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          placeholder={t('searchPlaceholder') || 'Search projects, skills, blog…'}
-          className="relative w-full bg-transparent border-0 rounded-xl pl-11 pr-10 py-2.5 text-sm text-vscode-text placeholder-vscode-text-secondary/60 focus:outline-none font-medium transition-all duration-300"
-          style={{
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-          }}
-        />
-
-        {/* Clear Button */}
-        {query && (
-          <motion.button
-            type="button"
-            onClick={clearSearch}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 p-1 rounded-md hover:bg-vscode-hover/50 transition-colors"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <X size={16} className="text-vscode-text-secondary hover:text-vscode-text" />
-          </motion.button>
-        )}
-
-        {/* Focus Ring */}
-        {isFocused && (
-          <motion.div
-            className="absolute inset-0 rounded-xl pointer-events-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+          {/* Input Field */}
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            placeholder={t('searchPlaceholder') || 'Search'}
+            className="w-full pl-12 pr-10 py-3 bg-transparent border-0 outline-none text-sm font-normal"
             style={{
-              boxShadow: '0 0 0 2px rgba(0, 122, 204, 0.4), 0 4px 12px rgba(0, 122, 204, 0.15)',
+              color: '#CCCCCC',
             }}
           />
-        )}
+
+          {/* Clear Button */}
+          {query && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-vscode-hover transition-colors"
+              style={{ color: '#CCCCCC' }}
+            >
+              <X size={16} />
+            </motion.button>
+          )}
+        </div>
       </div>
 
       {/* Search Results Dropdown */}
       <AnimatePresence>
         {isFocused && results.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="absolute top-full mt-2 w-full bg-vscode-sidebar/95 backdrop-blur-xl border border-vscode-border rounded-xl shadow-2xl overflow-hidden z-50"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl z-50 overflow-hidden"
             style={{
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 122, 204, 0.1)',
+              backgroundColor: '#2D2D2D',
+              border: '1px solid #4A4A4A',
             }}
           >
-            <div className="max-h-96 overflow-y-auto custom-scrollbar">
+            <div className="max-h-80 overflow-y-auto custom-scrollbar">
               {results.map((result, index) => {
                 const Icon = typeIcons[result.type]
                 const isSelected = index === selectedIndex
-
                 return (
                   <motion.button
                     key={result.id}
                     onClick={() => handleResultClick(result)}
+                    onMouseEnter={() => setSelectedIndex(index)}
                     className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors ${
                       isSelected
-                        ? 'bg-vscode-blue/20 border-l-2 border-l-vscode-blue'
-                        : 'hover:bg-vscode-active/50'
+                        ? 'bg-vscode-blue/20'
+                        : 'hover:bg-vscode-hover'
                     }`}
-                    onMouseEnter={() => setSelectedIndex(index)}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.03 }}
+                    style={{
+                      backgroundColor: isSelected ? 'rgba(0, 122, 204, 0.2)' : 'transparent',
+                    }}
                   >
-                    <div className={`p-2 rounded-lg ${isSelected ? 'bg-vscode-blue/30' : 'bg-vscode-active'}`}>
-                      <Icon
-                        size={16}
-                        className={isSelected ? 'text-vscode-blue' : 'text-vscode-text-secondary'}
-                      />
-                    </div>
+                    <Icon
+                      size={18}
+                      style={{
+                        color: isSelected ? '#007acc' : '#CCCCCC',
+                      }}
+                    />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs text-vscode-text-secondary uppercase tracking-wide">
-                          {typeLabels[result.type]}
-                        </span>
-                        <span className="text-xs text-vscode-text-secondary">•</span>
-                        <span
-                          className={`text-sm font-medium ${
-                            isSelected ? 'text-vscode-blue' : 'text-vscode-text'
-                          }`}
-                        >
-                          {result.title}
-                        </span>
+                      <div
+                        className="text-sm font-medium mb-0.5"
+                        style={{
+                          color: isSelected ? '#007acc' : '#CCCCCC',
+                        }}
+                      >
+                        {result.title}
                       </div>
                       {result.description && (
-                        <p className="text-xs text-vscode-text-secondary line-clamp-1">
+                        <div
+                          className="text-xs"
+                          style={{ color: '#858585' }}
+                        >
                           {result.description}
-                        </p>
+                        </div>
                       )}
                     </div>
                   </motion.button>
                 )
               })}
             </div>
-
-            {/* Footer */}
-            <div className="px-4 py-2 bg-vscode-active/50 border-t border-vscode-border text-xs text-vscode-text-secondary flex items-center justify-between">
-              <span>Navigate with ↑↓ or mouse</span>
-              <span>Press Enter to open</span>
-            </div>
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {/* No Results Message */}
-      <AnimatePresence>
+        {/* No Results */}
         {isFocused && query.trim() && results.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full mt-2 w-full bg-vscode-sidebar/95 backdrop-blur-xl border border-vscode-border rounded-xl shadow-2xl p-6 text-center z-50"
+            className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl z-50 p-4 text-center"
+            style={{
+              backgroundColor: '#2D2D2D',
+              border: '1px solid #4A4A4A',
+            }}
           >
-            <p className="text-sm text-vscode-text-secondary">
+            <div style={{ color: '#858585' }} className="text-sm">
               No results found for &quot;{query}&quot;
-            </p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   )
 }
-

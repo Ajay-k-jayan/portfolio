@@ -119,7 +119,7 @@ export function NewSidebar() {
         )}
 
         {/* Main Menu Icons - Compact Grid */}
-        <div className="flex-1 py-1.5 grid grid-cols-1 gap-0.5 px-1">
+        <div className="flex-1 pt-0 grid grid-cols-1 gap-0.5 px-1">
           {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = activeMenuItem === item.id
@@ -164,8 +164,8 @@ export function NewSidebar() {
       <div className="w-12 bg-vscode-sidebar border-r border-vscode-border flex flex-col h-full">
         {/* Recently Selected (Top) - Compact */}
         {recentlySelected.length > 0 && (
-          <div className="py-1.5 border-b border-vscode-border flex-shrink-0">
-            <div className="px-2 mb-1 flex justify-center">
+          <div className="pt-1 pb-0.5 border-b border-vscode-border flex-shrink-0">
+            <div className="px-2 mb-0.5 flex justify-center">
               <History size={10} className="text-vscode-text-secondary" />
             </div>
             <div className="space-y-0.5">
@@ -208,7 +208,7 @@ export function NewSidebar() {
         )}
 
         {/* Main Menu Icons - Compact, No Scroll */}
-        <div className="flex-1 flex flex-col justify-center py-1 space-y-0.5 px-1">
+        <div className="flex-1 flex flex-col justify-start pt-0 space-y-0.5 px-1">
           {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = activeMenuItem === item.id

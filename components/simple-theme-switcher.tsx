@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Moon, Sun, ChevronDown, Check } from 'lucide-react'
+import { Moon, Sun, ChevronDown, Check, Palette, Sparkles, Droplet, Paintbrush, Brush, Circle, Square, Hexagon, Stars, Rocket } from 'lucide-react'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -27,10 +27,26 @@ export function SimpleThemeSwitcher() {
     }
   }, [isOpen])
 
-  // Get icon based on current theme type
+  // Get icon based on theme name/type
+  const getIconForTheme = (themeId: string, themeType: string) => {
+    const iconMap: Record<string, typeof Moon> = {
+      'dark': Moon,
+      'light': Sun,
+      'blue': Droplet,
+      'monokai': Paintbrush,
+      'dracula': Sparkles,
+      'github-dark': Circle,
+      'github-light': Sun,
+      'high-contrast': Square,
+      'nord': Hexagon,
+      'one-dark': Stars,
+    }
+    return iconMap[themeId] || (themeType === 'light' ? Sun : Palette)
+  }
+
   const getIcon = () => {
-    if (!currentTheme) return Moon
-    return currentTheme.type === 'light' ? Sun : Moon
+    if (!currentTheme) return Palette
+    return getIconForTheme(currentTheme.id, currentTheme.type)
   }
 
   const Icon = getIcon()
@@ -77,11 +93,27 @@ export function SimpleThemeSwitcher() {
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      {theme.type === 'light' ? (
-                        <Sun size={14} className="text-vscode-text-secondary" />
-                      ) : (
-                        <Moon size={14} className="text-vscode-text-secondary" />
-                      )}
+                      {(() => {
+                        const ThemeIcon = getIconForTheme(theme.id, theme.type)
+                        const iconColors: Record<string, string> = {
+                          'dark': 'text-vscode-blue',
+                          'light': 'text-yellow-400',
+                          'blue': 'text-blue-400',
+                          'monokai': 'text-green-400',
+                          'dracula': 'text-purple-400',
+                          'github-dark': 'text-gray-400',
+                          'github-light': 'text-orange-400',
+                          'high-contrast': 'text-white',
+                          'nord': 'text-cyan-400',
+                          'one-dark': 'text-vscode-blue',
+                        }
+                        return (
+                          <ThemeIcon 
+                            size={14} 
+                            className={iconColors[theme.id] || 'text-vscode-text-secondary'} 
+                          />
+                        )
+                      })()}
                       <span>{theme.name}</span>
                     </div>
                     {currentTheme?.id === theme.id && (
