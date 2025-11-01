@@ -10,22 +10,18 @@ export function PortfolioHeader() {
   const [showSearchMobile, setShowSearchMobile] = useState(false)
 
   return (
-    <header className="h-14 bg-vscode-sidebar border-b border-vscode-border flex items-center px-4 relative z-50">
+    <header className="h-12 bg-vscode-sidebar border-b border-vscode-border flex items-center px-3 py-1.5 relative z-50">
       {/* Left: Portfolio Brand */}
       <div className="flex-shrink-0">
-        <motion.h1
-          className="text-lg font-bold text-vscode-text tracking-wide"
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: 'spring', stiffness: 300 }}
-        >
+        <h1 className="text-sm font-semibold text-vscode-text">
           <span className="text-vscode-blue">Ajay</span>{' '}
           <span className="text-vscode-text">Portfolio</span>
-        </motion.h1>
+        </h1>
       </div>
 
       {/* Center: Enhanced Global Search Bar */}
-      <div className="flex-1 flex justify-center px-4">
-        <div className="w-full max-w-2xl hidden md:block">
+      <div className="flex-1 flex justify-center px-3">
+        <div className="w-full max-w-md hidden md:block">
           <EnhancedSearch />
         </div>
 

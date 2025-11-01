@@ -108,27 +108,24 @@ export function EnhancedSearch() {
   }
 
   return (
-    <div ref={searchRef} className="relative w-full max-w-2xl">
-      {/* Search Input - Dark Theme Design matching the image */}
-      <div className="relative">
+    <div ref={searchRef} className="relative w-full max-w-md">
+      {/* Search Input - VS Code Extensions Search Style */}
+      <div className="relative my-3">
         <div
-          className={`relative rounded-xl transition-all duration-300 ${
-            isFocused
-              ? 'ring-2 ring-vscode-blue/50 shadow-lg shadow-vscode-blue/20'
-              : 'shadow-md'
+          className={`relative rounded-sm h-8 flex items-center border transition-colors ${
+            isFocused 
+              ? 'border-vscode-blue' 
+              : 'border-vscode-border'
           }`}
           style={{
-            backgroundColor: '#2D2D2D',
-            border: '1px solid #4A4A4A',
+            backgroundColor: 'var(--theme-sidebar)',
           }}
         >
           {/* Magnifying Glass Icon */}
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+          <div className="absolute left-3 pointer-events-none z-10">
             <Search
-              size={18}
-              style={{ 
-                color: isFocused ? '#007acc' : '#CCCCCC'
-              }}
+              size={16}
+              className="text-vscode-text-secondary"
             />
           </div>
 
@@ -139,11 +136,12 @@ export function EnhancedSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
-            placeholder={t('searchPlaceholder') || 'Search'}
-            className="w-full pl-12 pr-10 py-3 bg-transparent border-0 outline-none text-sm font-normal"
-            style={{
-              color: '#CCCCCC',
+            onBlur={() => {
+              // Delay blur to allow click on results
+              setTimeout(() => setIsFocused(false), 200)
             }}
+            placeholder={t('searchPlaceholder') || 'Search'}
+            className="w-full pl-10 pr-8 h-full bg-transparent border-0 outline-none text-sm font-normal text-vscode-text placeholder:text-vscode-text-secondary"
           />
 
           {/* Clear Button */}
@@ -152,10 +150,10 @@ export function EnhancedSearch() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-vscode-hover transition-colors"
-              style={{ color: '#CCCCCC' }}
+              className="absolute right-1 p-0.5 rounded hover:bg-vscode-hover transition-colors flex items-center justify-center"
+              style={{ color: 'var(--theme-text-secondary)' }}
             >
-              <X size={16} />
+              <X size={11} />
             </motion.button>
           )}
         </div>
@@ -169,11 +167,7 @@ export function EnhancedSearch() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl z-50 overflow-hidden"
-            style={{
-              backgroundColor: '#2D2D2D',
-              border: '1px solid #4A4A4A',
-            }}
+            className="absolute top-full left-0 right-0 mt-1 rounded shadow-2xl z-50 overflow-hidden bg-vscode-sidebar border border-vscode-border"
           >
             <div className="max-h-80 overflow-y-auto custom-scrollbar">
               {results.map((result, index) => {
@@ -230,11 +224,7 @@ export function EnhancedSearch() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl z-50 p-4 text-center"
-            style={{
-              backgroundColor: '#2D2D2D',
-              border: '1px solid #4A4A4A',
-            }}
+            className="absolute top-full left-0 right-0 mt-1 rounded shadow-2xl z-50 p-4 text-center bg-vscode-sidebar border border-vscode-border"
           >
             <div style={{ color: '#858585' }} className="text-sm">
               No results found for &quot;{query}&quot;

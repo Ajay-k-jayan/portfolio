@@ -474,27 +474,29 @@ export function SkillsTab() {
         </div>
 
         {/* Search Bar */}
-        <div className="mb-4">
+        <div className="mb-6 mt-4">
           <div className="relative">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-vscode-text-secondary pointer-events-none"
-            />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search skills by name, description, or tags..."
-              className="w-full pl-11 pr-10 py-3 bg-vscode-sidebar border border-vscode-border rounded-lg text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:border-transparent transition-all"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-vscode-hover rounded transition-colors"
-              >
-                <X size={16} className="text-vscode-text-secondary" />
-              </button>
-            )}
+            <div className="relative rounded-sm h-8 flex items-center border border-vscode-border bg-vscode-sidebar transition-colors">
+              <Search
+                size={16}
+                className="absolute left-3 text-vscode-text-secondary pointer-events-none z-10"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search"
+                className="w-full pl-10 pr-8 h-full bg-transparent border-0 outline-none text-sm font-normal text-vscode-text placeholder:text-vscode-text-secondary focus:outline-none focus:ring-0"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 p-1 hover:bg-vscode-hover rounded transition-colors flex items-center justify-center"
+                >
+                  <X size={14} className="text-vscode-text-secondary" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -633,21 +635,26 @@ export function SkillsTab() {
               const isExpanded = expandedSections[sectionKey] ?? true
 
               return (
-                <div key={category.name} className="space-y-3">
+                <div key={category.name} className="mb-5">
                   <button
-                    onClick={() => toggleSection(sectionKey)}
-                    className="w-full px-3 py-2.5 bg-[#252526] border border-[#3e3e42] rounded flex items-center gap-2.5 hover:bg-[#2a2d2e] transition-colors group"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      toggleSection(sectionKey)
+                    }}
+                    className="w-full flex items-center gap-2.5 px-0 py-2 text-left hover:opacity-80 transition-opacity group cursor-pointer"
                   >
                     <motion.div
                       animate={{ rotate: isExpanded ? 90 : 0 }}
                       transition={{ duration: 0.2 }}
+                      className="flex-shrink-0"
                     >
-                      <ChevronRight size={14} className="text-[#cccccc] group-hover:text-[#ffffff]" />
+                      <ChevronRight size={14} className="text-vscode-text-secondary" />
                     </motion.div>
-                    <span className="text-xs font-medium text-[#cccccc] uppercase tracking-wider flex-1 text-left">
+                    <span className="text-sm font-medium text-vscode-text uppercase tracking-wide flex-1 text-left">
                       {category.name}
                     </span>
-                    <span className="w-5 h-5 rounded-full border border-[#3e3e42] flex items-center justify-center text-[10px] text-[#cccccc] font-medium bg-[#1e1e1e]">
+                    <span className="text-xs text-vscode-text-secondary bg-[#2d2d30] border border-[#3e3e42] px-2 py-0.5 rounded font-medium">
                       {category.skills.length}
                     </span>
                   </button>

@@ -12,7 +12,7 @@ interface LanguageContextType {
 
 const translations = {
   en: {
-    searchPlaceholder: 'Search projects, skills, blog…',
+    searchPlaceholder: 'Search',
     changeLanguage: 'Change Language',
     theme: 'Theme',
     welcome: 'Welcome',
@@ -23,7 +23,7 @@ const translations = {
     contact: 'Contact',
   },
   ml: {
-    searchPlaceholder: 'പ്രോജക്റ്റുകൾ, വൈദഗ്ദ്ധ്യം, ബ്ലോഗ് തിരയുക…',
+    searchPlaceholder: 'തിരയുക',
     changeLanguage: 'ഭാഷ മാറ്റുക',
     theme: 'തീം',
     welcome: 'സ്വാഗതം',
