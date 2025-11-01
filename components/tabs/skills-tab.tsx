@@ -339,7 +339,7 @@ export function SkillsTab() {
     (levelFilter !== 'all' ? 1 : 0) +
     (sortBy !== 'level' || sortOrder !== 'desc' ? 1 : 0)
 
-  const SkillCard = ({ skill, index }: { skill: Skill; index: number }) => {
+  const SkillCard = ({ skill, index, isListView = false }: { skill: Skill; index: number; isListView?: boolean }) => {
     const starsFilled = Math.floor(skill.level / 20)
     const badge = getProficiencyBadge(skill.level)
     const isExpert = skill.level >= 80
@@ -350,31 +350,34 @@ export function SkillsTab() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: index * 0.02, duration: 0.2 }}
-        className="relative bg-vscode-sidebar border border-vscode-border rounded-lg p-3 hover:border-vscode-blue/50 hover:shadow-lg transition-all group cursor-pointer"
+        className={`relative bg-vscode-sidebar border border-vscode-border hover:border-vscode-blue/50 hover:shadow-lg transition-all group cursor-pointer ${
+          isListView ? 'p-2.5 rounded' : 'rounded-lg p-3'
+        }`}
         onClick={() => {
           if (website) {
             window.open(website, '_blank', 'noopener,noreferrer')
           }
         }}
       >
-
-
         {/* Card Content */}
-        <div className="flex items-center gap-3">
-          <div className="flex-shrink-0">
-            <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center p-2 shadow-md border border-vscode-border/20 transition-transform group-hover:scale-110">
-              <SkillIcon skillId={skill.id} skillName={skill.name} />
+        {isListView ? (
+          <div className="flex items-center gap-3 w-full">
+            {/* Icon */}
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 p-1 bg-white rounded-full flex items-center justify-center shadow-md border border-vscode-border/20">
+                <SkillIcon skillId={skill.id} skillName={skill.name} />
+              </div>
             </div>
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <div className="mb-1">
-              <h3 className="text-sm font-semibold text-vscode-text line-clamp-1 leading-tight">
+            
+            {/* Skill Name */}
+            <div className="flex-shrink-0">
+              <h3 className="text-sm font-semibold text-vscode-text">
                 {skill.name}
               </h3>
             </div>
 
-            <div className="flex items-center gap-0.5 mb-1.5">
+            {/* Stars */}
+            <div className="flex items-center gap-0.5 flex-shrink-0">
               {[...Array(5)].map((_, i) => (
                 <StarIcon
                   key={i}
@@ -388,11 +391,52 @@ export function SkillsTab() {
               ))}
             </div>
 
-            <div className="text-[10px] text-vscode-text-secondary">
-              {skill.category}
+            {/* Spacer */}
+            <div className="flex-1"></div>
+
+            {/* Category - Right aligned */}
+            <div className="flex-shrink-0">
+              <span className="text-xs text-vscode-text-secondary">
+                {skill.category}
+              </span>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              <div className="w-14 h-14 p-2 bg-white rounded-full flex items-center justify-center shadow-md border border-vscode-border/20 transition-transform group-hover:scale-110">
+                <SkillIcon skillId={skill.id} skillName={skill.name} />
+              </div>
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="mb-1.5">
+                <h3 className="text-sm font-semibold text-vscode-text line-clamp-1 leading-tight">
+                  {skill.name}
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon
+                      key={i}
+                      size={10}
+                      className={
+                        i < starsFilled
+                          ? 'text-orange-400 fill-orange-400'
+                          : 'text-vscode-text-secondary opacity-30'
+                      }
+                    />
+                  ))}
+                </div>
+                <span className="text-[10px] text-vscode-text-secondary">
+                  {skill.category}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
       </motion.div>
     )
@@ -506,7 +550,7 @@ export function SkillsTab() {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm transition-colors ${
+              className={`flex items-center gap-2 px-3 h-8 rounded text-sm transition-colors ${
                 showFilters ? 'bg-vscode-blue text-white' : 'bg-vscode-sidebar border border-vscode-border hover:bg-vscode-hover text-vscode-text'
               }`}
             >
@@ -523,7 +567,7 @@ export function SkillsTab() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-3 py-1.5 bg-vscode-sidebar border border-vscode-border rounded text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue"
+              className="px-3 h-8 bg-vscode-sidebar border border-vscode-border rounded text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue"
             >
               <option value="level">Sort by Level</option>
               <option value="name">Sort by Name</option>
@@ -532,7 +576,7 @@ export function SkillsTab() {
             </select>
             <button
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="p-1.5 bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover transition-colors"
+              className="w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover transition-colors"
             >
               {sortOrder === 'asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
             </button>
@@ -675,9 +719,9 @@ export function SkillsTab() {
                             ))}
                           </div>
                         ) : (
-                          <div className="space-y-2">
+                          <div className="space-y-1.5">
                             {category.skills.map((skill, index) => (
-                              <SkillCard key={skill.id} skill={skill} index={index} />
+                              <SkillCard key={skill.id} skill={skill} index={index} isListView={true} />
                             ))}
                           </div>
                         )}
