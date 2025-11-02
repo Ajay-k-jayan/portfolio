@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Clock, Sparkles, Globe } from 'lucide-react'
+import { Calendar, Clock, Sparkles, Globe, BookOpen } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Tooltip } from './ui/tooltip'
@@ -73,8 +73,14 @@ export function BlogSystem() {
     <div className="h-full p-6 overflow-auto">
       {!selectedPost ? (
         <div className="max-w-5xl mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-vscode-text">Blog</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2 mb-1">
+                <BookOpen className="text-vscode-blue" size={20} />
+                Blog
+              </h1>
+              <p className="text-sm text-vscode-text-secondary">Articles and insights on web development and technology</p>
+            </div>
             <div className="flex items-center gap-2 text-sm text-vscode-text-secondary">
               <Globe size={16} />
               <span>Available in multiple languages</span>

@@ -14,6 +14,7 @@ import { WelcomeTab } from './tabs/welcome-tab'
 import { SkillsTab } from './tabs/skills-tab'
 import { ProjectsTab } from './tabs/projects-tab'
 import { AchievementsView } from './sidebar-views/achievements-view'
+import { CertificationsView } from './sidebar-views/certifications-view'
 import { ExperienceTab } from './tabs/experience-tab'
 import { BlogSystem } from './blog-system'
 import { SocialIntegrations } from './social-integrations'
@@ -31,7 +32,7 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
       'project': <ProjectsTab />,
       'achievement': <AchievementsView />,
       'experience': <ExperienceTab />,
-      'certifications': <AchievementsView />,
+      'certifications': <CertificationsView />,
       'blogs': <BlogSystem />,
       'social-medias': <SocialIntegrations />,
       'recommendation': <RecommendationsTab />,

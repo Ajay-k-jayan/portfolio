@@ -1,6 +1,6 @@
 'use client'
 
-import { Github, Linkedin, Mail, Download, ExternalLink } from 'lucide-react'
+import { Github, Linkedin, Mail, Download, ExternalLink, Share2 } from 'lucide-react'
 
 export function SocialIntegrations() {
   const socialLinks = [
@@ -33,8 +33,18 @@ export function SocialIntegrations() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
+    <div className="h-full p-8 overflow-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2 mb-1">
+            <Share2 className="text-vscode-blue" size={20} />
+            Social Medias
+          </h1>
+          <p className="text-sm text-vscode-text-secondary">Connect with me on social platforms and download my resume</p>
+        </div>
+        
+        <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
         <h2 className="text-xl font-semibold text-vscode-text mb-4">Connect with Me</h2>
         <div className="flex flex-wrap gap-4">
           {socialLinks.map((social) => {
@@ -120,6 +130,7 @@ export function SocialIntegrations() {
             Send Message
           </button>
         </form>
+      </div>
       </div>
     </div>
   )

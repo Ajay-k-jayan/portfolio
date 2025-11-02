@@ -1,53 +1,105 @@
 'use client'
 
-import { Trophy, ExternalLink, Calendar, Search, ArrowUpDown, LayoutGrid, LayoutList } from 'lucide-react'
+import { Award, ExternalLink, Calendar, Search, ArrowUpDown, LayoutGrid, LayoutList } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from '../ui/tooltip'
 
 type ViewMode = 'grid' | 'list'
 
-interface Achievement {
+interface Certification {
   id: string
   name: string
   issuer: string
   date: string
   url: string
-  description: string
 }
 
-const achievements: Achievement[] = [
+const certifications: Certification[] = [
   {
     id: '1',
-    name: 'Beinex Excelencia Award',
-    issuer: 'Beinex',
-    date: 'Dec 2024',
-    url: 'https://www.linkedin.com/posts/ajay-k-jayan_beinex-aurex-excellenceaward-activity-7272685557753737216-j5G5?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAADhUQH0B75sHXxuJZHIofzdfcMBiTv5KIp0',
-    description: 'Excellence Award for outstanding performance and contribution',
+    name: 'Programming with JavaScript',
+    issuer: 'Meta, Coursera',
+    date: 'Aug 2023',
+    url: 'https://www.coursera.org/account/accomplishments/certificate/7CHPEWSYGXD9',
   },
   {
     id: '2',
-    name: 'Star Performer in Full Stack Web Development Internship Program',
-    issuer: 'Beinex',
-    date: 'Jun - Aug 2022',
-    url: 'https://academy.beinex.com/certificates/yW0BUsGUQ1UKeiFhPEozwI4Bwk4m?ref',
-    description: 'Recognized as Star Performer for exceptional contribution during internship program',
+    name: 'Version Control',
+    issuer: 'Meta, Coursera',
+    date: 'Aug 2023',
+    url: 'https://www.coursera.org/account/accomplishments/certificate/2GZUY2SUXAVB',
+  },
+  {
+    id: '3',
+    name: 'Introduction to Front-End Development',
+    issuer: 'Meta, Coursera',
+    date: 'Jul 2023',
+    url: 'https://google.com/',
+  },
+  {
+    id: '4',
+    name: 'Modern JavaScript: ES6 Basics',
+    issuer: 'Google, Coursera',
+    date: 'Jul 2023',
+    url: 'https://coursera.org/share/e6eeaf6c1b164db0eea5ab20f68680b9',
+  },
+  {
+    id: '5',
+    name: 'React.js Essentials Bootcamp',
+    issuer: 'LetsUpgrade',
+    date: 'Jun 2023',
+    url: 'https://verify.letsupgrade.in/certificate/LUERJSJUN123217',
+  },
+  {
+    id: '6',
+    name: 'Regular Expressions in Python',
+    issuer: 'Coursera',
+    date: 'Sep 2022',
+    url: 'https://www.coursera.org/account/accomplishments/certificate/PJJXDR63PLZZ',
+  },
+  {
+    id: '7',
+    name: 'Get Started with Figma',
+    issuer: 'Coursera',
+    date: 'Aug 2022',
+    url: 'https://www.coursera.org/account/accomplishments/certificate/TM6KQS57MASK',
+  },
+  {
+    id: '8',
+    name: 'AI For Everyone',
+    issuer: 'DeepLearning.AI, Coursera',
+    date: 'Sep 2020',
+    url: 'https://www.coursera.org/account/accomplishments/certificate/27YGB49FSF6Q',
+  },
+  {
+    id: '9',
+    name: 'Amazon Web Services (AWS)',
+    issuer: 'Amazon Web Services (AWS), Coursera',
+    date: 'Sep 2020',
+    url: 'https://www.coursera.org/account/accomplishments/certificate/9KLJZPV5CWY6',
+  },
+  {
+    id: '10',
+    name: 'Programming for Everybody (Getting Started with Python)',
+    issuer: 'University of Michigan, Coursera',
+    date: 'Jun 2020',
+    url: 'https://www.coursera.org/account/accomplishments/certificate/V6RS8KL44Q5B',
   },
 ]
 
-export function AchievementsView() {
+export function CertificationsView() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'issuer'>('date')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   const filteredAndSorted = useMemo(() => {
-    let filtered = achievements.filter((achievement) => {
+    let filtered = certifications.filter((cert) => {
       const searchLower = searchQuery.toLowerCase()
       return (
-        achievement.name.toLowerCase().includes(searchLower) ||
-        achievement.issuer.toLowerCase().includes(searchLower) ||
-        achievement.date.toLowerCase().includes(searchLower) ||
-        achievement.description.toLowerCase().includes(searchLower)
+        cert.name.toLowerCase().includes(searchLower) ||
+        cert.issuer.toLowerCase().includes(searchLower) ||
+        cert.date.toLowerCase().includes(searchLower)
       )
     })
 
@@ -57,10 +109,7 @@ export function AchievementsView() {
         case 'date':
           // Parse dates like "Dec 2024", "Jun - Aug 2022"
           const parseDate = (dateStr: string): number => {
-            // Handle ranges like "Jun - Aug 2022" - use the later date
-            const cleanDate = dateStr.includes(' - ') 
-              ? dateStr.split(' - ')[1].trim()
-              : dateStr.trim()
+            const cleanDate = dateStr.trim()
             
             // Parse month abbreviations
             const months: Record<string, number> = {
@@ -92,11 +141,11 @@ export function AchievementsView() {
     return sorted
   }, [searchQuery, sortBy])
 
-  const AchievementCard = ({ achievement, index, isListView = false }: { achievement: Achievement; index: number; isListView?: boolean }) => {
+  const CertificationCard = ({ cert, index, isListView = false }: { cert: Certification; index: number; isListView?: boolean }) => {
     return (
       <motion.a
-        key={achievement.id}
-        href={achievement.url}
+        key={cert.id}
+        href={cert.url}
         target="_blank"
         rel="noopener noreferrer"
         initial={{ opacity: 0, scale: 0.95 }}
@@ -109,48 +158,45 @@ export function AchievementsView() {
         {isListView ? (
           <>
             <div className="flex-shrink-0">
-              <Trophy className="text-vscode-blue" size={20} />
+              <Award className="text-vscode-blue" size={20} />
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-sm font-semibold text-vscode-text group-hover:text-vscode-blue transition-colors truncate">
-                {achievement.name}
+                {cert.name}
               </h4>
             </div>
             <div className="flex items-center gap-3 text-xs text-vscode-text-secondary flex-shrink-0">
               <div className="flex items-center gap-1">
                 <Calendar size={12} />
-                <span>{achievement.date}</span>
+                <span>{cert.date}</span>
               </div>
               <span>•</span>
-              <span className="truncate max-w-[150px]">{achievement.issuer}</span>
+              <span className="truncate max-w-[150px]">{cert.issuer}</span>
             </div>
             <ExternalLink size={14} className="text-vscode-text-secondary group-hover:text-vscode-blue flex-shrink-0" />
           </>
         ) : (
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 mt-1">
-              <Trophy className="text-vscode-blue" size={24} />
+              <Award className="text-vscode-blue" size={24} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <h4 className="text-sm font-semibold text-vscode-text group-hover:text-vscode-blue transition-colors">
-                  {achievement.name}
+                  {cert.name}
                 </h4>
                 <ExternalLink size={14} className="text-vscode-text-secondary group-hover:text-vscode-blue flex-shrink-0 mt-0.5" />
               </div>
-              <div className="flex items-center gap-3 text-xs text-vscode-text-secondary mb-2">
+              <div className="flex items-center gap-3 text-xs text-vscode-text-secondary">
                 <div className="flex items-center gap-1">
                   <Calendar size={12} />
-                  <span>{achievement.date}</span>
+                  <span>{cert.date}</span>
                 </div>
                 <span>•</span>
-                <span className="truncate">{achievement.issuer}</span>
+                <span className="truncate">{cert.issuer}</span>
               </div>
-              <p className="text-xs text-vscode-text-secondary line-clamp-2 mb-2">
-                {achievement.description}
-              </p>
-              <span className="inline-block px-2 py-0.5 bg-vscode-blue/20 text-vscode-blue text-[10px] rounded font-medium">
-                Achievement
+              <span className="inline-block mt-2 px-2 py-0.5 bg-vscode-blue/20 text-vscode-blue text-[10px] rounded font-medium">
+                Certification
               </span>
             </div>
           </div>
@@ -168,14 +214,14 @@ export function AchievementsView() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
-                  <Trophy className="text-vscode-blue" size={20} />
-                  Achievements
+                  <Award className="text-vscode-blue" size={20} />
+                  Certifications
                 </h1>
                 {/* Count Badge */}
                 <div className="relative">
                   <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">
                     <span className="text-xs font-bold text-white">
-                      {achievements.length}
+                      {certifications.length}
                     </span>
                   </div>
                   {/* Pulse effect */}
@@ -194,7 +240,7 @@ export function AchievementsView() {
                 </div>
               </div>
               <p className="text-sm text-vscode-text-secondary">
-                Awards and recognitions for outstanding performance
+                Professional certifications and course completions
               </p>
             </div>
             <div className="flex items-center gap-1 ml-4">
@@ -264,7 +310,7 @@ export function AchievementsView() {
           </div>
         </div>
 
-        {/* Achievements Grid/List */}
+        {/* Certifications Grid/List */}
         <AnimatePresence mode="wait">
           <motion.div
             key={viewMode}
@@ -274,15 +320,15 @@ export function AchievementsView() {
             transition={{ duration: 0.2 }}
           >
             {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {filteredAndSorted.map((achievement, index) => (
-                  <AchievementCard key={achievement.id} achievement={achievement} index={index} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filteredAndSorted.map((cert, index) => (
+                  <CertificationCard key={cert.id} cert={cert} index={index} />
                 ))}
               </div>
             ) : (
               <div className="space-y-1.5">
-                {filteredAndSorted.map((achievement, index) => (
-                  <AchievementCard key={achievement.id} achievement={achievement} index={index} isListView={true} />
+                {filteredAndSorted.map((cert, index) => (
+                  <CertificationCard key={cert.id} cert={cert} index={index} isListView={true} />
                 ))}
               </div>
             )}
@@ -291,10 +337,11 @@ export function AchievementsView() {
 
         {filteredAndSorted.length === 0 && (
           <div className="text-center py-12 text-vscode-text-secondary">
-            <p>No achievements found matching your search.</p>
+            <p>No certifications found matching your search.</p>
           </div>
         )}
       </div>
     </div>
   )
 }
+

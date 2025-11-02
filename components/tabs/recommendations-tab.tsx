@@ -12,16 +12,20 @@ import {
   ArrowUpRight,
   Search,
   Filter,
-  X
+  X,
+  LayoutGrid,
+  LayoutList
 } from 'lucide-react'
 import { Tooltip } from '../ui/tooltip'
 import { recommendationsData } from '@/lib/recommendations-data'
 
 type SortOption = 'date-desc' | 'date-asc' | 'name-asc' | 'name-desc'
+type ViewMode = 'grid' | 'list'
 
 export function RecommendationsTab() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('date-desc')
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
 
   // Filter and sort recommendations
   const filteredAndSortedRecommendations = useMemo(() => {
@@ -63,38 +67,81 @@ export function RecommendationsTab() {
     <div className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto">
       <div className="max-w-7xl mx-auto p-6 sm:p-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-vscode-blue/10 rounded-lg">
-                <MessageSquare className="text-vscode-blue" size={24} />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-3">
+        <div className="mb-6">
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
+                  <MessageSquare className="text-vscode-blue" size={20} />
                   Recommendations
-                  <div className="flex items-center justify-center min-w-[32px] h-7 px-2.5 bg-vscode-blue rounded-full shadow-sm">
+                </h1>
+                <div className="relative">
+                  <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">
                     <span className="text-xs font-bold text-white">
                       {recommendationsData.length}
                     </span>
                   </div>
-                </h1>
-                <p className="text-sm text-vscode-text-secondary mt-1">
-                  Testimonials and recommendations from colleagues, managers, and collaborators
-                </p>
+                  {/* Pulse effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-vscode-blue rounded-full"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 0, 0.3],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                </div>
               </div>
+              <p className="text-sm text-vscode-text-secondary">
+                Testimonials and recommendations from colleagues, managers, and collaborators
+              </p>
             </div>
-            <motion.a
-              href="https://www.linkedin.com/in/ajay-k-jayan/details/recommendations/?detailScreenTabIndex=0"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-vscode-blue text-white hover:bg-vscode-blue-accent transition-colors text-sm font-medium"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Linkedin size={16} />
-              <span>View on LinkedIn</span>
-              <ArrowUpRight size={14} />
-            </motion.a>
+            <div className="flex items-center gap-2">
+              {/* Grid/List View Toggle */}
+              <Tooltip content={viewMode === 'grid' ? 'Switch to List View' : 'Switch to Grid View'} position="bottom">
+                <motion.button
+                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                  className="relative w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover hover:border-vscode-border/80 transition-all duration-200 group"
+                  whileHover={{ scale: 1.08, borderColor: 'rgba(0, 122, 204, 0.3)' }}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  <motion.div
+                    key={viewMode}
+                    initial={{ opacity: 0, scale: 0.7, rotate: -180 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.7, rotate: 180 }}
+                    transition={{ 
+                      duration: 0.25, 
+                      ease: [0.34, 1.56, 0.64, 1],
+                      opacity: { duration: 0.15 }
+                    }}
+                    className="flex items-center justify-center"
+                  >
+                    {viewMode === 'grid' ? (
+                      <LayoutGrid size={15} className="text-vscode-text-secondary group-hover:text-vscode-text transition-colors" />
+                    ) : (
+                      <LayoutList size={15} className="text-vscode-text-secondary group-hover:text-vscode-text transition-colors" />
+                    )}
+                  </motion.div>
+                </motion.button>
+              </Tooltip>
+              <motion.a
+                href="https://www.linkedin.com/in/ajay-k-jayan/details/recommendations/?detailScreenTabIndex=0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-vscode-blue text-white hover:bg-vscode-blue-accent transition-colors text-sm font-medium"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Linkedin size={16} />
+                <span>View on LinkedIn</span>
+                <ArrowUpRight size={14} />
+              </motion.a>
+            </div>
           </div>
         </div>
 
@@ -136,9 +183,15 @@ export function RecommendationsTab() {
           </div>
         </div>
 
-        {/* Recommendations List - One per row */}
-        <div className="space-y-3">
-          <AnimatePresence mode="wait">
+        {/* Recommendations Grid/List */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={viewMode}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
             {filteredAndSortedRecommendations.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -152,72 +205,136 @@ export function RecommendationsTab() {
                   {searchQuery ? 'No recommendations found matching your search.' : 'No recommendations available.'}
                 </p>
               </motion.div>
-            ) : (
-              filteredAndSortedRecommendations.map((recommendation, index) => (
-                <motion.div
-                  key={recommendation.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: index * 0.05, duration: 0.3 }}
-                  className="group relative bg-vscode-sidebar border border-vscode-border rounded-lg p-4 hover:border-vscode-blue/50 hover:shadow-lg transition-all duration-300"
-                >
-                  {/* User Details - Compact Header */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-vscode-text text-base mb-1">
-                        {recommendation.name}
-                      </h3>
-                      <p className="text-xs text-vscode-text-secondary mb-1">
-                        {recommendation.position}
-                      </p>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        {/* Only show company if it's meaningful */}
-                        {recommendation.company && 
-                         recommendation.company.toLowerCase() !== 'current company' && 
-                         recommendation.company.toLowerCase() !== 'company name' && (
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {filteredAndSortedRecommendations.map((recommendation, index) => (
+                  <motion.div
+                    key={recommendation.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                    className="group relative bg-vscode-sidebar border border-vscode-border rounded-lg p-4 hover:border-vscode-blue/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col"
+                  >
+                    {/* User Details - Compact Header */}
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-vscode-text text-sm mb-1">
+                          {recommendation.name}
+                        </h3>
+                        <p className="text-xs text-vscode-text-secondary mb-1">
+                          {recommendation.position}
+                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {recommendation.company && 
+                           recommendation.company.toLowerCase() !== 'current company' && 
+                           recommendation.company.toLowerCase() !== 'company name' && (
+                            <div className="flex items-center gap-1 text-xs text-vscode-text-secondary">
+                              {recommendation.companyUrl ? (
+                                <a
+                                  href={recommendation.companyUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-vscode-blue hover:text-vscode-blue-accent transition-colors"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Building2 size={10} />
+                                  <span className="truncate max-w-[100px]">{recommendation.company}</span>
+                                </a>
+                              ) : (
+                                <>
+                                  <Building2 size={10} />
+                                  <span className="truncate max-w-[100px]">{recommendation.company}</span>
+                                </>
+                              )}
+                            </div>
+                          )}
                           <div className="flex items-center gap-1 text-xs text-vscode-text-secondary">
-                            {recommendation.companyUrl ? (
-                              <a
-                                href={recommendation.companyUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-vscode-blue hover:text-vscode-blue-accent transition-colors"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Building2 size={11} />
-                                <span>{recommendation.company}</span>
-                              </a>
-                            ) : (
-                              <>
-                                <Building2 size={11} />
-                                <span>{recommendation.company}</span>
-                              </>
-                            )}
+                            <Calendar size={10} />
+                            <span>{new Date(recommendation.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
                           </div>
-                        )}
-                        <div className="flex items-center gap-1 text-xs text-vscode-text-secondary">
-                          <Calendar size={11} />
-                          <span>{new Date(recommendation.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Quote Text - Compact */}
-                  <div className="flex items-start gap-2">
-                    <div className="p-1.5 bg-vscode-blue/10 rounded flex-shrink-0 mt-0.5">
-                      <Quote className="text-vscode-blue" size={14} />
+                    {/* Quote Text - Compact */}
+                    <div className="flex items-start gap-2 flex-1">
+                      <div className="p-1 bg-vscode-blue/10 rounded flex-shrink-0 mt-0.5">
+                        <Quote className="text-vscode-blue" size={12} />
+                      </div>
+                      <blockquote className="text-vscode-text text-xs leading-relaxed whitespace-pre-wrap flex-1 line-clamp-4">
+                        &ldquo;{recommendation.quote}&rdquo;
+                      </blockquote>
                     </div>
-                    <blockquote className="text-vscode-text text-sm leading-relaxed whitespace-pre-wrap flex-1">
-                      &ldquo;{recommendation.quote}&rdquo;
-                    </blockquote>
-                  </div>
-                </motion.div>
-              ))
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredAndSortedRecommendations.map((recommendation, index) => (
+                  <motion.div
+                    key={recommendation.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ delay: index * 0.05, duration: 0.3 }}
+                    className="group relative bg-vscode-sidebar border border-vscode-border rounded-lg p-4 hover:border-vscode-blue/50 hover:shadow-lg transition-all duration-300"
+                  >
+                    {/* User Details - Compact Header */}
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-vscode-text text-base mb-1">
+                          {recommendation.name}
+                        </h3>
+                        <p className="text-xs text-vscode-text-secondary mb-1">
+                          {recommendation.position}
+                        </p>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {recommendation.company && 
+                           recommendation.company.toLowerCase() !== 'current company' && 
+                           recommendation.company.toLowerCase() !== 'company name' && (
+                            <div className="flex items-center gap-1 text-xs text-vscode-text-secondary">
+                              {recommendation.companyUrl ? (
+                                <a
+                                  href={recommendation.companyUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-vscode-blue hover:text-vscode-blue-accent transition-colors"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Building2 size={11} />
+                                  <span>{recommendation.company}</span>
+                                </a>
+                              ) : (
+                                <>
+                                  <Building2 size={11} />
+                                  <span>{recommendation.company}</span>
+                                </>
+                              )}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1 text-xs text-vscode-text-secondary">
+                            <Calendar size={11} />
+                            <span>{new Date(recommendation.date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quote Text - Compact */}
+                    <div className="flex items-start gap-2">
+                      <div className="p-1.5 bg-vscode-blue/10 rounded flex-shrink-0 mt-0.5">
+                        <Quote className="text-vscode-blue" size={14} />
+                      </div>
+                      <blockquote className="text-vscode-text text-sm leading-relaxed whitespace-pre-wrap flex-1">
+                        &ldquo;{recommendation.quote}&rdquo;
+                      </blockquote>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             )}
-          </AnimatePresence>
-        </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )

@@ -61,10 +61,83 @@ const portfolioData = {
     period: '2018-2021',
     location: 'Ernakulam, Kerala, India',
   },
+  achievements: [
+    { 
+      name: 'Beinex Excelencia Award', 
+      date: 'Dec 2024', 
+      issuer: 'Beinex',
+      url: 'https://www.linkedin.com/posts/ajay-k-jayan_beinex-aurex-excellenceaward-activity-7272685557753737216-j5G5?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAADhUQH0B75sHXxuJZHIofzdfcMBiTv5KIp0',
+      description: 'Excellence Award for outstanding performance and contribution'
+    },
+    { 
+      name: 'Star Performer in Full Stack Web Development Internship Program', 
+      date: 'Jun - Aug 2022', 
+      issuer: 'Beinex',
+      url: 'https://academy.beinex.com/certificates/yW0BUsGUQ1UKeiFhPEozwI4Bwk4m?ref',
+      description: 'Recognized as Star Performer for exceptional contribution during internship program'
+    },
+  ],
   certifications: [
-    { name: 'Beinex Excelencia Award', date: 'Dec 2024', issuer: 'Beinex' },
-    { name: 'Programming with JavaScript', date: 'Aug 2023', issuer: 'Meta, Coursera' },
-    { name: 'Version Control', date: 'Aug 2023', issuer: 'Meta, Coursera' },
+    { 
+      name: 'Programming with JavaScript', 
+      date: 'Aug 2023', 
+      issuer: 'Meta, Coursera',
+      url: 'https://www.coursera.org/account/accomplishments/certificate/7CHPEWSYGXD9'
+    },
+    { 
+      name: 'Version Control', 
+      date: 'Aug 2023', 
+      issuer: 'Meta, Coursera',
+      url: 'https://www.coursera.org/account/accomplishments/certificate/2GZUY2SUXAVB'
+    },
+    { 
+      name: 'Introduction to Front-End Development', 
+      date: 'Jul 2023', 
+      issuer: 'Meta, Coursera',
+      url: 'https://google.com/'
+    },
+    { 
+      name: 'Modern JavaScript: ES6 Basics', 
+      date: 'Jul 2023', 
+      issuer: 'Google, Coursera',
+      url: 'https://coursera.org/share/e6eeaf6c1b164db0eea5ab20f68680b9'
+    },
+    { 
+      name: 'React.js Essentials Bootcamp', 
+      date: 'Jun 2023', 
+      issuer: 'LetsUpgrade',
+      url: 'https://verify.letsupgrade.in/certificate/LUERJSJUN123217'
+    },
+    { 
+      name: 'Regular Expressions in Python', 
+      date: 'Sep 2022', 
+      issuer: 'Coursera',
+      url: 'https://www.coursera.org/account/accomplishments/certificate/PJJXDR63PLZZ'
+    },
+    { 
+      name: 'Get Started with Figma', 
+      date: 'Aug 2022', 
+      issuer: 'Coursera',
+      url: 'https://www.coursera.org/account/accomplishments/certificate/TM6KQS57MASK'
+    },
+    { 
+      name: 'AI For Everyone', 
+      date: 'Sep 2020', 
+      issuer: 'DeepLearning.AI, Coursera',
+      url: 'https://www.coursera.org/account/accomplishments/certificate/27YGB49FSF6Q'
+    },
+    { 
+      name: 'Amazon Web Services (AWS)', 
+      date: 'Sep 2020', 
+      issuer: 'Amazon Web Services (AWS), Coursera',
+      url: 'https://www.coursera.org/account/accomplishments/certificate/9KLJZPV5CWY6'
+    },
+    { 
+      name: 'Programming for Everybody (Getting Started with Python)', 
+      date: 'Jun 2020', 
+      issuer: 'University of Michigan, Coursera',
+      url: 'https://www.coursera.org/account/accomplishments/certificate/V6RS8KL44Q5B'
+    },
   ],
 }
 
@@ -108,13 +181,22 @@ const fileStructure: FileItem[] = [
             metadata: { size: '1.5 KB', modified: '2024-12-15', lines: 25, language: 'json' },
           },
           {
+            name: 'achievements.json',
+            type: 'file',
+            icon: <FileCode size={16} />,
+            tabId: 'achievements.json',
+            code: JSON.stringify(portfolioData.achievements, null, 2),
+            language: 'json',
+            metadata: { size: '1.2 KB', modified: '2024-12-15', lines: 18, language: 'json' },
+          },
+          {
             name: 'certifications.json',
             type: 'file',
             icon: <FileCode size={16} />,
             tabId: 'certifications.json',
             code: JSON.stringify(portfolioData.certifications, null, 2),
             language: 'json',
-            metadata: { size: '2.1 KB', modified: '2024-12-15', lines: 35, language: 'json' },
+            metadata: { size: '2.1 KB', modified: '2024-12-15', lines: 32, language: 'json' },
           },
           {
             name: 'education.json',
