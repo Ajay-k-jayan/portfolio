@@ -39,9 +39,11 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
     return contentMap[activeMenuItem] || <WelcomeTab />
   }
 
-  // Use tabs if they exist, otherwise use sidebar menu item content
+  // Use tabs only if activeMenuItem is 'file-explore', otherwise use sidebar menu item content
   const activeTab = tabs.find(t => t.id === activeTabId)
-  const activeContent = activeTab?.content || (tabs.length === 0 ? getContentFromMenuItem() : children)
+  const activeContent = activeMenuItem === 'file-explore' && activeTab?.content
+    ? activeTab.content
+    : getContentFromMenuItem()
 
   return (
     <div className="h-screen w-screen flex flex-col bg-vscode-bg text-vscode-text overflow-hidden relative">

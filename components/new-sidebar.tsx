@@ -46,7 +46,9 @@ export function NewSidebar() {
     recentlySelected, 
     setActiveMenuItem, 
     sidebarCollapsed,
-    toggleSidebar
+    toggleSidebar,
+    closeTab,
+    tabs
   } = useAppStore()
   const [mounted, setMounted] = useState(false)
 
@@ -56,6 +58,13 @@ export function NewSidebar() {
   }, [])
 
   const handleMenuItemClick = (menuId: string) => {
+    // Close all tabs when clicking non-file-explore menu items
+    if (menuId !== 'file-explore' && tabs.length > 0) {
+      // Create a copy of tabs array to avoid mutation during iteration
+      const tabsToClose = [...tabs]
+      tabsToClose.forEach(tab => closeTab(tab.id))
+    }
+    
     setActiveMenuItem(menuId)
     // Don't create tabs - content will be shown directly in main area
   }

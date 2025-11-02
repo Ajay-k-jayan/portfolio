@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Calendar, Clock, Sparkles, Globe } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { Tooltip } from './ui/tooltip'
 
 interface BlogPost {
   id: string
