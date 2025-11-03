@@ -3,9 +3,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Settings, Palette, Layout, Bell, Eye, Share2, FileText, 
-  ChevronRight, ChevronDown, RotateCcw, Check, Grid, List, 
-  Info, Monitor, Maximize, Minimize, Type, Sparkles, Zap,
+  Settings, Palette, Bell, Eye, Share2, FileText, 
+  ChevronRight, ChevronDown, RotateCcw, Check, 
+  Info, Type, Sparkles, Zap,
   Home, TrendingUp, Clock
 } from 'lucide-react'
 import { useAppStore, PortfolioSettings, defaultSettings } from '@/lib/store'
@@ -226,9 +226,6 @@ export function SettingsView() {
       compactView: 'Compact View',
       showAnimations: 'Show Animations',
       animationSpeed: 'Animation Speed',
-      sidebarWidth: 'Sidebar Width',
-      panelWidth: 'Panel Width',
-      gridLayout: 'Grid Layout',
       showStats: 'Show Statistics',
       showSocialLinks: 'Show Social Links',
       showGitHubStats: 'Show GitHub Stats',
@@ -609,143 +606,6 @@ export function SettingsView() {
                             )}
                           </motion.button>
                         ))}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Layout Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
-            <button
-              onClick={() => toggleSection('layout')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Layout className="text-green-400" size={18} />
-                <span className="text-sm font-semibold text-vscode-text">Layout</span>
-              </div>
-              {expandedSections.has('layout') ? (
-                <ChevronDown className="text-vscode-text-secondary" size={16} />
-              ) : (
-                <ChevronRight className="text-vscode-text-secondary" size={16} />
-              )}
-            </button>
-            <AnimatePresence>
-              {expandedSections.has('layout') && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 space-y-6">
-                    {/* Grid Layout */}
-                    <div>
-                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
-                        View Layout
-                      </label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <motion.button
-                          onClick={() => handleSettingChange('gridLayout', 'grid')}
-                          className={`relative p-4 rounded-lg border-2 transition-all ${
-                            portfolioSettings.gridLayout === 'grid'
-                              ? 'border-vscode-blue bg-vscode-blue/10'
-                              : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
-                          }`}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <GridLayoutPreview active={portfolioSettings.gridLayout === 'grid'} />
-                          <div className="mt-3 flex items-center justify-center gap-2">
-                            <Grid size={16} className="text-vscode-text-secondary" />
-                            <span className="text-xs font-medium text-vscode-text">Grid View</span>
-                          </div>
-                          {portfolioSettings.gridLayout === 'grid' && (
-                            <div className="absolute top-2 right-2">
-                              <Check size={16} className="text-vscode-blue" />
-                            </div>
-                          )}
-                        </motion.button>
-                        <motion.button
-                          onClick={() => handleSettingChange('gridLayout', 'list')}
-                          className={`relative p-4 rounded-lg border-2 transition-all ${
-                            portfolioSettings.gridLayout === 'list'
-                              ? 'border-vscode-blue bg-vscode-blue/10'
-                              : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
-                          }`}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <ListLayoutPreview active={portfolioSettings.gridLayout === 'list'} />
-                          <div className="mt-3 flex items-center justify-center gap-2">
-                            <List size={16} className="text-vscode-text-secondary" />
-                            <span className="text-xs font-medium text-vscode-text">List View</span>
-                          </div>
-                          {portfolioSettings.gridLayout === 'list' && (
-                            <div className="absolute top-2 right-2">
-                              <Check size={16} className="text-vscode-blue" />
-                            </div>
-                          )}
-                        </motion.button>
-                      </div>
-                    </div>
-
-                    {/* Width Settings */}
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-xs font-medium text-vscode-text-secondary">
-                            Sidebar Width
-                          </label>
-                          <span className="text-xs font-medium text-vscode-text">
-                            {portfolioSettings.sidebarWidth}px
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Minimize size={14} className="text-vscode-text-secondary" />
-                          <input
-                            type="range"
-                            min="200"
-                            max="400"
-                            value={portfolioSettings.sidebarWidth}
-                            onChange={(e) => handleSettingChange('sidebarWidth', parseInt(e.target.value))}
-                            className="flex-1 h-2 bg-vscode-active rounded-lg appearance-none cursor-pointer"
-                            style={{
-                              background: `linear-gradient(to right, var(--theme-blue) 0%, var(--theme-blue) ${((portfolioSettings.sidebarWidth - 200) / 200) * 100}%, var(--theme-active) ${((portfolioSettings.sidebarWidth - 200) / 200) * 100}%, var(--theme-active) 100%)`
-                            }}
-                          />
-                          <Maximize size={14} className="text-vscode-text-secondary" />
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-xs font-medium text-vscode-text-secondary">
-                            Panel Width
-                          </label>
-                          <span className="text-xs font-medium text-vscode-text">
-                            {portfolioSettings.panelWidth}px
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Minimize size={14} className="text-vscode-text-secondary" />
-                          <input
-                            type="range"
-                            min="300"
-                            max="600"
-                            value={portfolioSettings.panelWidth}
-                            onChange={(e) => handleSettingChange('panelWidth', parseInt(e.target.value))}
-                            className="flex-1 h-2 bg-vscode-active rounded-lg appearance-none cursor-pointer"
-                            style={{
-                              background: `linear-gradient(to right, var(--theme-blue) 0%, var(--theme-blue) ${((portfolioSettings.panelWidth - 300) / 300) * 100}%, var(--theme-active) ${((portfolioSettings.panelWidth - 300) / 300) * 100}%, var(--theme-active) 100%)`
-                            }}
-                          />
-                          <Maximize size={14} className="text-vscode-text-secondary" />
-                        </div>
                       </div>
                     </div>
                   </div>
