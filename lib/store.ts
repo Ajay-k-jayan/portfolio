@@ -7,6 +7,15 @@ export interface Tab {
   icon?: string
 }
 
+export interface Notification {
+  id: string
+  title: string
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
+  timestamp: Date
+  read?: boolean
+}
+
 export interface PortfolioSettings {
   showWelcomeOnStartup: boolean
   compactView: boolean
@@ -76,6 +85,7 @@ interface AppState {
   recentlySelected: string[]
   fileExploreExpanded: boolean
   portfolioSettings: PortfolioSettings
+  notifications: Notification[]
   openSidebarView: (view: string) => void
   closeSidebarView: () => void
   addTab: (tab: Tab) => void
@@ -86,6 +96,10 @@ interface AppState {
   toggleFileExplore: () => void
   updateSettings: (settings: Partial<PortfolioSettings>) => void
   resetSettings: () => void
+  addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void
+  removeNotification: (id: string) => void
+  markNotificationAsRead: (id: string) => void
+  clearAllNotifications: () => void
 }
 
 // Load recently selected from localStorage
@@ -115,6 +129,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   recentlySelected: loadRecentlySelected(),
   fileExploreExpanded: false,
   portfolioSettings: loadSettings(),
+  notifications: [],
   openSidebarView: (view) => set({ activeSidebarView: view, sidebarCollapsed: false }),
   closeSidebarView: () => set({ activeSidebarView: '' }),
   addTab: (tab) => set((state) => {
@@ -185,6 +200,38 @@ export const useAppStore = create<AppState>((set, get) => ({
       // Dispatch reset event
       window.dispatchEvent(new CustomEvent('settingsReset'))
     }
+    // Add notification for reset
+    get().addNotification({
+      title: 'Settings Reset',
+      message: 'All settings have been restored to default values',
+      type: 'success'
+    })
+  },
+  addNotification: (notification) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      timestamp: new Date(),
+      read: false
+    }
+    set((state) => ({
+      notifications: [newNotification, ...state.notifications].slice(0, 50) // Keep max 50 notifications
+    }))
+  },
+  removeNotification: (id) => {
+    set((state) => ({
+      notifications: state.notifications.filter(n => n.id !== id)
+    }))
+  },
+  markNotificationAsRead: (id) => {
+    set((state) => ({
+      notifications: state.notifications.map(n => 
+        n.id === id ? { ...n, read: true } : n
+      )
+    }))
+  },
+  clearAllNotifications: () => {
+    set({ notifications: [] })
   },
 }))
 

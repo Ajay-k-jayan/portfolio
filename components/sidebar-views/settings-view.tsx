@@ -6,7 +6,7 @@ import {
   Settings, Palette, Bell, Eye, Share2, FileText, 
   ChevronRight, ChevronDown, RotateCcw, Check, 
   Info, Type, Sparkles, Zap,
-  Home, TrendingUp, Clock
+  Home, TrendingUp, Clock, Search, X
 } from 'lucide-react'
 import { useAppStore, PortfolioSettings, defaultSettings } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
@@ -70,16 +70,18 @@ const NormalViewPreview = ({ active }: { active: boolean }) => (
 
 const FontSizePreview = ({ size, active }: { size: 'small' | 'medium' | 'large', active: boolean }) => {
   const sizeMap = {
-    small: 'text-xs',
-    medium: 'text-sm',
-    large: 'text-base'
+    small: 'text-[10px]',
+    medium: 'text-xs',
+    large: 'text-sm'
   }
   return (
     <div className={`w-full h-16 rounded border-2 transition-all ${
-      active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+      active 
+        ? 'border-vscode-blue bg-gradient-to-br from-vscode-blue/20 to-vscode-blue/10' 
+        : 'border-vscode-border bg-vscode-active/80 hover:bg-vscode-hover'
     }`}>
-      <div className="p-3 h-full flex items-center">
-        <p className={`${sizeMap[size]} text-vscode-text font-medium`}>
+      <div className="p-2.5 h-full flex items-center justify-center">
+        <p className={`${sizeMap[size]} text-vscode-text font-medium ${active ? 'text-vscode-blue' : ''}`}>
           Sample Text
         </p>
       </div>
@@ -95,10 +97,12 @@ const FontFamilyPreview = ({ family, active }: { family: 'system' | 'mono' | 'sa
   }
   return (
     <div className={`w-full h-16 rounded border-2 transition-all ${
-      active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+      active 
+        ? 'border-vscode-blue bg-gradient-to-br from-vscode-blue/20 to-vscode-blue/10' 
+        : 'border-vscode-border bg-vscode-active/80 hover:bg-vscode-hover'
     }`}>
-      <div className="p-3 h-full flex items-center">
-        <p className={`text-sm text-vscode-text ${familyMap[family]}`}>
+      <div className="p-2.5 h-full flex items-center justify-center">
+        <p className={`text-xs font-medium ${familyMap[family]} ${active ? 'text-vscode-blue' : 'text-vscode-text'}`}>
           {family === 'mono' ? 'Consolas Mono' : family === 'sans' ? 'Inter Sans' : 'System Font'}
         </p>
       </div>
@@ -106,38 +110,119 @@ const FontFamilyPreview = ({ family, active }: { family: 'system' | 'mono' | 'sa
   )
 }
 
-const ThemePreviewCard = ({ theme, active, onClick }: { theme: any, active: boolean, onClick: () => void }) => (
-  <motion.button
-    onClick={onClick}
-    whileHover={{ scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
-    className={`relative w-full rounded-lg border-2 transition-all overflow-hidden ${
-      active 
-        ? 'border-vscode-blue ring-2 ring-vscode-blue/50' 
-        : 'border-vscode-border hover:border-vscode-blue/50'
-    }`}
-  >
-    <div 
-      className="h-20 w-full"
-      style={{ 
-        background: `linear-gradient(135deg, ${theme.colors.bg} 0%, ${theme.colors.sidebar} 100%)`
-      }}
-    >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-xs font-semibold text-white drop-shadow-lg">{theme.name}</div>
+const ThemePreviewCard = ({ theme, active, onClick }: { theme: any, active: boolean, onClick: () => void }) => {
+  return (
+    <div className="flex flex-col">
+      <motion.button
+        onClick={onClick}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className={`relative w-full rounded-lg border-2 transition-all overflow-hidden ${
+          active 
+            ? 'border-vscode-blue ring-2 ring-vscode-blue/50 shadow-lg shadow-vscode-blue/20' 
+            : 'border-vscode-border hover:border-vscode-blue/50 hover:shadow-md'
+        }`}
+      >
+        {/* Code Editor Preview */}
+        <div 
+          className="h-20 w-full relative"
+          style={{ 
+            backgroundColor: theme.colors.bg
+          }}
+        >
+          {/* Editor Title Bar */}
+          <div 
+            className="h-4 flex items-center px-1.5 border-b"
+            style={{ 
+              backgroundColor: theme.colors.sidebar,
+              borderColor: theme.colors.border
+            }}
+          >
+            <div className="flex gap-1">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.colors.red || '#f48771' }} />
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.colors.yellow || '#dcdcaa' }} />
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: theme.colors.green || '#4ec9b0' }} />
+            </div>
+            <div 
+              className="text-[7px] ml-1.5 font-mono"
+              style={{ color: theme.colors.textSecondary || theme.colors.text }}
+            >
+              app.ts
+            </div>
+          </div>
+
+          {/* Code Content */}
+          <div className="p-1.5 h-full font-mono text-[8px] leading-[1.2]">
+            <div className="flex items-start gap-1">
+              <div 
+                className="text-[7px] text-right select-none flex-shrink-0"
+                style={{ color: theme.colors.textSecondary, width: '14px' }}
+              >
+                1
+              </div>
+              <div className="flex-1 min-w-0">
+                <span style={{ color: theme.colors.blue || '#007acc' }}>function</span>
+                <span style={{ color: theme.colors.text }}> func(</span>
+                <span style={{ color: theme.colors.text }}>param</span>
+                <span style={{ color: theme.colors.text }}>) {'{'}</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-1 mt-0.5">
+              <div 
+                className="text-[7px] text-right select-none flex-shrink-0"
+                style={{ color: theme.colors.textSecondary, width: '14px' }}
+              >
+                2
+              </div>
+              <div className="flex-1 min-w-0">
+                <span style={{ color: theme.colors.textSecondary }}>  </span>
+                <span style={{ color: theme.colors.blue || '#007acc' }}>const</span>
+                <span style={{ color: theme.colors.text }}> text = </span>
+                <span style={{ color: theme.colors.orange || '#ce9178' }}>&quot;Sample&quot;</span>
+                <span style={{ color: theme.colors.text }}>;</span>
+              </div>
+            </div>
+            <div className="flex items-start gap-1 mt-0.5">
+              <div 
+                className="text-[7px] text-right select-none flex-shrink-0"
+                style={{ color: theme.colors.textSecondary, width: '14px' }}
+              >
+                3
+              </div>
+              <div className="flex-1 min-w-0">
+                <span style={{ color: theme.colors.textSecondary }}>  </span>
+                <span style={{ color: theme.colors.purple || '#c586c0' }}>return</span>
+                <span style={{ color: theme.colors.text }}> {'{'} text, </span>
+                <span style={{ color: theme.colors.text }}>boolean</span>
+                <span style={{ color: theme.colors.text }}>: </span>
+                <span style={{ color: theme.colors.blue || '#007acc' }}>true</span>
+                <span style={{ color: theme.colors.text }}> {'}'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {active && (
+          <div className="absolute top-1.5 right-1.5 z-20">
+            <div className="w-4 h-4 bg-vscode-blue rounded-full flex items-center justify-center shadow-lg">
+              <Check size={10} className="text-white" />
+            </div>
+          </div>
+        )}
+      </motion.button>
+
+      {/* Theme Name - Outside Card */}
+      <div className="mt-2 text-center">
+        <div 
+          className="text-xs font-medium"
+          style={{ color: active ? 'var(--theme-blue, #007acc)' : theme.colors.text || '#cccccc' }}
+        >
+          {theme.name}
         </div>
       </div>
     </div>
-    {active && (
-      <div className="absolute top-2 right-2">
-        <div className="w-5 h-5 bg-vscode-blue rounded-full flex items-center justify-center">
-          <Check size={12} className="text-white" />
-        </div>
-      </div>
-    )}
-  </motion.button>
-)
+  )
+}
 
 const AnimationSpeedPreview = ({ speed, active }: { speed: 'fast' | 'normal' | 'slow', active: boolean }) => {
   const speedMap = {
@@ -164,13 +249,107 @@ const AnimationSpeedPreview = ({ speed, active }: { speed: 'fast' | 'normal' | '
   )
 }
 
+interface SettingsCategory {
+  id: string
+  label: string
+  icon: any
+  iconColor: string
+  settings: Array<{
+    key: string
+    label: string
+    description?: string
+  }>
+}
+
+// Define settings categories (constant, moved outside component)
+const settingsCategories: SettingsCategory[] = [
+    {
+      id: 'display',
+      label: 'Display',
+      icon: Eye,
+      iconColor: 'text-blue-400',
+      settings: [
+        { key: 'showWelcomeOnStartup', label: 'Show Welcome on Startup', description: 'Display welcome page when opening' },
+        { key: 'compactView', label: 'Compact View', description: 'Use compact spacing' },
+        { key: 'showAnimations', label: 'Show Animations', description: 'Enable smooth transitions' },
+        { key: 'animationSpeed', label: 'Animation Speed', description: 'Control animation duration' },
+      ]
+    },
+    {
+      id: 'appearance',
+      label: 'Appearance',
+      icon: Palette,
+      iconColor: 'text-purple-400',
+      settings: [
+        { key: 'theme', label: 'Theme', description: 'Choose color theme' },
+        { key: 'fontSize', label: 'Font Size', description: 'Adjust text size' },
+        { key: 'fontFamily', label: 'Font Family', description: 'Choose font style' },
+      ]
+    },
+    {
+      id: 'content',
+      label: 'Content',
+      icon: FileText,
+      iconColor: 'text-yellow-400',
+      settings: [
+        { key: 'showStats', label: 'Show Statistics', description: 'Display stats on welcome page' },
+        { key: 'showSocialLinks', label: 'Show Social Links', description: 'Display social media links' },
+        { key: 'showGitHubStats', label: 'Show GitHub Stats', description: 'Display GitHub profile data' },
+        { key: 'showRecentItems', label: 'Show Recent Items', description: 'Display recently viewed items' },
+      ]
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      icon: Bell,
+      iconColor: 'text-orange-400',
+      settings: [
+        { key: 'emailNotifications', label: 'Email Notifications', description: 'Get notified via email' },
+        { key: 'formSuccessAlerts', label: 'Form Success Alerts', description: 'Show alerts on form success' },
+        { key: 'updateNotifications', label: 'Update Notifications', description: 'Notify about updates' },
+      ]
+    },
+    {
+      id: 'navigation',
+      label: 'Navigation',
+      icon: Share2,
+      iconColor: 'text-pink-400',
+      settings: [
+        { key: 'enableQuickNav', label: 'Enable Quick Navigation', description: 'Fast access to pages' },
+        { key: 'showRecentlyViewed', label: 'Show Recently Viewed', description: 'Display recent items in sidebar' },
+      ]
+    },
+]
+
 export function SettingsView() {
-  const { portfolioSettings, updateSettings, resetSettings } = useAppStore()
+  const { portfolioSettings, updateSettings, resetSettings, addNotification } = useAppStore()
   const { themes, setTheme } = useEnhancedTheme()
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['display', 'appearance']))
   const [showResetNotification, setShowResetNotification] = useState(false)
   const [showChangeNotification, setShowChangeNotification] = useState(false)
   const [lastChangedSetting, setLastChangedSetting] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Filter categories based on search
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery.trim()) return settingsCategories
+    
+    const query = searchQuery.toLowerCase()
+    return settingsCategories.filter(category => {
+      const categoryMatches = category.label.toLowerCase().includes(query)
+      const settingsMatch = category.settings.some(setting => 
+        setting.label.toLowerCase().includes(query) ||
+        setting.description?.toLowerCase().includes(query)
+      )
+      return categoryMatches || settingsMatch
+    }).map(category => ({
+      ...category,
+      settings: category.settings.filter(setting =>
+        setting.label.toLowerCase().includes(query) ||
+        setting.description?.toLowerCase().includes(query)
+      )
+    }))
+  }, [searchQuery])
 
   // Check if settings differ from defaults
   const hasChanges = useMemo(() => {
@@ -240,7 +419,37 @@ export function SettingsView() {
       fontFamily: 'Font Family',
     }
     
-    setLastChangedSetting(settingLabels[key] || key)
+    const settingLabel = settingLabels[key] || key
+    
+    // Add notification for setting change
+    if (key === 'theme') {
+      const themeNames: Record<string, string> = {
+        dark: 'Dark',
+        light: 'Light',
+        'dark-plus': 'Dark+',
+        'light-plus': 'Light+',
+        'monokai': 'Monokai',
+        'github-dark': 'GitHub Dark',
+        'github-light': 'GitHub Light',
+        'solarized-dark': 'Solarized Dark',
+        'solarized-light': 'Solarized Light',
+        'one-dark-pro': 'One Dark Pro',
+      }
+      const themeName = themeNames[value as string] || (value as string)
+      addNotification({
+        title: 'Setting Changed',
+        message: `Theme updated to ${themeName}`,
+        type: 'info'
+      })
+    } else {
+      addNotification({
+        title: 'Setting Changed',
+        message: `${settingLabel} updated`,
+        type: 'info'
+      })
+    }
+    
+    setLastChangedSetting(settingLabel)
   }
 
   const handleReset = () => {
@@ -259,38 +468,42 @@ export function SettingsView() {
 
   return (
     <div className="h-full overflow-auto bg-vscode-bg text-vscode-text relative">
-      {/* Floating Notification - Bottom Right */}
+      {/* Floating Notification Toast - Bottom Right (Visual Studio Style) */}
       <AnimatePresence>
         {(showResetNotification || showChangeNotification) && (
           <motion.div
-            initial={{ opacity: 0, x: 100, y: 100 }}
-            animate={{ opacity: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, x: 100, y: 100 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, x: 100, y: 100, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 100, y: 100, scale: 0.9 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             className="fixed bottom-6 right-6 z-50"
           >
-            <div className={`p-4 rounded-lg border shadow-lg flex items-center gap-3 ${
+            <div className={`pl-4 pr-5 py-3.5 rounded-lg border shadow-xl backdrop-blur-sm flex items-center gap-3 max-w-sm ${
               showResetNotification 
-                ? 'bg-green-500/10 border-green-500/30 text-green-400' 
-                : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+                ? 'bg-[#1e3a2e] border-[#2d5a3d] text-[#4ade80]' 
+                : 'bg-[#1e2939] border-[#2d3f5a] text-[#60a5fa]'
             }`}>
-              {showResetNotification ? (
-                <>
-                  <Check size={20} />
-                  <div>
-                    <div className="text-sm font-semibold">Settings Reset</div>
-                    <div className="text-xs opacity-80">All settings restored to defaults</div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Info size={20} />
-                  <div>
-                    <div className="text-sm font-semibold">Setting Changed</div>
-                    <div className="text-xs opacity-80">{lastChangedSetting} updated</div>
-                  </div>
-                </>
-              )}
+              <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                showResetNotification 
+                  ? 'bg-green-500/20' 
+                  : 'bg-blue-500/20'
+              }`}>
+                {showResetNotification ? (
+                  <Check size={18} className="text-green-400" />
+                ) : (
+                  <Info size={18} className="text-blue-400" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold mb-0.5">
+                  {showResetNotification ? 'Settings Reset' : 'Setting Changed'}
+                </div>
+                <div className="text-xs opacity-90 leading-tight">
+                  {showResetNotification 
+                    ? 'All settings restored to defaults' 
+                    : lastChangedSetting ? `${lastChangedSetting} updated` : 'Setting updated'}
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -340,478 +553,404 @@ export function SettingsView() {
           </div>
         </div>
 
-        {/* Settings Sections */}
-        <div className="space-y-4">
-          {/* Display Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
-            <button
-              onClick={() => toggleSection('display')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Eye className="text-blue-400" size={18} />
-                <span className="text-sm font-semibold text-vscode-text">Display</span>
-              </div>
-              {expandedSections.has('display') ? (
-                <ChevronDown className="text-vscode-text-secondary" size={16} />
-              ) : (
-                <ChevronRight className="text-vscode-text-secondary" size={16} />
-              )}
-            </button>
-            <AnimatePresence>
-              {expandedSections.has('display') && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 space-y-6">
-                    {/* Compact View Toggle */}
-                    <div>
-                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
-                        View Mode
-                      </label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <motion.button
-                          onClick={() => handleSettingChange('compactView', false)}
-                          className={`relative p-4 rounded-lg border-2 transition-all ${
-                            !portfolioSettings.compactView
-                              ? 'border-vscode-blue bg-vscode-blue/10'
-                              : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
-                          }`}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <NormalViewPreview active={!portfolioSettings.compactView} />
-                          <div className="mt-2 text-center">
-                            <span className="text-xs font-medium text-vscode-text">Normal</span>
-                          </div>
-                          {!portfolioSettings.compactView && (
-                            <div className="absolute top-2 right-2">
-                              <Check size={16} className="text-vscode-blue" />
-                            </div>
-                          )}
-                        </motion.button>
-                        <motion.button
-                          onClick={() => handleSettingChange('compactView', true)}
-                          className={`relative p-4 rounded-lg border-2 transition-all ${
-                            portfolioSettings.compactView
-                              ? 'border-vscode-blue bg-vscode-blue/10'
-                              : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
-                          }`}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <CompactViewPreview active={portfolioSettings.compactView} />
-                          <div className="mt-2 text-center">
-                            <span className="text-xs font-medium text-vscode-text">Compact</span>
-                          </div>
-                          {portfolioSettings.compactView && (
-                            <div className="absolute top-2 right-2">
-                              <Check size={16} className="text-vscode-blue" />
-                            </div>
-                          )}
-                        </motion.button>
-                      </div>
-                    </div>
-
-                    {/* Animation Speed */}
-                    <div>
-                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
-                        Animation Speed
-                      </label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {(['fast', 'normal', 'slow'] as const).map((speed) => (
-                          <motion.button
-                            key={speed}
-                            onClick={() => handleSettingChange('animationSpeed', speed)}
-                            className={`relative p-4 rounded-lg border-2 transition-all ${
-                              portfolioSettings.animationSpeed === speed
-                                ? 'border-vscode-blue bg-vscode-blue/10'
-                                : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
-                            }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            <AnimationSpeedPreview 
-                              speed={speed} 
-                              active={portfolioSettings.animationSpeed === speed} 
-                            />
-                            <div className="mt-2 text-center">
-                              <span className="text-xs font-medium text-vscode-text capitalize">{speed}</span>
-                            </div>
-                            {portfolioSettings.animationSpeed === speed && (
-                              <div className="absolute top-2 right-2">
-                                <Check size={16} className="text-vscode-blue" />
-                              </div>
-                            )}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Toggle Settings */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-500/10 rounded">
-                            <Zap className="text-blue-400" size={16} />
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-vscode-text">Show Animations</div>
-                            <div className="text-xs text-vscode-text-secondary">Enable smooth transitions</div>
-                          </div>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={portfolioSettings.showAnimations}
-                            onChange={(e) => handleSettingChange('showAnimations', e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
-                        </label>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-green-500/10 rounded">
-                            <Home className="text-green-400" size={16} />
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-vscode-text">Show Welcome on Startup</div>
-                            <div className="text-xs text-vscode-text-secondary">Display welcome page when opening</div>
-                          </div>
-                        </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={portfolioSettings.showWelcomeOnStartup}
-                            onChange={(e) => handleSettingChange('showWelcomeOnStartup', e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        {/* Advanced Search */}
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary" size={18} />
+            <input
+              type="text"
+              placeholder="Search settings..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-11 pl-10 pr-10 bg-vscode-sidebar border border-vscode-border rounded-lg text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:border-vscode-blue transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary hover:text-vscode-text transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
-
-          {/* Appearance Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
-            <button
-              onClick={() => toggleSection('appearance')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
+          {searchQuery && (
+            <motion.p
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 text-xs text-vscode-text-secondary"
             >
-              <div className="flex items-center gap-2">
-                <Palette className="text-purple-400" size={18} />
-                <span className="text-sm font-semibold text-vscode-text">Appearance</span>
-              </div>
-              {expandedSections.has('appearance') ? (
-                <ChevronDown className="text-vscode-text-secondary" size={16} />
-              ) : (
-                <ChevronRight className="text-vscode-text-secondary" size={16} />
-              )}
-            </button>
-            <AnimatePresence>
-              {expandedSections.has('appearance') && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 space-y-6">
-                    {/* Theme Selection */}
-                    <div>
-                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
-                        Theme
-                      </label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {themes.map((theme) => (
-                          <ThemePreviewCard
-                            key={theme.id}
-                            theme={theme}
-                            active={portfolioSettings.theme === theme.id}
-                            onClick={() => handleSettingChange('theme', theme.id)}
-                          />
-                        ))}
-                      </div>
-                    </div>
+              Found {filteredCategories.reduce((acc, cat) => acc + cat.settings.length, 0)} matching setting{filteredCategories.reduce((acc, cat) => acc + cat.settings.length, 0) !== 1 ? 's' : ''}
+            </motion.p>
+          )}
+        </div>
 
-                    {/* Font Size */}
-                    <div>
-                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
-                        Font Size
-                      </label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {(['small', 'medium', 'large'] as const).map((size) => (
-                          <motion.button
-                            key={size}
-                            onClick={() => handleSettingChange('fontSize', size)}
-                            className={`relative p-4 rounded-lg border-2 transition-all ${
-                              portfolioSettings.fontSize === size
-                                ? 'border-vscode-blue bg-vscode-blue/10'
-                                : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
-                            }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
+        {/* Settings Categories - Card Design */}
+        <AnimatePresence mode="wait">
+          {filteredCategories.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center py-8"
+            >
+              <Search className="mx-auto text-vscode-text-secondary mb-3" size={36} />
+              <p className="text-sm text-vscode-text-secondary">No settings found matching &quot;{searchQuery}&quot;</p>
+            </motion.div>
+          ) : (
+            <div className="space-y-2">
+              {filteredCategories.map((category) => {
+                const Icon = category.icon
+                const isExpanded = expandedSections.has(category.id)
+                
+                return (
+                  <motion.div
+                    key={category.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="bg-vscode-sidebar border border-vscode-border rounded overflow-hidden hover:border-vscode-border/80 transition-all"
+                  >
+                    <motion.button
+                      onClick={() => toggleSection(category.id)}
+                      className="w-full flex items-center justify-between px-3 py-2.5 bg-vscode-active hover:bg-vscode-hover transition-colors"
+                      whileHover={{ x: 2 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-1.5 rounded ${
+                          category.iconColor === 'text-blue-400' ? 'bg-blue-500/20' :
+                          category.iconColor === 'text-purple-400' ? 'bg-purple-500/20' :
+                          category.iconColor === 'text-yellow-400' ? 'bg-yellow-500/20' :
+                          category.iconColor === 'text-orange-400' ? 'bg-orange-500/20' :
+                          category.iconColor === 'text-pink-400' ? 'bg-pink-500/20' :
+                          'bg-vscode-active/50'
+                        }`}>
+                          <Icon className={category.iconColor} size={16} />
+                        </div>
+                        <span className="text-xs font-medium text-vscode-text">{category.label}</span>
+                      </div>
+                      <ChevronRight 
+                        className={`text-vscode-text-secondary transition-transform ${isExpanded ? 'rotate-90' : ''}`} 
+                        size={14} 
+                      />
+                    </motion.button>
+                    <AnimatePresence>
+                      {isExpanded && category.settings.length > 0 && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="p-3 space-y-4">
+                            {/* Render category-specific content */}
+                            {category.id === 'display' && (
+                              <>
+                                {/* Compact View Toggle */}
+                                <div>
+                                  <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
+                                    View Mode
+                                  </label>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <motion.button
+                                      onClick={() => handleSettingChange('compactView', false)}
+                                      className={`relative p-3 rounded border-2 transition-all ${
+                                        !portfolioSettings.compactView
+                                          ? 'border-vscode-blue bg-vscode-blue/10'
+                                          : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
+                                      }`}
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                    >
+                                      <NormalViewPreview active={!portfolioSettings.compactView} />
+                                      <div className="mt-1.5 text-center">
+                                        <span className="text-[10px] font-medium text-vscode-text">Normal</span>
+                                      </div>
+                                      {!portfolioSettings.compactView && (
+                                        <div className="absolute top-1.5 right-1.5">
+                                          <Check size={12} className="text-vscode-blue" />
+                                        </div>
+                                      )}
+                                    </motion.button>
+                                    <motion.button
+                                      onClick={() => handleSettingChange('compactView', true)}
+                                      className={`relative p-3 rounded border-2 transition-all ${
+                                        portfolioSettings.compactView
+                                          ? 'border-vscode-blue bg-vscode-blue/10'
+                                          : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
+                                      }`}
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                    >
+                                      <CompactViewPreview active={portfolioSettings.compactView} />
+                                      <div className="mt-1.5 text-center">
+                                        <span className="text-[10px] font-medium text-vscode-text">Compact</span>
+                                      </div>
+                                      {portfolioSettings.compactView && (
+                                        <div className="absolute top-1.5 right-1.5">
+                                          <Check size={12} className="text-vscode-blue" />
+                                        </div>
+                                      )}
+                                    </motion.button>
+                                  </div>
+                                </div>
+
+                                {/* Animation Speed */}
+                                <div>
+                                  <label className="block text-xs font-medium text-vscode-text-secondary mb-2">
+                                    Animation Speed
+                                  </label>
+                                  <div className="grid grid-cols-3 gap-2">
+                                    {(['fast', 'normal', 'slow'] as const).map((speed) => (
+                                      <motion.button
+                                        key={speed}
+                                        onClick={() => handleSettingChange('animationSpeed', speed)}
+                                        className={`relative p-2.5 rounded border-2 transition-all ${
+                                          portfolioSettings.animationSpeed === speed
+                                            ? 'border-vscode-blue bg-vscode-blue/10'
+                                            : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
+                                        }`}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                      >
+                                        <AnimationSpeedPreview 
+                                          speed={speed} 
+                                          active={portfolioSettings.animationSpeed === speed} 
+                                        />
+                                        <div className="mt-1.5 text-center">
+                                          <span className="text-[10px] font-medium text-vscode-text capitalize">{speed}</span>
+                                        </div>
+                                        {portfolioSettings.animationSpeed === speed && (
+                                          <div className="absolute top-1.5 right-1.5">
+                                            <Check size={12} className="text-vscode-blue" />
+                                          </div>
+                                        )}
+                                      </motion.button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Toggle Settings */}
+                                <div className="space-y-2">
+                                  {category.settings.filter(s => s.key !== 'compactView' && s.key !== 'animationSpeed').map((setting) => (
+                                    <div key={setting.key} className="flex items-center justify-between p-2.5 bg-vscode-active rounded hover:bg-vscode-hover transition-colors">
+                                      <div className="flex items-center gap-2.5">
+                                        <div className={`p-1.5 rounded ${
+                                          category.iconColor === 'text-blue-400' ? 'bg-blue-500/10' :
+                                          category.iconColor === 'text-purple-400' ? 'bg-purple-500/10' :
+                                          category.iconColor === 'text-yellow-400' ? 'bg-yellow-500/10' :
+                                          category.iconColor === 'text-orange-400' ? 'bg-orange-500/10' :
+                                          category.iconColor === 'text-pink-400' ? 'bg-pink-500/10' :
+                                          'bg-vscode-active/50'
+                                        }`}>
+                                          {setting.key === 'showAnimations' ? <Zap className={category.iconColor} size={14} /> :
+                                           setting.key === 'showWelcomeOnStartup' ? <Home className="text-green-400" size={14} /> :
+                                           <Eye className={category.iconColor} size={14} />}
+                                        </div>
+                                        <div>
+                                          <div className="text-xs font-medium text-vscode-text">{setting.label}</div>
+                                          {setting.description && (
+                                            <div className="text-[10px] text-vscode-text-secondary leading-tight">{setting.description}</div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                        <input
+                                          type="checkbox"
+                                          checked={portfolioSettings[setting.key as keyof PortfolioSettings] as boolean}
+                                          onChange={(e) => handleSettingChange(setting.key as keyof PortfolioSettings, e.target.checked)}
+                                          className="sr-only peer"
+                                        />
+                                        <div className="w-9 h-5 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-vscode-blue"></div>
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </>
+                            )}
+
+                            {category.id === 'appearance' && (
+                              <>
+                                {/* Theme Selection */}
+                                {category.settings.find(s => s.key === 'theme') && (
+                                  <div>
+                                    <label className="block text-xs font-medium text-vscode-text-secondary mb-2">
+                                      Theme
+                                    </label>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                      {themes.map((theme) => (
+                                        <ThemePreviewCard
+                                          key={theme.id}
+                                          theme={theme}
+                                          active={portfolioSettings.theme === theme.id}
+                                          onClick={() => handleSettingChange('theme', theme.id)}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Font Size */}
+                                {category.settings.find(s => s.key === 'fontSize') && (
+                                  <div>
+                                    <label className="block text-xs font-medium text-vscode-text-secondary mb-2">
+                                      Font Size
+                                    </label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                      {(['small', 'medium', 'large'] as const).map((size) => (
+                                        <motion.button
+                                          key={size}
+                                          onClick={() => handleSettingChange('fontSize', size)}
+                                          className={`relative rounded-lg border-2 transition-all ${
+                                            portfolioSettings.fontSize === size
+                                              ? 'border-vscode-blue bg-vscode-sidebar'
+                                              : 'border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50'
+                                          }`}
+                                          whileHover={{ scale: 1.02 }}
+                                          whileTap={{ scale: 0.98 }}
+                                        >
                             <FontSizePreview size={size} active={portfolioSettings.fontSize === size} />
-                            <div className="mt-2 text-center">
-                              <span className="text-xs font-medium text-vscode-text capitalize">{size}</span>
+                            <div className="pb-2 text-center">
+                              <span className={`text-[10px] font-medium capitalize ${
+                                portfolioSettings.fontSize === size 
+                                  ? 'text-vscode-blue' 
+                                  : 'text-vscode-text-secondary'
+                              }`}>
+                                {size}
+                              </span>
                             </div>
                             {portfolioSettings.fontSize === size && (
-                              <div className="absolute top-2 right-2">
-                                <Check size={16} className="text-vscode-blue" />
+                              <div className="absolute top-1.5 right-1.5">
+                                <div className="w-4 h-4 bg-vscode-blue rounded-full flex items-center justify-center">
+                                  <Check size={10} className="text-white" />
+                                </div>
                               </div>
                             )}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
+                                        </motion.button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
 
-                    {/* Font Family */}
-                    <div>
-                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
-                        Font Family
-                      </label>
-                      <div className="grid grid-cols-3 gap-3">
-                        {(['system', 'mono', 'sans'] as const).map((family) => (
-                          <motion.button
-                            key={family}
-                            onClick={() => handleSettingChange('fontFamily', family)}
-                            className={`relative p-4 rounded-lg border-2 transition-all ${
-                              portfolioSettings.fontFamily === family
-                                ? 'border-vscode-blue bg-vscode-blue/10'
-                                : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
-                            }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
+                                {/* Font Family */}
+                                {category.settings.find(s => s.key === 'fontFamily') && (
+                                  <div>
+                                    <label className="block text-xs font-medium text-vscode-text-secondary mb-2">
+                                      Font Family
+                                    </label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                      {(['system', 'mono', 'sans'] as const).map((family) => (
+                                        <motion.button
+                                          key={family}
+                                          onClick={() => handleSettingChange('fontFamily', family)}
+                                          className={`relative rounded-lg border-2 transition-all ${
+                                            portfolioSettings.fontFamily === family
+                                              ? 'border-vscode-blue bg-vscode-sidebar'
+                                              : 'border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50'
+                                          }`}
+                                          whileHover={{ scale: 1.02 }}
+                                          whileTap={{ scale: 0.98 }}
+                                        >
                             <FontFamilyPreview family={family} active={portfolioSettings.fontFamily === family} />
-                            <div className="mt-2 text-center">
-                              <span className="text-xs font-medium text-vscode-text capitalize">{family}</span>
+                            <div className="pb-2 text-center">
+                              <span className={`text-[10px] font-medium capitalize ${
+                                portfolioSettings.fontFamily === family 
+                                  ? 'text-vscode-blue' 
+                                  : 'text-vscode-text-secondary'
+                              }`}>
+                                {family}
+                              </span>
                             </div>
                             {portfolioSettings.fontFamily === family && (
-                              <div className="absolute top-2 right-2">
-                                <Check size={16} className="text-vscode-blue" />
+                              <div className="absolute top-1.5 right-1.5">
+                                <div className="w-4 h-4 bg-vscode-blue rounded-full flex items-center justify-center">
+                                  <Check size={10} className="text-white" />
+                                </div>
                               </div>
                             )}
-                          </motion.button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+                                        </motion.button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            )}
 
-          {/* Content Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
-            <button
-              onClick={() => toggleSection('content')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <FileText className="text-yellow-400" size={18} />
-                <span className="text-sm font-semibold text-vscode-text">Content</span>
-              </div>
-              {expandedSections.has('content') ? (
-                <ChevronDown className="text-vscode-text-secondary" size={16} />
-              ) : (
-                <ChevronRight className="text-vscode-text-secondary" size={16} />
-              )}
-            </button>
-            <AnimatePresence>
-              {expandedSections.has('content') && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 space-y-3">
-                    {[
-                      { key: 'showStats', icon: TrendingUp, label: 'Show Statistics', desc: 'Display stats on welcome page', color: 'blue' },
-                      { key: 'showSocialLinks', icon: Share2, label: 'Show Social Links', desc: 'Display social media links', color: 'pink' },
-                      { key: 'showGitHubStats', icon: Sparkles, label: 'Show GitHub Stats', desc: 'Display GitHub profile data', color: 'purple' },
-                      { key: 'showRecentItems', icon: Clock, label: 'Show Recent Items', desc: 'Display recently viewed items', color: 'green' },
-                    ].map((item) => {
-                      const Icon = item.icon
-                      const colorClasses = {
-                        blue: 'bg-blue-500/10 text-blue-400',
-                        pink: 'bg-pink-500/10 text-pink-400',
-                        purple: 'bg-purple-500/10 text-purple-400',
-                        green: 'bg-green-500/10 text-green-400',
-                      }
-                      return (
-                        <div key={item.key} className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded ${colorClasses[item.color as keyof typeof colorClasses]}`}>
-                              <Icon size={16} />
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-vscode-text">{item.label}</div>
-                              <div className="text-xs text-vscode-text-secondary">{item.desc}</div>
-                            </div>
+                            {/* Other categories - Simple toggle switches */}
+                            {!['display', 'appearance'].includes(category.id) && (
+                              <div className="space-y-3">
+                                {category.settings.map((setting) => {
+                                  const settingIcons: Record<string, any> = {
+                                    showStats: TrendingUp,
+                                    showSocialLinks: Share2,
+                                    showGitHubStats: Sparkles,
+                                    showRecentItems: Clock,
+                                    emailNotifications: Share2,
+                                    formSuccessAlerts: Check,
+                                    updateNotifications: Info,
+                                    enableQuickNav: Zap,
+                                    showRecentlyViewed: Clock,
+                                  }
+                                  const settingColors: Record<string, string> = {
+                                    showStats: 'bg-blue-500/10 text-blue-400',
+                                    showSocialLinks: 'bg-pink-500/10 text-pink-400',
+                                    showGitHubStats: 'bg-purple-500/10 text-purple-400',
+                                    showRecentItems: 'bg-green-500/10 text-green-400',
+                                    emailNotifications: 'bg-blue-500/10 text-blue-400',
+                                    formSuccessAlerts: 'bg-green-500/10 text-green-400',
+                                    updateNotifications: 'bg-orange-500/10 text-orange-400',
+                                    enableQuickNav: 'bg-yellow-500/10 text-yellow-400',
+                                    showRecentlyViewed: 'bg-cyan-500/10 text-cyan-400',
+                                  }
+                                  const SettingIcon = settingIcons[setting.key] || category.icon
+                                  const iconColor = settingColors[setting.key] || (
+                                    category.iconColor === 'text-blue-400' ? 'bg-blue-500/10' :
+                                    category.iconColor === 'text-purple-400' ? 'bg-purple-500/10' :
+                                    category.iconColor === 'text-yellow-400' ? 'bg-yellow-500/10' :
+                                    category.iconColor === 'text-orange-400' ? 'bg-orange-500/10' :
+                                    category.iconColor === 'text-pink-400' ? 'bg-pink-500/10' :
+                                    'bg-vscode-active/50'
+                                  )
+                                  const iconTextColor = settingColors[setting.key]?.split(' ')[1] || category.iconColor
+                                  
+                                  return (
+                                    <div key={setting.key} className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
+                                      <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded ${iconColor}`}>
+                                          <SettingIcon className={iconTextColor} size={16} />
+                                        </div>
+                                        <div>
+                                          <div className="text-sm font-medium text-vscode-text">{setting.label}</div>
+                                          {setting.description && (
+                                            <div className="text-xs text-vscode-text-secondary">{setting.description}</div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={portfolioSettings[setting.key as keyof PortfolioSettings] as boolean}
+                                          onChange={(e) => handleSettingChange(setting.key as keyof PortfolioSettings, e.target.checked)}
+                                          className="sr-only peer"
+                                        />
+                                        <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
+                                      </label>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            )}
                           </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={portfolioSettings[item.key as keyof PortfolioSettings] as boolean}
-                              onChange={(e) => handleSettingChange(item.key as keyof PortfolioSettings, e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
-                          </label>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Notification Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
-            <button
-              onClick={() => toggleSection('notifications')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Bell className="text-orange-400" size={18} />
-                <span className="text-sm font-semibold text-vscode-text">Notifications</span>
-              </div>
-              {expandedSections.has('notifications') ? (
-                <ChevronDown className="text-vscode-text-secondary" size={16} />
-              ) : (
-                <ChevronRight className="text-vscode-text-secondary" size={16} />
-              )}
-            </button>
-            <AnimatePresence>
-              {expandedSections.has('notifications') && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 space-y-3">
-                    {[
-                      { key: 'emailNotifications', icon: Share2, label: 'Email Notifications', desc: 'Get notified via email', color: 'blue' },
-                      { key: 'formSuccessAlerts', icon: Check, label: 'Form Success Alerts', desc: 'Show alerts on form success', color: 'green' },
-                      { key: 'updateNotifications', icon: Info, label: 'Update Notifications', desc: 'Notify about updates', color: 'orange' },
-                    ].map((item) => {
-                      const Icon = item.icon
-                      const colorClasses = {
-                        blue: 'bg-blue-500/10 text-blue-400',
-                        green: 'bg-green-500/10 text-green-400',
-                        orange: 'bg-orange-500/10 text-orange-400',
-                      }
-                      return (
-                        <div key={item.key} className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded ${colorClasses[item.color as keyof typeof colorClasses]}`}>
-                              <Icon size={16} />
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-vscode-text">{item.label}</div>
-                              <div className="text-xs text-vscode-text-secondary">{item.desc}</div>
-                            </div>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={portfolioSettings[item.key as keyof PortfolioSettings] as boolean}
-                              onChange={(e) => handleSettingChange(item.key as keyof PortfolioSettings, e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
-                          </label>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Navigation Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
-            <button
-              onClick={() => toggleSection('navigation')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Share2 className="text-pink-400" size={18} />
-                <span className="text-sm font-semibold text-vscode-text">Navigation</span>
-              </div>
-              {expandedSections.has('navigation') ? (
-                <ChevronDown className="text-vscode-text-secondary" size={16} />
-              ) : (
-                <ChevronRight className="text-vscode-text-secondary" size={16} />
-              )}
-            </button>
-            <AnimatePresence>
-              {expandedSections.has('navigation') && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 space-y-3">
-                    {[
-                      { key: 'enableQuickNav', icon: Zap, label: 'Enable Quick Navigation', desc: 'Fast access to pages', color: 'yellow' },
-                      { key: 'showRecentlyViewed', icon: Clock, label: 'Show Recently Viewed', desc: 'Display recent items in sidebar', color: 'cyan' },
-                    ].map((item) => {
-                      const Icon = item.icon
-                      const colorClasses = {
-                        yellow: 'bg-yellow-500/10 text-yellow-400',
-                        cyan: 'bg-cyan-500/10 text-cyan-400',
-                      }
-                      return (
-                        <div key={item.key} className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded ${colorClasses[item.color as keyof typeof colorClasses]}`}>
-                              <Icon size={16} />
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-vscode-text">{item.label}</div>
-                              <div className="text-xs text-vscode-text-secondary">{item.desc}</div>
-                            </div>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={portfolioSettings[item.key as keyof PortfolioSettings] as boolean}
-                              onChange={(e) => handleSettingChange(item.key as keyof PortfolioSettings, e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
-                          </label>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
