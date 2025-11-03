@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Settings, Palette, Layout, Bell, Globe, Monitor, Moon, Sun, 
   Layers, Eye, Zap, Search, User, Mail, Share2, Code, 
   Briefcase, Award, BookOpen, Home, Folder, ChevronRight, ChevronDown,
-  RotateCcw, Check, Grid, List, Clock, Activity, TrendingUp, FileText
+  RotateCcw, Check, Grid, List, Clock, Activity, TrendingUp, FileText, Info
 } from 'lucide-react'
-import { useAppStore, PortfolioSettings } from '@/lib/store'
+import { useAppStore, PortfolioSettings, defaultSettings } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
 
 export function SettingsView() {
@@ -16,6 +16,13 @@ export function SettingsView() {
   const { themes, setTheme } = useEnhancedTheme()
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['display', 'appearance']))
   const [showResetNotification, setShowResetNotification] = useState(false)
+  const [showChangeNotification, setShowChangeNotification] = useState(false)
+  const [lastChangedSetting, setLastChangedSetting] = useState<string | null>(null)
+
+  // Check if settings differ from defaults
+  const hasChanges = useMemo(() => {
+    return JSON.stringify(portfolioSettings) !== JSON.stringify(defaultSettings)
+  }, [portfolioSettings])
 
   // Listen for theme changes from settings
   useEffect(() => {
@@ -30,6 +37,18 @@ export function SettingsView() {
     window.addEventListener('themeChange', handleThemeChange as EventListener)
     return () => window.removeEventListener('themeChange', handleThemeChange as EventListener)
   }, [themes, setTheme])
+
+  // Show notification when settings change
+  useEffect(() => {
+    if (hasChanges && lastChangedSetting) {
+      setShowChangeNotification(true)
+      const timer = setTimeout(() => {
+        setShowChangeNotification(false)
+        setLastChangedSetting(null)
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [hasChanges, lastChangedSetting])
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
@@ -49,12 +68,40 @@ export function SettingsView() {
   ) => {
     // Apply immediately
     updateSettings({ [key]: value })
+    
+    // Set the changed setting name for notification
+    const settingLabels: Record<string, string> = {
+      showWelcomeOnStartup: 'Welcome on Startup',
+      compactView: 'Compact View',
+      showAnimations: 'Show Animations',
+      animationSpeed: 'Animation Speed',
+      sidebarWidth: 'Sidebar Width',
+      panelWidth: 'Panel Width',
+      gridLayout: 'Grid Layout',
+      showStats: 'Show Statistics',
+      showSocialLinks: 'Show Social Links',
+      showGitHubStats: 'Show GitHub Stats',
+      showRecentItems: 'Show Recent Items',
+      emailNotifications: 'Email Notifications',
+      formSuccessAlerts: 'Form Success Alerts',
+      updateNotifications: 'Update Notifications',
+      enableQuickNav: 'Enable Quick Navigation',
+      showRecentlyViewed: 'Show Recently Viewed',
+      theme: 'Theme',
+      fontSize: 'Font Size',
+      fontFamily: 'Font Family',
+    }
+    
+    setLastChangedSetting(settingLabels[key] || key)
   }
 
   const handleReset = () => {
     resetSettings()
     setShowResetNotification(true)
-    setTimeout(() => setShowResetNotification(false), 3000)
+    setLastChangedSetting(null)
+    setTimeout(() => {
+      setShowResetNotification(false)
+    }, 3000)
     
     // Reset theme if changed
     const themeToApply = themes.find(t => t.id === 'dark')
@@ -64,7 +111,44 @@ export function SettingsView() {
   }
 
   return (
-    <div className="h-full overflow-auto bg-vscode-bg text-vscode-text">
+    <div className="h-full overflow-auto bg-vscode-bg text-vscode-text relative">
+      {/* Floating Notification - Bottom Right */}
+      <AnimatePresence>
+        {(showResetNotification || showChangeNotification) && (
+          <motion.div
+            initial={{ opacity: 0, x: 100, y: 100 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 100, y: 100 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-6 right-6 z-50"
+          >
+            <div className={`p-4 rounded-lg border shadow-lg flex items-center gap-3 ${
+              showResetNotification 
+                ? 'bg-green-500/10 border-green-500/30 text-green-400' 
+                : 'bg-blue-500/10 border-blue-500/30 text-blue-400'
+            }`}>
+              {showResetNotification ? (
+                <>
+                  <Check size={20} />
+                  <div>
+                    <div className="text-sm font-semibold">Settings Reset</div>
+                    <div className="text-xs opacity-80">All settings restored to defaults</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Info size={20} />
+                  <div>
+                    <div className="text-sm font-semibold">Setting Changed</div>
+                    <div className="text-xs opacity-80">{lastChangedSetting} updated</div>
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-5xl mx-auto p-6">
         {/* Header */}
         <div className="mb-6 border-b border-vscode-border pb-4">
@@ -80,19 +164,36 @@ export function SettingsView() {
                 </p>
               </div>
             </div>
-            <motion.button
-              onClick={handleReset}
-              className="flex items-center gap-2 px-4 py-2 bg-vscode-active hover:bg-vscode-hover border border-vscode-border rounded text-sm text-vscode-text transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <RotateCcw size={16} />
-              <span>Reset to Defaults</span>
-            </motion.button>
+            <div className="flex items-center gap-3">
+              {hasChanges && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/30 rounded text-xs text-blue-400"
+                >
+                  <Info size={14} />
+                  <span>Modified</span>
+                </motion.div>
+              )}
+              <motion.button
+                onClick={handleReset}
+                disabled={!hasChanges}
+                className={`flex items-center gap-2 px-4 py-2 border border-vscode-border rounded text-sm transition-colors ${
+                  hasChanges
+                    ? 'bg-vscode-active hover:bg-vscode-hover text-vscode-text'
+                    : 'bg-vscode-active/50 text-vscode-text-secondary cursor-not-allowed'
+                }`}
+                whileHover={hasChanges ? { scale: 1.05 } : {}}
+                whileTap={hasChanges ? { scale: 0.95 } : {}}
+              >
+                <RotateCcw size={16} />
+                <span>Reset to Defaults</span>
+              </motion.button>
+            </div>
           </div>
         </div>
 
-        {/* Reset Notification */}
+        {/* Reset Notification - Top */}
         <AnimatePresence>
           {showResetNotification && (
             <motion.div
@@ -509,7 +610,6 @@ export function SettingsView() {
               )}
             </AnimatePresence>
           </div>
-
         </div>
       </div>
     </div>

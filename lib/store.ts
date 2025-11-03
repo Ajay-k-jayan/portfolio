@@ -29,7 +29,7 @@ export interface PortfolioSettings {
   fontFamily: 'system' | 'mono' | 'sans'
 }
 
-const defaultSettings: PortfolioSettings = {
+export const defaultSettings: PortfolioSettings = {
   showWelcomeOnStartup: true,
   compactView: false,
   showAnimations: true,
