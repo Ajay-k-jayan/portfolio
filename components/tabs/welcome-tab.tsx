@@ -432,30 +432,32 @@ export function WelcomeTab() {
             )}
 
             {/* Resume Download */}
-            <div className="bg-vscode-sidebar border border-vscode-border rounded">
-              <div className="px-4 py-3 bg-vscode-active border-b border-vscode-border">
-                <div className="flex items-center gap-2">
-                  <FileText className="text-vscode-blue" size={16} />
-                  <span className="text-sm font-medium text-vscode-text">RESUME</span>
+            {portfolioSettings.showResumeDownload && (
+              <div className="bg-vscode-sidebar border border-vscode-border rounded">
+                <div className="px-4 py-3 bg-vscode-active border-b border-vscode-border">
+                  <div className="flex items-center gap-2">
+                    <FileText className="text-vscode-blue" size={16} />
+                    <span className="text-sm font-medium text-vscode-text">RESUME</span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <motion.button
+                    onClick={() => {
+                      const link = document.createElement('a')
+                      link.href = '/resume.pdf'
+                      link.download = 'Ajay_K_J_Resume.pdf'
+                      link.click()
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-vscode-blue hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors"
+                  >
+                    <Download size={16} />
+                    <span>Download Resume</span>
+                  </motion.button>
                 </div>
               </div>
-              <div className="p-4">
-                <motion.button
-                  onClick={() => {
-                    const link = document.createElement('a')
-                    link.href = '/resume.pdf'
-                    link.download = 'Ajay_K_J_Resume.pdf'
-                    link.click()
-                  }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-vscode-blue hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors"
-                >
-                  <Download size={16} />
-                  <span>Download Resume</span>
-                </motion.button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

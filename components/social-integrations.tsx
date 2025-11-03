@@ -1,8 +1,10 @@
 'use client'
 
 import { Github, Linkedin, Mail, Download, ExternalLink, Share2 } from 'lucide-react'
+import { useAppStore } from '@/lib/store'
 
 export function SocialIntegrations() {
+  const { portfolioSettings } = useAppStore()
   const socialLinks = [
     {
       name: 'GitHub',
@@ -66,19 +68,21 @@ export function SocialIntegrations() {
         </div>
       </div>
 
-      <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-vscode-text mb-4">Resume</h2>
-        <button
-          onClick={handleDownloadResume}
-          className="flex items-center gap-2 px-4 py-2 bg-vscode-blue hover:bg-blue-600 text-white rounded-lg transition-colors"
-        >
-          <Download size={18} />
-          <span>Download Resume (PDF)</span>
-        </button>
-        <p className="text-sm text-vscode-text-secondary mt-2">
-          Get the latest version of my resume
-        </p>
-      </div>
+      {portfolioSettings.showResumeDownload && (
+        <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-vscode-text mb-4">Resume</h2>
+          <button
+            onClick={handleDownloadResume}
+            className="flex items-center gap-2 px-4 py-2 bg-vscode-blue hover:bg-blue-600 text-white rounded-lg transition-colors"
+          >
+            <Download size={18} />
+            <span>Download Resume (PDF)</span>
+          </button>
+          <p className="text-sm text-vscode-text-secondary mt-2">
+            Get the latest version of my resume
+          </p>
+        </div>
+      )}
 
       <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
         <h2 className="text-xl font-semibold text-vscode-text mb-4">Contact Information</h2>

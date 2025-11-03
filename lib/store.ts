@@ -36,6 +36,15 @@ export interface PortfolioSettings {
   theme: string
   fontSize: 'small' | 'medium' | 'large'
   fontFamily: 'system' | 'mono' | 'sans'
+  showDateTimeWidget: boolean
+  showWeatherWidget: boolean
+  showLocationWidget: boolean
+  showNetworkStatusWidget: boolean
+  showSystemInfoWidget: boolean
+  showSocialLinksWidget: boolean
+  showResumeDownload: boolean
+  showThemeSwitcher: boolean
+  showLanguageSwitcher: boolean
 }
 
 export const defaultSettings: PortfolioSettings = {
@@ -58,6 +67,15 @@ export const defaultSettings: PortfolioSettings = {
   theme: 'dark',
   fontSize: 'medium',
   fontFamily: 'system',
+  showDateTimeWidget: true,
+  showWeatherWidget: true,
+  showLocationWidget: true,
+  showNetworkStatusWidget: true,
+  showSystemInfoWidget: true,
+  showSocialLinksWidget: true,
+  showResumeDownload: true,
+  showThemeSwitcher: true,
+  showLanguageSwitcher: true,
 }
 
 // Load settings from localStorage

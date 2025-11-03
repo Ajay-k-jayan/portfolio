@@ -3,8 +3,10 @@
 import { Github, Download, Linkedin, Mail, ExternalLink } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Tooltip } from '@/components/ui/tooltip'
+import { useAppStore } from '@/lib/store'
 
 export function SocialLinksWidget() {
+  const { portfolioSettings } = useAppStore()
   const socialLinks = [
     {
       name: 'GitHub',
@@ -64,24 +66,26 @@ export function SocialLinksWidget() {
           </Tooltip>
         )
       })}
-      <Tooltip 
-        content={
-          <div className="flex flex-col gap-1">
-            <span className="font-semibold">Download Resume</span>
-            <span className="text-xs opacity-75">Ajay_K_J_Resume.pdf</span>
-          </div>
-        } 
-        position="top"
-      >
-        <motion.button
-          onClick={handleDownloadResume}
-          className="p-1.5 rounded hover:bg-black/20 transition-colors cursor-pointer hover:text-green-400 flex-shrink-0"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+      {portfolioSettings.showResumeDownload && (
+        <Tooltip 
+          content={
+            <div className="flex flex-col gap-1">
+              <span className="font-semibold">Download Resume</span>
+              <span className="text-xs opacity-75">Ajay_K_J_Resume.pdf</span>
+            </div>
+          } 
+          position="top"
         >
-          <Download size={12} />
-        </motion.button>
-      </Tooltip>
+          <motion.button
+            onClick={handleDownloadResume}
+            className="p-1.5 rounded hover:bg-black/20 transition-colors cursor-pointer hover:text-green-400 flex-shrink-0"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Download size={12} />
+          </motion.button>
+        </Tooltip>
+      )}
     </div>
   )
 }

@@ -5,8 +5,6 @@ import { NewSidebar } from './new-sidebar'
 import { PortfolioHeader } from './portfolio-header'
 import { TabBar } from './tab-bar'
 import { StatusBar } from './status-bar'
-import { AIChatbot } from './ai-chatbot'
-import { VoiceAssistant } from './voice-assistant'
 import { ParticleBackground } from './particle-background'
 import { useAppStore } from '@/lib/store'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -23,7 +21,6 @@ import { SettingsView } from './sidebar-views/settings-view'
 
 export function VSCodeLayout({ children }: { children: React.ReactNode }) {
   const { tabs, activeTabId, sidebarCollapsed, activeMenuItem, portfolioSettings } = useAppStore()
-  const [showChatbot, setShowChatbot] = useState(false)
 
   // Apply font size and family settings dynamically
   useEffect(() => {
@@ -114,26 +111,6 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <StatusBar />
-      {showChatbot && (
-        <AIChatbot onClose={() => setShowChatbot(false)} />
-      )}
-      <VoiceAssistant />
-      <motion.button
-        onClick={() => setShowChatbot(!showChatbot)}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-20 right-6 bg-vscode-blue text-white rounded-full p-4 shadow-lg hover:bg-blue-600 transition-colors z-50"
-        aria-label="Toggle AI Chatbot"
-        animate={{
-          boxShadow: showChatbot
-            ? '0 0 20px rgba(0, 122, 204, 0.5)'
-            : '0 4px 6px rgba(0, 0, 0, 0.3)',
-        }}
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      </motion.button>
     </div>
   )
 }

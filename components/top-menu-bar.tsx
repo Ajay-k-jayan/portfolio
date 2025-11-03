@@ -3,23 +3,27 @@
 import { useState } from 'react'
 import { useTheme } from '@/contexts/theme-context'
 import { File, Edit, View, Go, Run, Terminal, Help, Moon, Sun, Palette } from 'lucide-react'
+import { useAppStore } from '@/lib/store'
 
 export function TopMenuBar() {
   const { theme, setTheme } = useTheme()
+  const { portfolioSettings } = useAppStore()
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
+
+  const fileMenuItems = [
+    { label: 'New File', shortcut: 'Ctrl+N' },
+    { label: 'Open File...', shortcut: 'Ctrl+O' },
+    { label: 'Save', shortcut: 'Ctrl+S' },
+    { label: 'Save As...', shortcut: 'Ctrl+Shift+S' },
+    { type: 'separator' },
+    ...(portfolioSettings.showResumeDownload ? [{ label: 'Download Resume', shortcut: 'Ctrl+D' }] : []),
+    { label: 'Print...', shortcut: 'Ctrl+P' },
+  ]
 
   const menus = [
     {
       name: 'File',
-      items: [
-        { label: 'New File', shortcut: 'Ctrl+N' },
-        { label: 'Open File...', shortcut: 'Ctrl+O' },
-        { label: 'Save', shortcut: 'Ctrl+S' },
-        { label: 'Save As...', shortcut: 'Ctrl+Shift+S' },
-        { type: 'separator' },
-        { label: 'Download Resume', shortcut: 'Ctrl+D' },
-        { label: 'Print...', shortcut: 'Ctrl+P' },
-      ],
+      items: fileMenuItems,
     },
     {
       name: 'Edit',

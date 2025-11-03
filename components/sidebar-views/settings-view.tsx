@@ -6,7 +6,9 @@ import {
   Settings, Palette, Bell, Eye, Share2, FileText, 
   ChevronRight, ChevronDown, RotateCcw, Check, 
   Info, Type, Sparkles, Zap,
-  Home, TrendingUp, Clock, Search, X
+  Home, TrendingUp, Clock, Search, X, Moon, Globe,
+  Calendar, Cloud, MapPin, Wifi, Cpu, Download, 
+  Layout, Gauge, Mail as MailIcon, Navigation, Activity
 } from 'lucide-react'
 import { useAppStore, PortfolioSettings, defaultSettings } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
@@ -269,7 +271,6 @@ const settingsCategories: SettingsCategory[] = [
       icon: Eye,
       iconColor: 'text-blue-400',
       settings: [
-        { key: 'showWelcomeOnStartup', label: 'Show Welcome on Startup', description: 'Display welcome page when opening' },
         { key: 'compactView', label: 'Compact View', description: 'Use compact spacing' },
         { key: 'showAnimations', label: 'Show Animations', description: 'Enable smooth transitions' },
         { key: 'animationSpeed', label: 'Animation Speed', description: 'Control animation duration' },
@@ -304,19 +305,42 @@ const settingsCategories: SettingsCategory[] = [
       icon: Bell,
       iconColor: 'text-orange-400',
       settings: [
-        { key: 'emailNotifications', label: 'Email Notifications', description: 'Get notified via email' },
-        { key: 'formSuccessAlerts', label: 'Form Success Alerts', description: 'Show alerts on form success' },
         { key: 'updateNotifications', label: 'Update Notifications', description: 'Notify about updates' },
       ]
     },
     {
       id: 'navigation',
       label: 'Navigation',
-      icon: Share2,
+      icon: Navigation,
       iconColor: 'text-pink-400',
       settings: [
         { key: 'enableQuickNav', label: 'Enable Quick Navigation', description: 'Fast access to pages' },
         { key: 'showRecentlyViewed', label: 'Show Recently Viewed', description: 'Display recent items in sidebar' },
+      ]
+    },
+    {
+      id: 'header',
+      label: 'Header',
+      icon: Layout,
+      iconColor: 'text-indigo-400',
+      settings: [
+        { key: 'showThemeSwitcher', label: 'Theme Switcher', description: 'Show theme selector in header' },
+        { key: 'showLanguageSwitcher', label: 'Language Switcher', description: 'Show language selector in header' },
+      ]
+    },
+    {
+      id: 'statusbar',
+      label: 'Status Bar',
+      icon: Activity,
+      iconColor: 'text-cyan-400',
+      settings: [
+        { key: 'showDateTimeWidget', label: 'Date & Time', description: 'Show date and time in status bar' },
+        { key: 'showWeatherWidget', label: 'Weather', description: 'Show weather information' },
+        { key: 'showLocationWidget', label: 'Location', description: 'Show current location' },
+        { key: 'showNetworkStatusWidget', label: 'Network Status', description: 'Show network latency' },
+        { key: 'showSystemInfoWidget', label: 'System Info', description: 'Show CPU and memory usage' },
+        { key: 'showSocialLinksWidget', label: 'Social Links', description: 'Show social media links' },
+        { key: 'showResumeDownload', label: 'Resume Download', description: 'Show resume download button' },
       ]
     },
 ]
@@ -324,7 +348,10 @@ const settingsCategories: SettingsCategory[] = [
 export function SettingsView() {
   const { portfolioSettings, updateSettings, resetSettings, addNotification } = useAppStore()
   const { themes, setTheme } = useEnhancedTheme()
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['display', 'appearance']))
+  // All categories expanded by default
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(settingsCategories.map(cat => cat.id))
+  )
   const [showResetNotification, setShowResetNotification] = useState(false)
   const [showChangeNotification, setShowChangeNotification] = useState(false)
   const [lastChangedSetting, setLastChangedSetting] = useState<string | null>(null)
@@ -401,7 +428,6 @@ export function SettingsView() {
     updateSettings({ [key]: value })
     
     const settingLabels: Record<string, string> = {
-      showWelcomeOnStartup: 'Welcome on Startup',
       compactView: 'Compact View',
       showAnimations: 'Show Animations',
       animationSpeed: 'Animation Speed',
@@ -409,14 +435,21 @@ export function SettingsView() {
       showSocialLinks: 'Show Social Links',
       showGitHubStats: 'Show GitHub Stats',
       showRecentItems: 'Show Recent Items',
-      emailNotifications: 'Email Notifications',
-      formSuccessAlerts: 'Form Success Alerts',
       updateNotifications: 'Update Notifications',
       enableQuickNav: 'Enable Quick Navigation',
       showRecentlyViewed: 'Show Recently Viewed',
       theme: 'Theme',
       fontSize: 'Font Size',
       fontFamily: 'Font Family',
+      showDateTimeWidget: 'Date & Time Widget',
+      showWeatherWidget: 'Weather Widget',
+      showLocationWidget: 'Location Widget',
+      showNetworkStatusWidget: 'Network Status Widget',
+      showSystemInfoWidget: 'System Info Widget',
+      showSocialLinksWidget: 'Social Links Widget',
+      showResumeDownload: 'Resume Download',
+      showThemeSwitcher: 'Theme Switcher',
+      showLanguageSwitcher: 'Language Switcher',
     }
     
     const settingLabel = settingLabels[key] || key
@@ -524,32 +557,35 @@ export function SettingsView() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <AnimatePresence>
               {hasChanges && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/30 rounded text-xs text-blue-400"
+                  initial={{ opacity: 0, scale: 0.8, x: 20 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: 20 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-3"
                 >
-                  <Info size={14} />
-                  <span>Modified</span>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/30 rounded text-xs text-blue-400"
+                  >
+                    <Info size={14} />
+                    <span>Modified</span>
+                  </motion.div>
+                  <motion.button
+                    onClick={handleReset}
+                    className="flex items-center gap-2 px-4 py-2 border border-vscode-border rounded text-sm transition-colors bg-vscode-active hover:bg-vscode-hover text-vscode-text"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <RotateCcw size={16} />
+                    <span>Reset to Defaults</span>
+                  </motion.button>
                 </motion.div>
               )}
-              <motion.button
-                onClick={handleReset}
-                disabled={!hasChanges}
-                className={`flex items-center gap-2 px-4 py-2 border border-vscode-border rounded text-sm transition-colors ${
-                  hasChanges
-                    ? 'bg-vscode-active hover:bg-vscode-hover text-vscode-text'
-                    : 'bg-vscode-active/50 text-vscode-text-secondary cursor-not-allowed'
-                }`}
-                whileHover={hasChanges ? { scale: 1.05 } : {}}
-                whileTap={hasChanges ? { scale: 0.95 } : {}}
-              >
-                <RotateCcw size={16} />
-                <span>Reset to Defaults</span>
-              </motion.button>
-            </div>
+            </AnimatePresence>
           </div>
         </div>
 
@@ -664,9 +700,6 @@ export function SettingsView() {
                                       whileTap={{ scale: 0.98 }}
                                     >
                                       <NormalViewPreview active={!portfolioSettings.compactView} />
-                                      <div className="mt-1.5 text-center">
-                                        <span className="text-[10px] font-medium text-vscode-text">Normal</span>
-                                      </div>
                                       {!portfolioSettings.compactView && (
                                         <div className="absolute top-1.5 right-1.5">
                                           <Check size={12} className="text-vscode-blue" />
@@ -684,9 +717,6 @@ export function SettingsView() {
                                       whileTap={{ scale: 0.98 }}
                                     >
                                       <CompactViewPreview active={portfolioSettings.compactView} />
-                                      <div className="mt-1.5 text-center">
-                                        <span className="text-[10px] font-medium text-vscode-text">Compact</span>
-                                      </div>
                                       {portfolioSettings.compactView && (
                                         <div className="absolute top-1.5 right-1.5">
                                           <Check size={12} className="text-vscode-blue" />
@@ -718,9 +748,6 @@ export function SettingsView() {
                                           speed={speed} 
                                           active={portfolioSettings.animationSpeed === speed} 
                                         />
-                                        <div className="mt-1.5 text-center">
-                                          <span className="text-[10px] font-medium text-vscode-text capitalize">{speed}</span>
-                                        </div>
                                         {portfolioSettings.animationSpeed === speed && (
                                           <div className="absolute top-1.5 right-1.5">
                                             <Check size={12} className="text-vscode-blue" />
@@ -733,39 +760,68 @@ export function SettingsView() {
 
                                 {/* Toggle Settings */}
                                 <div className="space-y-2">
-                                  {category.settings.filter(s => s.key !== 'compactView' && s.key !== 'animationSpeed').map((setting) => (
-                                    <div key={setting.key} className="flex items-center justify-between p-2.5 bg-vscode-active rounded hover:bg-vscode-hover transition-colors">
-                                      <div className="flex items-center gap-2.5">
-                                        <div className={`p-1.5 rounded ${
-                                          category.iconColor === 'text-blue-400' ? 'bg-blue-500/10' :
-                                          category.iconColor === 'text-purple-400' ? 'bg-purple-500/10' :
-                                          category.iconColor === 'text-yellow-400' ? 'bg-yellow-500/10' :
-                                          category.iconColor === 'text-orange-400' ? 'bg-orange-500/10' :
-                                          category.iconColor === 'text-pink-400' ? 'bg-pink-500/10' :
-                                          'bg-vscode-active/50'
-                                        }`}>
-                                          {setting.key === 'showAnimations' ? <Zap className={category.iconColor} size={14} /> :
-                                           setting.key === 'showWelcomeOnStartup' ? <Home className="text-green-400" size={14} /> :
-                                           <Eye className={category.iconColor} size={14} />}
+                                  {category.settings.filter(s => s.key !== 'compactView' && s.key !== 'animationSpeed').map((setting) => {
+                                    // Get icon for each setting
+                                    const getSettingIcon = (key: string) => {
+                                      const iconMap: Record<string, any> = {
+                                        showAnimations: Zap,
+                                        showStats: TrendingUp,
+                                        showSocialLinks: Share2,
+                                        showGitHubStats: Sparkles,
+                                        showRecentItems: Clock,
+                                        updateNotifications: Info,
+                                        enableQuickNav: Zap,
+                                        showRecentlyViewed: Clock,
+                                        showDateTimeWidget: Calendar,
+                                        showWeatherWidget: Cloud,
+                                        showLocationWidget: MapPin,
+                                        showNetworkStatusWidget: Wifi,
+                                        showSystemInfoWidget: Cpu,
+                                        showSocialLinksWidget: Share2,
+                                        showResumeDownload: Download,
+                                        showThemeSwitcher: Moon,
+                                        showLanguageSwitcher: Globe,
+                                      }
+                                      return iconMap[key] || Eye
+                                    }
+                                    
+                                    const SettingIcon = getSettingIcon(setting.key)
+                                    const iconColorClass = category.iconColor
+                                    
+                                    return (
+                                      <div key={setting.key} className="flex items-center justify-between p-2.5 bg-vscode-active rounded hover:bg-vscode-hover transition-colors">
+                                        <div className="flex items-center gap-2.5">
+                                          <div className={`p-1.5 rounded ${
+                                            category.iconColor === 'text-blue-400' ? 'bg-blue-500/10' :
+                                            category.iconColor === 'text-purple-400' ? 'bg-purple-500/10' :
+                                            category.iconColor === 'text-yellow-400' ? 'bg-yellow-500/10' :
+                                            category.iconColor === 'text-orange-400' ? 'bg-orange-500/10' :
+                                            category.iconColor === 'text-pink-400' ? 'bg-pink-500/10' :
+                                            category.iconColor === 'text-cyan-400' ? 'bg-cyan-500/10' :
+                                            category.iconColor === 'text-indigo-400' ? 'bg-indigo-500/10' :
+                                            'bg-vscode-active/50'
+                                          }`}>
+                                            <SettingIcon className={iconColorClass} size={14} />
+                                          </div>
+                                          <div>
+                                            <div className="text-xs font-medium text-vscode-text">{setting.label}</div>
+                                            {setting.description && (
+                                              <div className="text-[10px] text-vscode-text-secondary leading-tight">{setting.description}</div>
+                                            )}
+                                          </div>
                                         </div>
-                                        <div>
-                                          <div className="text-xs font-medium text-vscode-text">{setting.label}</div>
-                                          {setting.description && (
-                                            <div className="text-[10px] text-vscode-text-secondary leading-tight">{setting.description}</div>
-                                          )}
-                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                          <input
+                                            type="checkbox"
+                                            checked={portfolioSettings[setting.key as keyof PortfolioSettings] as boolean}
+                                            onChange={(e) => handleSettingChange(setting.key as keyof PortfolioSettings, e.target.checked)}
+                                            className="sr-only peer"
+                                          />
+                                          <div className="w-9 h-5 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-vscode-blue"></div>
+                                        </label>
                                       </div>
-                                      <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                                        <input
-                                          type="checkbox"
-                                          checked={portfolioSettings[setting.key as keyof PortfolioSettings] as boolean}
-                                          onChange={(e) => handleSettingChange(setting.key as keyof PortfolioSettings, e.target.checked)}
-                                          className="sr-only peer"
-                                        />
-                                        <div className="w-9 h-5 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-vscode-blue"></div>
-                                      </label>
-                                    </div>
-                                  ))}
+                                    )
+                                  })}
                                 </div>
                               </>
                             )}

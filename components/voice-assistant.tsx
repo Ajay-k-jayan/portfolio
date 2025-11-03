@@ -6,7 +6,7 @@ import { useAppStore } from '@/lib/store'
 import toast from 'react-hot-toast'
 import { Tooltip } from './ui/tooltip'
 
-export function VoiceAssistant() {
+export function VoiceAssistant({ onTriggerClick }: { onTriggerClick?: () => void }) {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const { openSidebarView, addTab } = useAppStore()
@@ -87,7 +87,7 @@ export function VoiceAssistant() {
     }
   }, [handleVoiceCommand])
 
-  const startListening = () => {
+  const startListening = useCallback(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition
       const recognition = new SpeechRecognition()
@@ -124,26 +124,28 @@ export function VoiceAssistant() {
     } else {
       toast.error('Voice recognition not supported in your browser.')
     }
-  }
+  }, [handleVoiceCommand])
 
-  const stopListening = () => {
+  const stopListening = useCallback(() => {
     setIsListening(false)
     toast.success('Stopped listening')
-  }
+  }, [])
 
-  return (
-    <Tooltip content={isListening ? 'Stop listening' : 'Start voice assistant'}>
-      <button
-        onClick={isListening ? stopListening : startListening}
-        className={`fixed bottom-32 right-6 rounded-full p-4 shadow-lg transition-all z-50 ${
-          isListening
-            ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-            : 'bg-vscode-blue hover:bg-blue-600'
-        } text-white`}
-      >
-        {isListening ? <MicOff size={24} /> : <Mic size={24} />}
-      </button>
-    </Tooltip>
-  )
+  // Expose trigger function to parent
+  useEffect(() => {
+    ;(window as any).triggerVoiceAssistant = () => {
+      if (!isListening) {
+        startListening()
+      } else {
+        stopListening()
+      }
+    }
+    return () => {
+      delete (window as any).triggerVoiceAssistant
+    }
+  }, [isListening, startListening, stopListening])
+
+  // Return null since we're using the button in the header now
+  return null
 }
 
