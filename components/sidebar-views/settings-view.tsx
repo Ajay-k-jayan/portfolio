@@ -6,7 +6,7 @@ import {
   Settings, Palette, Layout, Bell, Globe, Monitor, Moon, Sun, 
   Layers, Eye, Zap, Search, User, Mail, Share2, Code, 
   Briefcase, Award, BookOpen, Home, Folder, ChevronRight, ChevronDown,
-  RotateCcw, Check, RefreshCw, Grid, List, Clock, Activity, TrendingUp, FileText, Download, Upload
+  RotateCcw, Check, Grid, List, Clock, Activity, TrendingUp, FileText
 } from 'lucide-react'
 import { useAppStore, PortfolioSettings } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
@@ -510,91 +510,6 @@ export function SettingsView() {
             </AnimatePresence>
           </div>
 
-          {/* Advanced Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded">
-            <button
-              onClick={() => toggleSection('advanced')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
-            >
-              <div className="flex items-center gap-2">
-                <Zap className="text-cyan-400" size={16} />
-                <span className="text-sm font-medium text-vscode-text">ADVANCED</span>
-              </div>
-              {expandedSections.has('advanced') ? (
-                <ChevronDown className="text-vscode-text-secondary" size={16} />
-              ) : (
-                <ChevronRight className="text-vscode-text-secondary" size={16} />
-              )}
-            </button>
-            <AnimatePresence>
-              {expandedSections.has('advanced') && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 space-y-3">
-                    <button
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          const settingsJson = JSON.stringify(portfolioSettings, null, 2)
-                          const blob = new Blob([settingsJson], { type: 'application/json' })
-                          const url = URL.createObjectURL(blob)
-                          const a = document.createElement('a')
-                          a.href = url
-                          a.download = 'portfolio-settings.json'
-                          a.click()
-                          URL.revokeObjectURL(url)
-                        }
-                      }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-vscode-active hover:bg-vscode-hover border border-vscode-border rounded text-sm text-vscode-text transition-colors"
-                    >
-                      <Download size={16} />
-                      <span>Export Settings</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          const input = document.createElement('input')
-                          input.type = 'file'
-                          input.accept = 'application/json'
-                          input.onchange = (e) => {
-                            const file = (e.target as HTMLInputElement).files?.[0]
-                            if (file) {
-                              const reader = new FileReader()
-                              reader.onload = (event) => {
-                                try {
-                                  const imported = JSON.parse(event.target?.result as string)
-                                  updateSettings(imported)
-                                } catch (error) {
-                                  alert('Failed to import settings. Invalid file format.')
-                                }
-                              }
-                              reader.readAsText(file)
-                            }
-                          }
-                          input.click()
-                        }
-                      }}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-vscode-active hover:bg-vscode-hover border border-vscode-border rounded text-sm text-vscode-text transition-colors"
-                    >
-                      <Upload size={16} />
-                      <span>Import Settings</span>
-                    </button>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-vscode-active hover:bg-vscode-hover border border-vscode-border rounded text-sm text-vscode-text transition-colors"
-                    >
-                      <RefreshCw size={16} />
-                      <span>Reload Portfolio</span>
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
         </div>
       </div>
     </div>
