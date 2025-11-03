@@ -3,16 +3,169 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Settings, Palette, Layout, Bell, Globe, Monitor, Moon, Sun, 
-  Layers, Eye, Zap, Search, User, Mail, Share2, Code, 
-  Briefcase, Award, BookOpen, Home, Folder, ChevronRight, ChevronDown,
-  RotateCcw, Check, Grid, List, Clock, Activity, TrendingUp, FileText, Info
+  Settings, Palette, Layout, Bell, Eye, Share2, FileText, 
+  ChevronRight, ChevronDown, RotateCcw, Check, Grid, List, 
+  Info, Monitor, Maximize, Minimize, Type, Sparkles, Zap,
+  Home, TrendingUp, Clock
 } from 'lucide-react'
 import { useAppStore, PortfolioSettings, defaultSettings } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
 
+// Visual Preview Components
+const GridLayoutPreview = ({ active }: { active: boolean }) => (
+  <div className={`w-full h-20 rounded border-2 transition-all ${
+    active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+  }`}>
+    <div className="p-2 h-full flex flex-col gap-1">
+      <div className="flex gap-1 flex-1">
+        <div className="flex-1 bg-vscode-border rounded" />
+        <div className="flex-1 bg-vscode-border rounded" />
+        <div className="flex-1 bg-vscode-border rounded" />
+      </div>
+      <div className="flex gap-1 flex-1">
+        <div className="flex-1 bg-vscode-border rounded" />
+        <div className="flex-1 bg-vscode-border rounded" />
+        <div className="flex-1 bg-vscode-border rounded" />
+      </div>
+    </div>
+  </div>
+)
+
+const ListLayoutPreview = ({ active }: { active: boolean }) => (
+  <div className={`w-full h-20 rounded border-2 transition-all ${
+    active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+  }`}>
+    <div className="p-2 h-full flex flex-col gap-1.5">
+      <div className="h-3 bg-vscode-border rounded" />
+      <div className="h-3 bg-vscode-border rounded w-3/4" />
+      <div className="h-3 bg-vscode-border rounded" />
+      <div className="h-3 bg-vscode-border rounded w-2/3" />
+    </div>
+  </div>
+)
+
+const CompactViewPreview = ({ active }: { active: boolean }) => (
+  <div className={`w-full h-16 rounded border-2 transition-all ${
+    active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+  }`}>
+    <div className="p-2 h-full flex flex-col gap-1">
+      <div className="h-2 bg-vscode-border rounded" />
+      <div className="h-2 bg-vscode-border rounded w-5/6" />
+      <div className="h-2 bg-vscode-border rounded w-4/6" />
+    </div>
+  </div>
+)
+
+const NormalViewPreview = ({ active }: { active: boolean }) => (
+  <div className={`w-full h-16 rounded border-2 transition-all ${
+    active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+  }`}>
+    <div className="p-2 h-full flex flex-col gap-2">
+      <div className="h-2.5 bg-vscode-border rounded" />
+      <div className="h-2.5 bg-vscode-border rounded w-5/6" />
+      <div className="h-2.5 bg-vscode-border rounded w-4/6" />
+    </div>
+  </div>
+)
+
+const FontSizePreview = ({ size, active }: { size: 'small' | 'medium' | 'large', active: boolean }) => {
+  const sizeMap = {
+    small: 'text-xs',
+    medium: 'text-sm',
+    large: 'text-base'
+  }
+  return (
+    <div className={`w-full h-16 rounded border-2 transition-all ${
+      active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+    }`}>
+      <div className="p-3 h-full flex items-center">
+        <p className={`${sizeMap[size]} text-vscode-text font-medium`}>
+          Sample Text
+        </p>
+      </div>
+    </div>
+  )
+}
+
+const FontFamilyPreview = ({ family, active }: { family: 'system' | 'mono' | 'sans', active: boolean }) => {
+  const familyMap = {
+    system: 'font-sans',
+    mono: 'font-mono',
+    sans: 'font-sans'
+  }
+  return (
+    <div className={`w-full h-16 rounded border-2 transition-all ${
+      active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+    }`}>
+      <div className="p-3 h-full flex items-center">
+        <p className={`text-sm text-vscode-text ${familyMap[family]}`}>
+          {family === 'mono' ? 'Consolas Mono' : family === 'sans' ? 'Inter Sans' : 'System Font'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+const ThemePreviewCard = ({ theme, active, onClick }: { theme: any, active: boolean, onClick: () => void }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    className={`relative w-full rounded-lg border-2 transition-all overflow-hidden ${
+      active 
+        ? 'border-vscode-blue ring-2 ring-vscode-blue/50' 
+        : 'border-vscode-border hover:border-vscode-blue/50'
+    }`}
+  >
+    <div 
+      className="h-20 w-full"
+      style={{ 
+        background: `linear-gradient(135deg, ${theme.colors.bg} 0%, ${theme.colors.sidebar} 100%)`
+      }}
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-xs font-semibold text-white drop-shadow-lg">{theme.name}</div>
+        </div>
+      </div>
+    </div>
+    {active && (
+      <div className="absolute top-2 right-2">
+        <div className="w-5 h-5 bg-vscode-blue rounded-full flex items-center justify-center">
+          <Check size={12} className="text-white" />
+        </div>
+      </div>
+    )}
+  </motion.button>
+)
+
+const AnimationSpeedPreview = ({ speed, active }: { speed: 'fast' | 'normal' | 'slow', active: boolean }) => {
+  const speedMap = {
+    fast: 0.5,
+    normal: 1,
+    slow: 2
+  }
+  return (
+    <div className={`w-full h-16 rounded border-2 transition-all ${
+      active ? 'border-vscode-blue bg-vscode-blue/10' : 'border-vscode-border bg-vscode-active/50 opacity-50'
+    }`}>
+      <div className="p-3 h-full flex items-center justify-center">
+        <motion.div
+          animate={{ x: [0, 60, 0] }}
+          transition={{ 
+            duration: speedMap[speed],
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+          className="w-3 h-3 bg-vscode-blue rounded-full"
+        />
+      </div>
+    </div>
+  )
+}
+
 export function SettingsView() {
-  const { portfolioSettings, updateSettings, resetSettings, setActiveMenuItem } = useAppStore()
+  const { portfolioSettings, updateSettings, resetSettings } = useAppStore()
   const { themes, setTheme } = useEnhancedTheme()
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['display', 'appearance']))
   const [showResetNotification, setShowResetNotification] = useState(false)
@@ -66,10 +219,8 @@ export function SettingsView() {
     key: K,
     value: PortfolioSettings[K]
   ) => {
-    // Apply immediately
     updateSettings({ [key]: value })
     
-    // Set the changed setting name for notification
     const settingLabels: Record<string, string> = {
       showWelcomeOnStartup: 'Welcome on Startup',
       compactView: 'Compact View',
@@ -103,7 +254,6 @@ export function SettingsView() {
       setShowResetNotification(false)
     }, 3000)
     
-    // Reset theme if changed
     const themeToApply = themes.find(t => t.id === 'dark')
     if (themeToApply) {
       setTheme('dark')
@@ -149,7 +299,7 @@ export function SettingsView() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-5xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="mb-6 border-b border-vscode-border pb-4">
           <div className="flex items-center justify-between">
@@ -160,7 +310,7 @@ export function SettingsView() {
               <div>
                 <h1 className="text-2xl font-semibold text-vscode-text">Settings</h1>
                 <p className="text-sm text-vscode-text-secondary mt-1">
-                  Customize your portfolio experience - changes apply immediately
+                  Visual settings - see your changes instantly
                 </p>
               </div>
             </div>
@@ -193,32 +343,17 @@ export function SettingsView() {
           </div>
         </div>
 
-        {/* Reset Notification - Top */}
-        <AnimatePresence>
-          {showResetNotification && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mb-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2 text-green-400"
-            >
-              <Check size={16} />
-              <span className="text-sm">Settings reset to defaults successfully!</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Settings Sections */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Display Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded">
+          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
             <button
               onClick={() => toggleSection('display')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
+              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Eye className="text-blue-400" size={16} />
-                <span className="text-sm font-medium text-vscode-text">DISPLAY</span>
+                <Eye className="text-blue-400" size={18} />
+                <span className="text-sm font-semibold text-vscode-text">Display</span>
               </div>
               {expandedSections.has('display') ? (
                 <ChevronDown className="text-vscode-text-secondary" size={16} />
@@ -235,45 +370,134 @@ export function SettingsView() {
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="p-4 space-y-3">
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Show Welcome on Startup</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.showWelcomeOnStartup}
-                        onChange={(e) => handleSettingChange('showWelcomeOnStartup', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Compact View</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.compactView}
-                        onChange={(e) => handleSettingChange('compactView', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Show Animations</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.showAnimations}
-                        onChange={(e) => handleSettingChange('showAnimations', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
+                  <div className="p-4 space-y-6">
+                    {/* Compact View Toggle */}
                     <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-2">Animation Speed</label>
-                      <select
-                        value={portfolioSettings.animationSpeed}
-                        onChange={(e) => handleSettingChange('animationSpeed', e.target.value as 'fast' | 'normal' | 'slow')}
-                        className="w-full px-3 py-2 bg-vscode-active border border-vscode-border rounded text-sm text-vscode-text focus:outline-none focus:border-vscode-blue"
-                      >
-                        <option value="fast">Fast</option>
-                        <option value="normal">Normal</option>
-                        <option value="slow">Slow</option>
-                      </select>
+                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
+                        View Mode
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <motion.button
+                          onClick={() => handleSettingChange('compactView', false)}
+                          className={`relative p-4 rounded-lg border-2 transition-all ${
+                            !portfolioSettings.compactView
+                              ? 'border-vscode-blue bg-vscode-blue/10'
+                              : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
+                          }`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <NormalViewPreview active={!portfolioSettings.compactView} />
+                          <div className="mt-2 text-center">
+                            <span className="text-xs font-medium text-vscode-text">Normal</span>
+                          </div>
+                          {!portfolioSettings.compactView && (
+                            <div className="absolute top-2 right-2">
+                              <Check size={16} className="text-vscode-blue" />
+                            </div>
+                          )}
+                        </motion.button>
+                        <motion.button
+                          onClick={() => handleSettingChange('compactView', true)}
+                          className={`relative p-4 rounded-lg border-2 transition-all ${
+                            portfolioSettings.compactView
+                              ? 'border-vscode-blue bg-vscode-blue/10'
+                              : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
+                          }`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <CompactViewPreview active={portfolioSettings.compactView} />
+                          <div className="mt-2 text-center">
+                            <span className="text-xs font-medium text-vscode-text">Compact</span>
+                          </div>
+                          {portfolioSettings.compactView && (
+                            <div className="absolute top-2 right-2">
+                              <Check size={16} className="text-vscode-blue" />
+                            </div>
+                          )}
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* Animation Speed */}
+                    <div>
+                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
+                        Animation Speed
+                      </label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {(['fast', 'normal', 'slow'] as const).map((speed) => (
+                          <motion.button
+                            key={speed}
+                            onClick={() => handleSettingChange('animationSpeed', speed)}
+                            className={`relative p-4 rounded-lg border-2 transition-all ${
+                              portfolioSettings.animationSpeed === speed
+                                ? 'border-vscode-blue bg-vscode-blue/10'
+                                : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <AnimationSpeedPreview 
+                              speed={speed} 
+                              active={portfolioSettings.animationSpeed === speed} 
+                            />
+                            <div className="mt-2 text-center">
+                              <span className="text-xs font-medium text-vscode-text capitalize">{speed}</span>
+                            </div>
+                            {portfolioSettings.animationSpeed === speed && (
+                              <div className="absolute top-2 right-2">
+                                <Check size={16} className="text-vscode-blue" />
+                              </div>
+                            )}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Toggle Settings */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-500/10 rounded">
+                            <Zap className="text-blue-400" size={16} />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-vscode-text">Show Animations</div>
+                            <div className="text-xs text-vscode-text-secondary">Enable smooth transitions</div>
+                          </div>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={portfolioSettings.showAnimations}
+                            onChange={(e) => handleSettingChange('showAnimations', e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
+                        </label>
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-500/10 rounded">
+                            <Home className="text-green-400" size={16} />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium text-vscode-text">Show Welcome on Startup</div>
+                            <div className="text-xs text-vscode-text-secondary">Display welcome page when opening</div>
+                          </div>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={portfolioSettings.showWelcomeOnStartup}
+                            onChange={(e) => handleSettingChange('showWelcomeOnStartup', e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -282,14 +506,14 @@ export function SettingsView() {
           </div>
 
           {/* Appearance Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded">
+          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
             <button
               onClick={() => toggleSection('appearance')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
+              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Palette className="text-purple-400" size={16} />
-                <span className="text-sm font-medium text-vscode-text">APPEARANCE</span>
+                <Palette className="text-purple-400" size={18} />
+                <span className="text-sm font-semibold text-vscode-text">Appearance</span>
               </div>
               {expandedSections.has('appearance') ? (
                 <ChevronDown className="text-vscode-text-secondary" size={16} />
@@ -306,42 +530,86 @@ export function SettingsView() {
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="p-4 space-y-3">
+                  <div className="p-4 space-y-6">
+                    {/* Theme Selection */}
                     <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-2">Theme</label>
-                      <select
-                        value={portfolioSettings.theme}
-                        onChange={(e) => handleSettingChange('theme', e.target.value)}
-                        className="w-full px-3 py-2 bg-vscode-active border border-vscode-border rounded text-sm text-vscode-text focus:outline-none focus:border-vscode-blue"
-                      >
-                        {themes.map(theme => (
-                          <option key={theme.id} value={theme.id}>{theme.name}</option>
+                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
+                        Theme
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {themes.map((theme) => (
+                          <ThemePreviewCard
+                            key={theme.id}
+                            theme={theme}
+                            active={portfolioSettings.theme === theme.id}
+                            onClick={() => handleSettingChange('theme', theme.id)}
+                          />
                         ))}
-                      </select>
+                      </div>
                     </div>
+
+                    {/* Font Size */}
                     <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-2">Font Size</label>
-                      <select
-                        value={portfolioSettings.fontSize}
-                        onChange={(e) => handleSettingChange('fontSize', e.target.value as 'small' | 'medium' | 'large')}
-                        className="w-full px-3 py-2 bg-vscode-active border border-vscode-border rounded text-sm text-vscode-text focus:outline-none focus:border-vscode-blue"
-                      >
-                        <option value="small">Small</option>
-                        <option value="medium">Medium</option>
-                        <option value="large">Large</option>
-                      </select>
+                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
+                        Font Size
+                      </label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {(['small', 'medium', 'large'] as const).map((size) => (
+                          <motion.button
+                            key={size}
+                            onClick={() => handleSettingChange('fontSize', size)}
+                            className={`relative p-4 rounded-lg border-2 transition-all ${
+                              portfolioSettings.fontSize === size
+                                ? 'border-vscode-blue bg-vscode-blue/10'
+                                : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <FontSizePreview size={size} active={portfolioSettings.fontSize === size} />
+                            <div className="mt-2 text-center">
+                              <span className="text-xs font-medium text-vscode-text capitalize">{size}</span>
+                            </div>
+                            {portfolioSettings.fontSize === size && (
+                              <div className="absolute top-2 right-2">
+                                <Check size={16} className="text-vscode-blue" />
+                              </div>
+                            )}
+                          </motion.button>
+                        ))}
+                      </div>
                     </div>
+
+                    {/* Font Family */}
                     <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-2">Font Family</label>
-                      <select
-                        value={portfolioSettings.fontFamily}
-                        onChange={(e) => handleSettingChange('fontFamily', e.target.value as 'system' | 'mono' | 'sans')}
-                        className="w-full px-3 py-2 bg-vscode-active border border-vscode-border rounded text-sm text-vscode-text focus:outline-none focus:border-vscode-blue"
-                      >
-                        <option value="system">System</option>
-                        <option value="mono">Monospace</option>
-                        <option value="sans">Sans Serif</option>
-                      </select>
+                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
+                        Font Family
+                      </label>
+                      <div className="grid grid-cols-3 gap-3">
+                        {(['system', 'mono', 'sans'] as const).map((family) => (
+                          <motion.button
+                            key={family}
+                            onClick={() => handleSettingChange('fontFamily', family)}
+                            className={`relative p-4 rounded-lg border-2 transition-all ${
+                              portfolioSettings.fontFamily === family
+                                ? 'border-vscode-blue bg-vscode-blue/10'
+                                : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <FontFamilyPreview family={family} active={portfolioSettings.fontFamily === family} />
+                            <div className="mt-2 text-center">
+                              <span className="text-xs font-medium text-vscode-text capitalize">{family}</span>
+                            </div>
+                            {portfolioSettings.fontFamily === family && (
+                              <div className="absolute top-2 right-2">
+                                <Check size={16} className="text-vscode-blue" />
+                              </div>
+                            )}
+                          </motion.button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </motion.div>
@@ -350,14 +618,14 @@ export function SettingsView() {
           </div>
 
           {/* Layout Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded">
+          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
             <button
               onClick={() => toggleSection('layout')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
+              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Layout className="text-green-400" size={16} />
-                <span className="text-sm font-medium text-vscode-text">LAYOUT</span>
+                <Layout className="text-green-400" size={18} />
+                <span className="text-sm font-semibold text-vscode-text">Layout</span>
               </div>
               {expandedSections.has('layout') ? (
                 <ChevronDown className="text-vscode-text-secondary" size={16} />
@@ -374,58 +642,110 @@ export function SettingsView() {
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="p-4 space-y-3">
+                  <div className="p-4 space-y-6">
+                    {/* Grid Layout */}
                     <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-2">
-                        Sidebar Width: {portfolioSettings.sidebarWidth}px
+                      <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
+                        View Layout
                       </label>
-                      <input
-                        type="range"
-                        min="200"
-                        max="400"
-                        value={portfolioSettings.sidebarWidth}
-                        onChange={(e) => handleSettingChange('sidebarWidth', parseInt(e.target.value))}
-                        className="w-full h-2 bg-vscode-active rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-2">
-                        Panel Width: {portfolioSettings.panelWidth}px
-                      </label>
-                      <input
-                        type="range"
-                        min="300"
-                        max="600"
-                        value={portfolioSettings.panelWidth}
-                        onChange={(e) => handleSettingChange('panelWidth', parseInt(e.target.value))}
-                        className="w-full h-2 bg-vscode-active rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-2">Grid Layout</label>
-                      <div className="flex gap-2">
-                        <button
+                      <div className="grid grid-cols-2 gap-4">
+                        <motion.button
                           onClick={() => handleSettingChange('gridLayout', 'grid')}
-                          className={`flex-1 px-3 py-2 rounded text-sm transition-colors ${
+                          className={`relative p-4 rounded-lg border-2 transition-all ${
                             portfolioSettings.gridLayout === 'grid'
-                              ? 'bg-vscode-blue text-white'
-                              : 'bg-vscode-active text-vscode-text-secondary hover:bg-vscode-hover'
+                              ? 'border-vscode-blue bg-vscode-blue/10'
+                              : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
                           }`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                         >
-                          <Grid size={16} className="inline mr-2" />
-                          Grid
-                        </button>
-                        <button
+                          <GridLayoutPreview active={portfolioSettings.gridLayout === 'grid'} />
+                          <div className="mt-3 flex items-center justify-center gap-2">
+                            <Grid size={16} className="text-vscode-text-secondary" />
+                            <span className="text-xs font-medium text-vscode-text">Grid View</span>
+                          </div>
+                          {portfolioSettings.gridLayout === 'grid' && (
+                            <div className="absolute top-2 right-2">
+                              <Check size={16} className="text-vscode-blue" />
+                            </div>
+                          )}
+                        </motion.button>
+                        <motion.button
                           onClick={() => handleSettingChange('gridLayout', 'list')}
-                          className={`flex-1 px-3 py-2 rounded text-sm transition-colors ${
+                          className={`relative p-4 rounded-lg border-2 transition-all ${
                             portfolioSettings.gridLayout === 'list'
-                              ? 'bg-vscode-blue text-white'
-                              : 'bg-vscode-active text-vscode-text-secondary hover:bg-vscode-hover'
+                              ? 'border-vscode-blue bg-vscode-blue/10'
+                              : 'border-vscode-border bg-vscode-active hover:border-vscode-blue/50'
                           }`}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                         >
-                          <List size={16} className="inline mr-2" />
-                          List
-                        </button>
+                          <ListLayoutPreview active={portfolioSettings.gridLayout === 'list'} />
+                          <div className="mt-3 flex items-center justify-center gap-2">
+                            <List size={16} className="text-vscode-text-secondary" />
+                            <span className="text-xs font-medium text-vscode-text">List View</span>
+                          </div>
+                          {portfolioSettings.gridLayout === 'list' && (
+                            <div className="absolute top-2 right-2">
+                              <Check size={16} className="text-vscode-blue" />
+                            </div>
+                          )}
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* Width Settings */}
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-xs font-medium text-vscode-text-secondary">
+                            Sidebar Width
+                          </label>
+                          <span className="text-xs font-medium text-vscode-text">
+                            {portfolioSettings.sidebarWidth}px
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Minimize size={14} className="text-vscode-text-secondary" />
+                          <input
+                            type="range"
+                            min="200"
+                            max="400"
+                            value={portfolioSettings.sidebarWidth}
+                            onChange={(e) => handleSettingChange('sidebarWidth', parseInt(e.target.value))}
+                            className="flex-1 h-2 bg-vscode-active rounded-lg appearance-none cursor-pointer"
+                            style={{
+                              background: `linear-gradient(to right, var(--theme-blue) 0%, var(--theme-blue) ${((portfolioSettings.sidebarWidth - 200) / 200) * 100}%, var(--theme-active) ${((portfolioSettings.sidebarWidth - 200) / 200) * 100}%, var(--theme-active) 100%)`
+                            }}
+                          />
+                          <Maximize size={14} className="text-vscode-text-secondary" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-xs font-medium text-vscode-text-secondary">
+                            Panel Width
+                          </label>
+                          <span className="text-xs font-medium text-vscode-text">
+                            {portfolioSettings.panelWidth}px
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Minimize size={14} className="text-vscode-text-secondary" />
+                          <input
+                            type="range"
+                            min="300"
+                            max="600"
+                            value={portfolioSettings.panelWidth}
+                            onChange={(e) => handleSettingChange('panelWidth', parseInt(e.target.value))}
+                            className="flex-1 h-2 bg-vscode-active rounded-lg appearance-none cursor-pointer"
+                            style={{
+                              background: `linear-gradient(to right, var(--theme-blue) 0%, var(--theme-blue) ${((portfolioSettings.panelWidth - 300) / 300) * 100}%, var(--theme-active) ${((portfolioSettings.panelWidth - 300) / 300) * 100}%, var(--theme-active) 100%)`
+                            }}
+                          />
+                          <Maximize size={14} className="text-vscode-text-secondary" />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -435,14 +755,14 @@ export function SettingsView() {
           </div>
 
           {/* Content Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded">
+          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
             <button
               onClick={() => toggleSection('content')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
+              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
             >
               <div className="flex items-center gap-2">
-                <FileText className="text-yellow-400" size={16} />
-                <span className="text-sm font-medium text-vscode-text">CONTENT</span>
+                <FileText className="text-yellow-400" size={18} />
+                <span className="text-sm font-semibold text-vscode-text">Content</span>
               </div>
               {expandedSections.has('content') ? (
                 <ChevronDown className="text-vscode-text-secondary" size={16} />
@@ -460,42 +780,42 @@ export function SettingsView() {
                   className="overflow-hidden"
                 >
                   <div className="p-4 space-y-3">
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Show Statistics</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.showStats}
-                        onChange={(e) => handleSettingChange('showStats', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Show Social Links</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.showSocialLinks}
-                        onChange={(e) => handleSettingChange('showSocialLinks', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Show GitHub Stats</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.showGitHubStats}
-                        onChange={(e) => handleSettingChange('showGitHubStats', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Show Recent Items</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.showRecentItems}
-                        onChange={(e) => handleSettingChange('showRecentItems', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
+                    {[
+                      { key: 'showStats', icon: TrendingUp, label: 'Show Statistics', desc: 'Display stats on welcome page', color: 'blue' },
+                      { key: 'showSocialLinks', icon: Share2, label: 'Show Social Links', desc: 'Display social media links', color: 'pink' },
+                      { key: 'showGitHubStats', icon: Sparkles, label: 'Show GitHub Stats', desc: 'Display GitHub profile data', color: 'purple' },
+                      { key: 'showRecentItems', icon: Clock, label: 'Show Recent Items', desc: 'Display recently viewed items', color: 'green' },
+                    ].map((item) => {
+                      const Icon = item.icon
+                      const colorClasses = {
+                        blue: 'bg-blue-500/10 text-blue-400',
+                        pink: 'bg-pink-500/10 text-pink-400',
+                        purple: 'bg-purple-500/10 text-purple-400',
+                        green: 'bg-green-500/10 text-green-400',
+                      }
+                      return (
+                        <div key={item.key} className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded ${colorClasses[item.color as keyof typeof colorClasses]}`}>
+                              <Icon size={16} />
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-vscode-text">{item.label}</div>
+                              <div className="text-xs text-vscode-text-secondary">{item.desc}</div>
+                            </div>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={portfolioSettings[item.key as keyof PortfolioSettings] as boolean}
+                              onChange={(e) => handleSettingChange(item.key as keyof PortfolioSettings, e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
+                          </label>
+                        </div>
+                      )
+                    })}
                   </div>
                 </motion.div>
               )}
@@ -503,14 +823,14 @@ export function SettingsView() {
           </div>
 
           {/* Notification Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded">
+          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
             <button
               onClick={() => toggleSection('notifications')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
+              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Bell className="text-orange-400" size={16} />
-                <span className="text-sm font-medium text-vscode-text">NOTIFICATIONS</span>
+                <Bell className="text-orange-400" size={18} />
+                <span className="text-sm font-semibold text-vscode-text">Notifications</span>
               </div>
               {expandedSections.has('notifications') ? (
                 <ChevronDown className="text-vscode-text-secondary" size={16} />
@@ -528,33 +848,40 @@ export function SettingsView() {
                   className="overflow-hidden"
                 >
                   <div className="p-4 space-y-3">
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Email Notifications</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.emailNotifications}
-                        onChange={(e) => handleSettingChange('emailNotifications', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Form Success Alerts</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.formSuccessAlerts}
-                        onChange={(e) => handleSettingChange('formSuccessAlerts', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Update Notifications</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.updateNotifications}
-                        onChange={(e) => handleSettingChange('updateNotifications', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
+                    {[
+                      { key: 'emailNotifications', icon: Share2, label: 'Email Notifications', desc: 'Get notified via email', color: 'blue' },
+                      { key: 'formSuccessAlerts', icon: Check, label: 'Form Success Alerts', desc: 'Show alerts on form success', color: 'green' },
+                      { key: 'updateNotifications', icon: Info, label: 'Update Notifications', desc: 'Notify about updates', color: 'orange' },
+                    ].map((item) => {
+                      const Icon = item.icon
+                      const colorClasses = {
+                        blue: 'bg-blue-500/10 text-blue-400',
+                        green: 'bg-green-500/10 text-green-400',
+                        orange: 'bg-orange-500/10 text-orange-400',
+                      }
+                      return (
+                        <div key={item.key} className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded ${colorClasses[item.color as keyof typeof colorClasses]}`}>
+                              <Icon size={16} />
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-vscode-text">{item.label}</div>
+                              <div className="text-xs text-vscode-text-secondary">{item.desc}</div>
+                            </div>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={portfolioSettings[item.key as keyof PortfolioSettings] as boolean}
+                              onChange={(e) => handleSettingChange(item.key as keyof PortfolioSettings, e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
+                          </label>
+                        </div>
+                      )
+                    })}
                   </div>
                 </motion.div>
               )}
@@ -562,14 +889,14 @@ export function SettingsView() {
           </div>
 
           {/* Navigation Settings */}
-          <div className="bg-vscode-sidebar border border-vscode-border rounded">
+          <div className="bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
             <button
               onClick={() => toggleSection('navigation')}
-              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
+              className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors"
             >
               <div className="flex items-center gap-2">
-                <Share2 className="text-pink-400" size={16} />
-                <span className="text-sm font-medium text-vscode-text">NAVIGATION</span>
+                <Share2 className="text-pink-400" size={18} />
+                <span className="text-sm font-semibold text-vscode-text">Navigation</span>
               </div>
               {expandedSections.has('navigation') ? (
                 <ChevronDown className="text-vscode-text-secondary" size={16} />
@@ -587,24 +914,38 @@ export function SettingsView() {
                   className="overflow-hidden"
                 >
                   <div className="p-4 space-y-3">
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Enable Quick Navigation</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.enableQuickNav}
-                        onChange={(e) => handleSettingChange('enableQuickNav', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
-                    <label className="flex items-center justify-between p-2 hover:bg-vscode-active rounded cursor-pointer">
-                      <span className="text-xs text-vscode-text-secondary">Show Recently Viewed</span>
-                      <input
-                        type="checkbox"
-                        checked={portfolioSettings.showRecentlyViewed}
-                        onChange={(e) => handleSettingChange('showRecentlyViewed', e.target.checked)}
-                        className="w-4 h-4 rounded border-vscode-border bg-vscode-active text-vscode-blue focus:ring-vscode-blue"
-                      />
-                    </label>
+                    {[
+                      { key: 'enableQuickNav', icon: Zap, label: 'Enable Quick Navigation', desc: 'Fast access to pages', color: 'yellow' },
+                      { key: 'showRecentlyViewed', icon: Clock, label: 'Show Recently Viewed', desc: 'Display recent items in sidebar', color: 'cyan' },
+                    ].map((item) => {
+                      const Icon = item.icon
+                      const colorClasses = {
+                        yellow: 'bg-yellow-500/10 text-yellow-400',
+                        cyan: 'bg-cyan-500/10 text-cyan-400',
+                      }
+                      return (
+                        <div key={item.key} className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded ${colorClasses[item.color as keyof typeof colorClasses]}`}>
+                              <Icon size={16} />
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-vscode-text">{item.label}</div>
+                              <div className="text-xs text-vscode-text-secondary">{item.desc}</div>
+                            </div>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={portfolioSettings[item.key as keyof PortfolioSettings] as boolean}
+                              onChange={(e) => handleSettingChange(item.key as keyof PortfolioSettings, e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-vscode-border peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-vscode-blue rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-vscode-blue"></div>
+                          </label>
+                        </div>
+                      )
+                    })}
                   </div>
                 </motion.div>
               )}
