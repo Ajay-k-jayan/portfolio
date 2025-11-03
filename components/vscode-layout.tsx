@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NewSidebar } from './new-sidebar'
 import { PortfolioHeader } from './portfolio-header'
 import { TabBar } from './tab-bar'
@@ -22,8 +22,39 @@ import { RecommendationsTab } from './tabs/recommendations-tab'
 import { SettingsView } from './sidebar-views/settings-view'
 
 export function VSCodeLayout({ children }: { children: React.ReactNode }) {
-  const { tabs, activeTabId, sidebarCollapsed, activeMenuItem } = useAppStore()
+  const { tabs, activeTabId, sidebarCollapsed, activeMenuItem, portfolioSettings } = useAppStore()
   const [showChatbot, setShowChatbot] = useState(false)
+
+  // Apply font size and family settings dynamically
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const root = document.documentElement
+      
+      // Apply font size
+      const fontSizeMap = {
+        small: '0.875rem',
+        medium: '1rem',
+        large: '1.125rem'
+      }
+      root.style.fontSize = fontSizeMap[portfolioSettings.fontSize]
+      
+      // Apply font family
+      const fontFamilyMap = {
+        system: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        mono: '"Consolas", "Monaco", "Courier New", monospace',
+        sans: '"Inter", "Segoe UI", Roboto, sans-serif'
+      }
+      root.style.fontFamily = fontFamilyMap[portfolioSettings.fontFamily]
+      
+      // Apply animation speed
+      const animationSpeedMap = {
+        fast: '150ms',
+        normal: '300ms',
+        slow: '500ms'
+      }
+      root.style.setProperty('--animation-speed', animationSpeedMap[portfolioSettings.animationSpeed])
+    }
+  }, [portfolioSettings.fontSize, portfolioSettings.fontFamily, portfolioSettings.animationSpeed])
 
   // Get content based on active menu item (from sidebar)
   const getContentFromMenuItem = () => {
@@ -59,16 +90,25 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
           {tabs.length > 0 && <TabBar />}
           <div className="flex-1 overflow-auto bg-vscode-bg relative z-10">
             <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTabId || activeMenuItem || 'welcome'}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.2 }}
-                className="w-full"
-              >
-                {activeContent}
-              </motion.div>
+              {portfolioSettings.showAnimations ? (
+                <motion.div
+                  key={activeTabId || activeMenuItem || 'welcome'}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ 
+                    duration: portfolioSettings.animationSpeed === 'fast' ? 0.15 : 
+                             portfolioSettings.animationSpeed === 'slow' ? 0.5 : 0.2 
+                  }}
+                  className="w-full"
+                >
+                  {activeContent}
+                </motion.div>
+              ) : (
+                <div className="w-full">
+                  {activeContent}
+                </div>
+              )}
             </AnimatePresence>
           </div>
         </div>

@@ -51,7 +51,8 @@ export function NewSidebar() {
     sidebarCollapsed,
     toggleSidebar,
     closeTab,
-    tabs
+    tabs,
+    portfolioSettings
   } = useAppStore()
   const [mounted, setMounted] = useState(false)
 
@@ -78,7 +79,7 @@ export function NewSidebar() {
     return (
       <div className="w-12 bg-vscode-sidebar border-r border-vscode-border flex flex-col h-full">
         {/* Recently Selected (Top) - Compact Icons */}
-        {mounted && recentlySelected.length > 0 && (
+        {mounted && portfolioSettings.showRecentlyViewed && recentlySelected.length > 0 && (
           <div className="py-1.5 border-b border-vscode-border flex-shrink-0">
             <div className="mb-1 flex justify-center items-center">
               <History size={10} className="text-vscode-text-secondary" />
@@ -159,7 +160,7 @@ export function NewSidebar() {
       {/* Left Icon Bar - Fixed Height, No Scroll */}
       <div className="w-12 bg-vscode-sidebar border-r border-vscode-border flex flex-col h-full">
         {/* Recently Selected (Top) - Compact */}
-        {mounted && recentlySelected.length > 0 && (
+        {mounted && portfolioSettings.showRecentlyViewed && recentlySelected.length > 0 && (
           <div className="pt-1 pb-0.5 border-b border-vscode-border flex-shrink-0">
             <div className="mb-0.5 flex justify-center items-center">
               <History size={10} className="text-vscode-text-secondary" />

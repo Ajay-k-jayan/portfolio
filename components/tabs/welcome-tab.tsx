@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 
 export function WelcomeTab() {
-  const { setActiveMenuItem } = useAppStore()
+  const { setActiveMenuItem, portfolioSettings } = useAppStore()
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['start', 'recent']))
 
   const toggleSection = (section: string) => {
@@ -160,9 +160,10 @@ export function WelcomeTab() {
           </motion.div>
         </div>
 
-        {/* Stats Grid - VSCode Panel Style */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          {stats.map((stat, index) => {
+            {/* Stats Grid - VSCode Panel Style */}
+        {portfolioSettings.showStats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+            {stats.map((stat, index) => {
             const Icon = stat.icon
             return (
               <motion.div
@@ -180,7 +181,8 @@ export function WelcomeTab() {
               </motion.div>
             )
           })}
-        </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Main Actions */}
@@ -244,11 +246,12 @@ export function WelcomeTab() {
                         </div>
                       </motion.div>
                     )}
-              </AnimatePresence>
+                  </AnimatePresence>
             </div>
 
             {/* Recent Section - VSCode Tree View Style */}
-            <div className="bg-vscode-sidebar border border-vscode-border rounded">
+            {portfolioSettings.showRecentItems && (
+              <div className="bg-vscode-sidebar border border-vscode-border rounded">
               <button
                 onClick={() => toggleSection('recent')}
                 className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
@@ -299,7 +302,8 @@ export function WelcomeTab() {
                       </motion.div>
                     )}
               </AnimatePresence>
-            </div>
+              </div>
+            )}
 
             {/* Personal Information Section */}
             <div className="bg-vscode-sidebar border border-vscode-border rounded">
@@ -384,15 +388,16 @@ export function WelcomeTab() {
             </div>
 
             {/* Quick Social Links */}
-            <div className="bg-vscode-sidebar border border-vscode-border rounded">
-              <div className="px-4 py-3 bg-vscode-active border-b border-vscode-border">
-                <div className="flex items-center gap-2">
-                  <Share2 className="text-vscode-blue" size={16} />
-                  <span className="text-sm font-medium text-vscode-text">QUICK LINKS</span>
+            {portfolioSettings.showSocialLinks && (
+              <div className="bg-vscode-sidebar border border-vscode-border rounded">
+                <div className="px-4 py-3 bg-vscode-active border-b border-vscode-border">
+                  <div className="flex items-center gap-2">
+                    <Share2 className="text-vscode-blue" size={16} />
+                    <span className="text-sm font-medium text-vscode-text">QUICK LINKS</span>
+                  </div>
                 </div>
-              </div>
-              <div className="p-4 space-y-2">
-                {socialQuickLinks.map((social, index) => {
+                <div className="p-4 space-y-2">
+                  {socialQuickLinks.map((social, index) => {
                       const Icon = social.icon
                       return (
                         <motion.a
@@ -422,8 +427,9 @@ export function WelcomeTab() {
                       <span className="text-sm text-vscode-text group-hover:text-vscode-blue transition-colors">View All Social Links</span>
                       <ArrowRight size={12} className="text-vscode-text-secondary group-hover:text-vscode-blue opacity-0 group-hover:opacity-100 transition-all ml-auto" />
                     </motion.button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Resume Download */}
             <div className="bg-vscode-sidebar border border-vscode-border rounded">

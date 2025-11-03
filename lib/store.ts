@@ -7,6 +7,66 @@ export interface Tab {
   icon?: string
 }
 
+export interface PortfolioSettings {
+  showWelcomeOnStartup: boolean
+  compactView: boolean
+  showAnimations: boolean
+  animationSpeed: 'fast' | 'normal' | 'slow'
+  sidebarWidth: number
+  panelWidth: number
+  gridLayout: 'grid' | 'list'
+  showStats: boolean
+  showSocialLinks: boolean
+  showGitHubStats: boolean
+  showRecentItems: boolean
+  emailNotifications: boolean
+  formSuccessAlerts: boolean
+  updateNotifications: boolean
+  enableQuickNav: boolean
+  showRecentlyViewed: boolean
+  theme: string
+  fontSize: 'small' | 'medium' | 'large'
+  fontFamily: 'system' | 'mono' | 'sans'
+}
+
+const defaultSettings: PortfolioSettings = {
+  showWelcomeOnStartup: true,
+  compactView: false,
+  showAnimations: true,
+  animationSpeed: 'normal',
+  sidebarWidth: 256,
+  panelWidth: 400,
+  gridLayout: 'grid',
+  showStats: true,
+  showSocialLinks: true,
+  showGitHubStats: true,
+  showRecentItems: true,
+  emailNotifications: false,
+  formSuccessAlerts: true,
+  updateNotifications: true,
+  enableQuickNav: true,
+  showRecentlyViewed: true,
+  theme: 'dark',
+  fontSize: 'medium',
+  fontFamily: 'system',
+}
+
+// Load settings from localStorage
+const loadSettings = (): PortfolioSettings => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('portfolioSettings')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return { ...defaultSettings, ...parsed }
+      }
+    } catch (e) {
+      console.error('Failed to load settings:', e)
+    }
+  }
+  return defaultSettings
+}
+
 interface AppState {
   tabs: Tab[]
   activeTabId: string | null
@@ -15,6 +75,7 @@ interface AppState {
   activeMenuItem: string
   recentlySelected: string[]
   fileExploreExpanded: boolean
+  portfolioSettings: PortfolioSettings
   openSidebarView: (view: string) => void
   closeSidebarView: () => void
   addTab: (tab: Tab) => void
@@ -23,6 +84,8 @@ interface AppState {
   toggleSidebar: () => void
   setActiveMenuItem: (menuId: string) => void
   toggleFileExplore: () => void
+  updateSettings: (settings: Partial<PortfolioSettings>) => void
+  resetSettings: () => void
 }
 
 // Load recently selected from localStorage
@@ -43,7 +106,7 @@ const loadRecentlySelected = (): string[] => {
   return []
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   tabs: [],
   activeTabId: null,
   sidebarCollapsed: false,
@@ -51,6 +114,7 @@ export const useAppStore = create<AppState>((set) => ({
   activeMenuItem: 'welcome',
   recentlySelected: loadRecentlySelected(),
   fileExploreExpanded: false,
+  portfolioSettings: loadSettings(),
   openSidebarView: (view) => set({ activeSidebarView: view, sidebarCollapsed: false }),
   closeSidebarView: () => set({ activeSidebarView: '' }),
   addTab: (tab) => set((state) => {
@@ -98,5 +162,29 @@ export const useAppStore = create<AppState>((set) => ({
     }
   }),
   toggleFileExplore: () => set((state) => ({ fileExploreExpanded: !state.fileExploreExpanded })),
+  updateSettings: (newSettings) => {
+    const currentSettings = get().portfolioSettings
+    const updatedSettings = { ...currentSettings, ...newSettings }
+    set({ portfolioSettings: updatedSettings })
+    
+    // Save to localStorage immediately
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('portfolioSettings', JSON.stringify(updatedSettings))
+    }
+    
+    // Apply theme immediately if changed
+    if (newSettings.theme && newSettings.theme !== currentSettings.theme) {
+      // Dispatch custom event for theme change
+      window.dispatchEvent(new CustomEvent('themeChange', { detail: newSettings.theme }))
+    }
+  },
+  resetSettings: () => {
+    set({ portfolioSettings: defaultSettings })
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('portfolioSettings')
+      // Dispatch reset event
+      window.dispatchEvent(new CustomEvent('settingsReset'))
+    }
+  },
 }))
 

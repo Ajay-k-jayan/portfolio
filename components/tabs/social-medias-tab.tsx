@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from '@/components/ui/tooltip'
+import { useAppStore } from '@/lib/store'
 
 interface GitHubData {
   followers?: number
@@ -80,6 +81,7 @@ const WhatsAppIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
 )
 
 export function SocialMediasTab() {
+  const { portfolioSettings } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [githubData, setGithubData] = useState<GitHubData | null>(null)
@@ -490,7 +492,7 @@ export function SocialMediasTab() {
             </div>
 
             {/* GitHub Integration Section */}
-            {githubData && (
+            {githubData && portfolioSettings.showGitHubStats && (
               <div className="bg-vscode-sidebar border border-vscode-border rounded">
                 <button
                   onClick={() => toggleSection('github')}
