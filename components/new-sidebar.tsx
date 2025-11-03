@@ -13,7 +13,8 @@ import {
   BookOpen,
   Share2,
   MessageSquare,
-  History
+  History,
+  Settings
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { WelcomeTab } from './tabs/welcome-tab'
@@ -32,13 +33,14 @@ const menuItems = [
   { id: 'welcome', label: 'Welcome', icon: Home },
   { id: 'file-explore', label: 'File Explore', icon: Folder },
   { id: 'skills', label: 'Skills', icon: Code },
-  { id: 'project', label: 'Project', icon: FolderOpen },
   { id: 'achievement', label: 'Achievement', icon: Trophy },
   { id: 'experience', label: 'Experience', icon: Briefcase },
   { id: 'certifications', label: 'Certifications', icon: Award },
-  { id: 'blogs', label: 'Blogs', icon: BookOpen },
   { id: 'social-medias', label: 'Social Medias', icon: Share2 },
   { id: 'recommendation', label: 'Recommendation', icon: MessageSquare },
+  { id: 'project', label: 'Project', icon: FolderOpen },
+  { id: 'blogs', label: 'Blogs', icon: BookOpen },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
 export function NewSidebar() {

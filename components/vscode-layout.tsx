@@ -17,8 +17,9 @@ import { AchievementsView } from './sidebar-views/achievements-view'
 import { CertificationsView } from './sidebar-views/certifications-view'
 import { ExperienceTab } from './tabs/experience-tab'
 import { BlogSystem } from './blog-system'
-import { SocialIntegrations } from './social-integrations'
+import { SocialMediasTab } from './tabs/social-medias-tab'
 import { RecommendationsTab } from './tabs/recommendations-tab'
+import { SettingsView } from './sidebar-views/settings-view'
 
 export function VSCodeLayout({ children }: { children: React.ReactNode }) {
   const { tabs, activeTabId, sidebarCollapsed, activeMenuItem } = useAppStore()
@@ -34,8 +35,9 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
       'experience': <ExperienceTab />,
       'certifications': <CertificationsView />,
       'blogs': <BlogSystem />,
-      'social-medias': <SocialIntegrations />,
+      'social-medias': <SocialMediasTab />,
       'recommendation': <RecommendationsTab />,
+      'settings': <SettingsView />,
     }
     return contentMap[activeMenuItem] || <WelcomeTab />
   }
