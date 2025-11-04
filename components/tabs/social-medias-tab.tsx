@@ -3,13 +3,14 @@
 import { useState, useEffect, useMemo } from 'react'
 import { 
   Share2, Mail as MailIcon, MessageSquare as MessageSquareIcon, Check, Loader2,
-  User, Search, X, Send, Mail, Code, AlertCircle,   ChevronRight, ChevronDown,
+  User, Search, X, Send, Mail, Code, AlertCircle, AlertTriangle, ChevronRight, ChevronDown,
   Github, Linkedin, Instagram, Facebook, MessageCircle, Briefcase, Bell,
   ExternalLink, Filter, Star, TrendingUp, Activity, Layers, Zap
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from '@/components/ui/tooltip'
 import { useAppStore } from '@/lib/store'
+import { AlertBox } from '@/components/ui/alert-box'
 
 interface GitHubData {
   followers?: number
@@ -81,7 +82,7 @@ const WhatsAppIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
 )
 
 export function SocialMediasTab() {
-  const { portfolioSettings } = useAppStore()
+  const { portfolioSettings, addNotification } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [githubData, setGithubData] = useState<GitHubData | null>(null)
@@ -249,32 +250,66 @@ export function SocialMediasTab() {
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-    setFormError('')
+    // Clear error state when user starts typing
+    if (formStatus === 'error') {
+      setFormStatus('idle')
+      setFormError('')
+    }
   }
 
   const validateForm = () => {
     if (!formData.name.trim()) {
-      setFormError('Name is required')
+      const errorMsg = 'Name is required'
+      addNotification({
+        title: 'Form Validation Error',
+        message: errorMsg,
+        type: 'warning'
+      })
       return false
     }
     if (!formData.email.trim()) {
-      setFormError('Email is required')
+      const errorMsg = 'Email is required'
+      addNotification({
+        title: 'Form Validation Error',
+        message: errorMsg,
+        type: 'warning'
+      })
       return false
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setFormError('Please enter a valid email address')
+      const errorMsg = 'Please enter a valid email address'
+      addNotification({
+        title: 'Form Validation Error',
+        message: errorMsg,
+        type: 'warning'
+      })
       return false
     }
     if (!formData.subject.trim()) {
-      setFormError('Subject is required')
+      const errorMsg = 'Subject is required'
+      addNotification({
+        title: 'Form Validation Error',
+        message: errorMsg,
+        type: 'warning'
+      })
       return false
     }
     if (!formData.message.trim()) {
-      setFormError('Message is required')
+      const errorMsg = 'Message is required'
+      addNotification({
+        title: 'Form Validation Error',
+        message: errorMsg,
+        type: 'warning'
+      })
       return false
     }
     if (formData.message.trim().length < 10) {
-      setFormError('Message must be at least 10 characters')
+      const errorMsg = 'Message must be at least 10 characters'
+      addNotification({
+        title: 'Form Validation Error',
+        message: errorMsg,
+        type: 'warning'
+      })
       return false
     }
     return true
@@ -297,10 +332,16 @@ export function SocialMediasTab() {
       )
       
       const mailtoLink = `mailto:ajaykj2000@gmail.com?subject=${emailSubject}&body=${emailBody}`
-      window.location.href = mailtoLink
+      
+      // Try to open email client
+      const link = document.createElement('a')
+      link.href = mailtoLink
+      link.click()
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Check if email client opened successfully
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
+      // If we're still here, assume success (can't reliably detect if email client opened)
       setFormStatus('success')
       setFormData({
         name: '',
@@ -309,12 +350,29 @@ export function SocialMediasTab() {
         message: ''
       })
 
+      // Add success notification
+      addNotification({
+        title: 'Contact Form',
+        message: `Form submitted successfully! Email client opened for ${formData.name}`,
+        type: 'success'
+      })
+
+      // Auto-hide success message after 5 seconds
       setTimeout(() => {
         setFormStatus('idle')
-      }, 3000)
+        setFormError('')
+      }, 5000)
     } catch (error) {
+      const errorMsg = 'Failed to send email. Please check your email client or try again.'
       setFormStatus('error')
-      setFormError('Failed to open email client. Please try again or email directly.')
+      setFormError(errorMsg)
+      
+      // Add warning notification for mail failure
+      addNotification({
+        title: 'Email Send Failed',
+        message: `Warning: Could not open email client. Please try again or contact directly at ajaykj2000@gmail.com`,
+        type: 'warning'
+      })
     }
   }
 
@@ -396,12 +454,15 @@ export function SocialMediasTab() {
             </div>
 
             {/* Error State */}
-            {githubError && (
-              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2 text-yellow-400 text-sm">
-                <AlertCircle size={16} />
-                <span>{githubError}</span>
-              </div>
-            )}
+              {githubError && (
+                <AlertBox
+                  type="warning"
+                  title="Warning"
+                  message={githubError}
+                  onClose={() => setGithubError(null)}
+                  showCloseButton={true}
+                />
+              )}
 
             {/* Social Platforms Section */}
             <div className="bg-vscode-sidebar border border-vscode-border rounded">
@@ -587,24 +648,26 @@ export function SocialMediasTab() {
               <div className="p-6">
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                   {formStatus === 'success' && (
-                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center gap-2 text-green-400 text-sm">
-                      <Check size={16} />
-                      <span>Email client opened successfully! Please send your message from there.</span>
-                    </div>
+                    <AlertBox
+                      type="success"
+                      title="Success"
+                      message="Email client opened successfully! Please send your message from there."
+                      onClose={() => setFormStatus('idle')}
+                      showCloseButton={true}
+                    />
                   )}
 
                   {formStatus === 'error' && formError && (
-                    <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
-                      <AlertCircle size={16} />
-                      <span>{formError}</span>
-                    </div>
-                  )}
-
-                  {formError && formStatus === 'idle' && (
-                    <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2 text-yellow-400 text-sm">
-                      <AlertCircle size={16} />
-                      <span>{formError}</span>
-                    </div>
+                    <AlertBox
+                      type="error"
+                      title="Error"
+                      message={formError}
+                      onClose={() => {
+                        setFormStatus('idle')
+                        setFormError('')
+                      }}
+                      showCloseButton={true}
+                    />
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

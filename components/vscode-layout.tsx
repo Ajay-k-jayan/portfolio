@@ -18,6 +18,7 @@ import { BlogSystem } from './blog-system'
 import { SocialMediasTab } from './tabs/social-medias-tab'
 import { RecommendationsTab } from './tabs/recommendations-tab'
 import { SettingsView } from './sidebar-views/settings-view'
+import { NotificationToast } from './notification-toast'
 
 export function VSCodeLayout({ children }: { children: React.ReactNode }) {
   const { tabs, activeTabId, sidebarCollapsed, activeMenuItem, portfolioSettings } = useAppStore()
@@ -111,6 +112,7 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <StatusBar />
+      <NotificationToast />
     </div>
   )
 }

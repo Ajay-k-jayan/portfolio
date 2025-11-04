@@ -6,7 +6,7 @@ import { Tooltip } from '@/components/ui/tooltip'
 import { useAppStore } from '@/lib/store'
 
 export function SocialLinksWidget() {
-  const { portfolioSettings } = useAppStore()
+  const { portfolioSettings, addNotification } = useAppStore()
   const socialLinks = [
     {
       name: 'GitHub',
@@ -33,6 +33,22 @@ export function SocialLinksWidget() {
     link.href = '/resume.pdf'
     link.download = 'Ajay_K_J_Resume.pdf'
     link.click()
+    
+    // Show download started notification
+    addNotification({
+      title: 'Resume Download',
+      message: 'Resume download started: Ajay_K_J_Resume.pdf',
+      type: 'info'
+    })
+    
+    // Show completion notification after a delay
+    setTimeout(() => {
+      addNotification({
+        title: 'Resume Download Complete',
+        message: 'Resume download completed successfully: Ajay_K_J_Resume.pdf',
+        type: 'success'
+      })
+    }, 2000)
   }
 
   return (

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Settings, Palette, Bell, Eye, Share2, FileText, 
-  ChevronRight, ChevronDown, RotateCcw, Check, 
+  ChevronRight, ChevronDown, RotateCcw, Check, CheckCircle,
   Info, Type, Sparkles, Zap,
   Home, TrendingUp, Clock, Search, X, Moon, Globe,
   Calendar, Cloud, MapPin, Wifi, Cpu, Download, 
@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useAppStore, PortfolioSettings, defaultSettings } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
+import { AlertBox } from '@/components/ui/alert-box'
 
 // Visual Preview Components
 const GridLayoutPreview = ({ active }: { active: boolean }) => (
@@ -114,7 +115,7 @@ const FontFamilyPreview = ({ family, active }: { family: 'system' | 'mono' | 'sa
 
 const ThemePreviewCard = ({ theme, active, onClick }: { theme: any, active: boolean, onClick: () => void }) => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-2">
       <motion.button
         onClick={onClick}
         whileHover={{ scale: 1.02 }}
@@ -214,7 +215,7 @@ const ThemePreviewCard = ({ theme, active, onClick }: { theme: any, active: bool
       </motion.button>
 
       {/* Theme Name - Outside Card */}
-      <div className="mt-2 text-center">
+      <div className="text-center">
         <div 
           className="text-xs font-medium"
           style={{ color: active ? 'var(--theme-blue, #007acc)' : theme.colors.text || '#cccccc' }}
@@ -347,7 +348,7 @@ const settingsCategories: SettingsCategory[] = [
 
 export function SettingsView() {
   const { portfolioSettings, updateSettings, resetSettings, addNotification } = useAppStore()
-  const { themes, setTheme } = useEnhancedTheme()
+  const { themes, setTheme, currentTheme } = useEnhancedTheme()
   // All categories expanded by default
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(settingsCategories.map(cat => cat.id))
@@ -501,43 +502,52 @@ export function SettingsView() {
 
   return (
     <div className="h-full overflow-auto bg-vscode-bg text-vscode-text relative">
-      {/* Floating Notification Toast - Bottom Right (Visual Studio Style) */}
+      {/* Floating Notification Toast - Bottom Right (Theme-Aware Visual Studio Style) */}
       <AnimatePresence>
-        {(showResetNotification || showChangeNotification) && (
+        {showResetNotification && (
           <motion.div
-            initial={{ opacity: 0, x: 100, y: 100, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 100, y: 100, scale: 0.9 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-6 right-6 z-50"
+            initial={{ opacity: 0, x: 100, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 100, scale: 0.95 }}
+            transition={{ 
+              duration: 0.35,
+              ease: [0.16, 1, 0.3, 1],
+              type: 'spring',
+              stiffness: 300,
+              damping: 30
+            }}
+            className="fixed bottom-12 right-2 z-[100]"
           >
-            <div className={`pl-4 pr-5 py-3.5 rounded-lg border shadow-xl backdrop-blur-sm flex items-center gap-3 max-w-sm ${
-              showResetNotification 
-                ? 'bg-[#1e3a2e] border-[#2d5a3d] text-[#4ade80]' 
-                : 'bg-[#1e2939] border-[#2d3f5a] text-[#60a5fa]'
-            }`}>
-              <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                showResetNotification 
-                  ? 'bg-green-500/20' 
-                  : 'bg-blue-500/20'
-              }`}>
-                {showResetNotification ? (
-                  <Check size={18} className="text-green-400" />
-                ) : (
-                  <Info size={18} className="text-blue-400" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold mb-0.5">
-                  {showResetNotification ? 'Settings Reset' : 'Setting Changed'}
-                </div>
-                <div className="text-xs opacity-90 leading-tight">
-                  {showResetNotification 
-                    ? 'All settings restored to defaults' 
-                    : lastChangedSetting ? `${lastChangedSetting} updated` : 'Setting updated'}
-                </div>
-              </div>
-            </div>
+            <AlertBox
+              type="success"
+              title="Settings Reset"
+              message="All settings restored to defaults"
+              onClose={() => setShowResetNotification(false)}
+              showCloseButton={true}
+            />
+          </motion.div>
+        )}
+        {showChangeNotification && !showResetNotification && (
+          <motion.div
+            initial={{ opacity: 0, x: 100, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 100, scale: 0.95 }}
+            transition={{ 
+              duration: 0.35,
+              ease: [0.16, 1, 0.3, 1],
+              type: 'spring',
+              stiffness: 300,
+              damping: 30
+            }}
+            className="fixed bottom-12 right-2 z-[100]"
+          >
+            <AlertBox
+              type="info"
+              title="Setting Changed"
+              message={lastChangedSetting ? `${lastChangedSetting} updated` : 'Setting updated'}
+              onClose={() => setShowChangeNotification(false)}
+              showCloseButton={true}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -831,10 +841,10 @@ export function SettingsView() {
                                 {/* Theme Selection */}
                                 {category.settings.find(s => s.key === 'theme') && (
                                   <div>
-                                    <label className="block text-xs font-medium text-vscode-text-secondary mb-2">
+                                    <label className="block text-xs font-medium text-vscode-text-secondary mb-3">
                                       Theme
                                     </label>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                       {themes.map((theme) => (
                                         <ThemePreviewCard
                                           key={theme.id}
@@ -970,7 +980,7 @@ export function SettingsView() {
                                   )
                                   const iconTextColor = settingColors[setting.key]?.split(' ')[1] || category.iconColor
                                   
-                                  return (
+  return (
                                     <div key={setting.key} className="flex items-center justify-between p-3 bg-vscode-active rounded-lg hover:bg-vscode-hover transition-colors">
                                       <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded ${iconColor}`}>

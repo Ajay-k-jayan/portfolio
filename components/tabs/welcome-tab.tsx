@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 
 export function WelcomeTab() {
-  const { setActiveMenuItem, portfolioSettings } = useAppStore()
+  const { setActiveMenuItem, portfolioSettings, addNotification } = useAppStore()
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['start', 'recent']))
 
   const toggleSection = (section: string) => {
@@ -447,6 +447,22 @@ export function WelcomeTab() {
                       link.href = '/resume.pdf'
                       link.download = 'Ajay_K_J_Resume.pdf'
                       link.click()
+                      
+                      // Show download started notification
+                      addNotification({
+                        title: 'Resume Download',
+                        message: 'Resume download started: Ajay_K_J_Resume.pdf',
+                        type: 'info'
+                      })
+                      
+                      // Show completion notification after a delay
+                      setTimeout(() => {
+                        addNotification({
+                          title: 'Resume Download Complete',
+                          message: 'Resume download completed successfully: Ajay_K_J_Resume.pdf',
+                          type: 'success'
+                        })
+                      }, 2000)
                     }}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}

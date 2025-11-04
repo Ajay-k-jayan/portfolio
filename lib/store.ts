@@ -117,6 +117,7 @@ interface AppState {
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void
   removeNotification: (id: string) => void
   markNotificationAsRead: (id: string) => void
+  markAllNotificationsAsRead: () => void
   clearAllNotifications: () => void
 }
 
@@ -138,6 +139,39 @@ const loadRecentlySelected = (): string[] => {
   return []
 }
 
+// Load notifications from localStorage
+const loadNotifications = (): Notification[] => {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('notifications')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed)) {
+          return parsed.map(n => ({
+            ...n,
+            timestamp: new Date(n.timestamp)
+          }))
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load notifications:', e)
+    }
+  }
+  return []
+}
+
+// Save notifications to localStorage
+const saveNotifications = (notifications: Notification[]) => {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('notifications', JSON.stringify(notifications))
+    } catch (e) {
+      console.error('Failed to save notifications:', e)
+    }
+  }
+}
+
+
 export const useAppStore = create<AppState>((set, get) => ({
   tabs: [],
   activeTabId: null,
@@ -147,7 +181,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   recentlySelected: loadRecentlySelected(),
   fileExploreExpanded: false,
   portfolioSettings: loadSettings(),
-  notifications: [],
+  notifications: loadNotifications(),
   openSidebarView: (view) => set({ activeSidebarView: view, sidebarCollapsed: false }),
   closeSidebarView: () => set({ activeSidebarView: '' }),
   addTab: (tab) => set((state) => {
@@ -210,6 +244,66 @@ export const useAppStore = create<AppState>((set, get) => ({
       // Dispatch custom event for theme change
       window.dispatchEvent(new CustomEvent('themeChange', { detail: newSettings.theme }))
     }
+
+    // Add notification for settings update
+    const settingLabels: Record<string, string> = {
+      compactView: 'Compact View',
+      showAnimations: 'Show Animations',
+      animationSpeed: 'Animation Speed',
+      showStats: 'Show Statistics',
+      showSocialLinks: 'Show Social Links',
+      showGitHubStats: 'Show GitHub Stats',
+      showRecentItems: 'Show Recent Items',
+      updateNotifications: 'Update Notifications',
+      enableQuickNav: 'Enable Quick Navigation',
+      showRecentlyViewed: 'Show Recently Viewed',
+      theme: 'Theme',
+      fontSize: 'Font Size',
+      fontFamily: 'Font Family',
+      showDateTimeWidget: 'Date & Time Widget',
+      showWeatherWidget: 'Weather Widget',
+      showLocationWidget: 'Location Widget',
+      showNetworkStatusWidget: 'Network Status Widget',
+      showSystemInfoWidget: 'System Info Widget',
+      showSocialLinksWidget: 'Social Links Widget',
+      showResumeDownload: 'Resume Download',
+      showThemeSwitcher: 'Theme Switcher',
+      showLanguageSwitcher: 'Language Switcher',
+    }
+
+    const changedKeys = Object.keys(newSettings)
+    if (changedKeys.length > 0) {
+      const firstKey = changedKeys[0] as keyof PortfolioSettings
+      const settingLabel = settingLabels[firstKey] || firstKey
+      const value = newSettings[firstKey]
+
+      if (firstKey === 'theme') {
+        const themeNames: Record<string, string> = {
+          dark: 'Dark',
+          light: 'Light',
+          'dark-plus': 'Dark+',
+          'light-plus': 'Light+',
+          'monokai': 'Monokai',
+          'github-dark': 'GitHub Dark',
+          'github-light': 'GitHub Light',
+          'solarized-dark': 'Solarized Dark',
+          'solarized-light': 'Solarized Light',
+          'one-dark-pro': 'One Dark Pro',
+        }
+        const themeName = themeNames[value as string] || (value as string)
+        get().addNotification({
+          title: 'Setting Changed',
+          message: `Theme updated to ${themeName}`,
+          type: 'info'
+        })
+      } else {
+        get().addNotification({
+          title: 'Setting Changed',
+          message: `${settingLabel} updated`,
+          type: 'info'
+        })
+      }
+    }
   },
   resetSettings: () => {
     set({ portfolioSettings: defaultSettings })
@@ -232,23 +326,38 @@ export const useAppStore = create<AppState>((set, get) => ({
       timestamp: new Date(),
       read: false
     }
-    set((state) => ({
-      notifications: [newNotification, ...state.notifications].slice(0, 50) // Keep max 50 notifications
-    }))
+
+    set((state) => {
+      const updated = [newNotification, ...state.notifications].slice(0, 50) // Keep max 50
+      saveNotifications(updated)
+      return { notifications: updated }
+    })
   },
   removeNotification: (id) => {
-    set((state) => ({
-      notifications: state.notifications.filter(n => n.id !== id)
-    }))
+    set((state) => {
+      const updated = state.notifications.filter(n => n.id !== id)
+      saveNotifications(updated)
+      return { notifications: updated }
+    })
   },
   markNotificationAsRead: (id) => {
-    set((state) => ({
-      notifications: state.notifications.map(n => 
+    set((state) => {
+      const updated = state.notifications.map(n =>
         n.id === id ? { ...n, read: true } : n
       )
-    }))
+      saveNotifications(updated)
+      return { notifications: updated }
+    })
+  },
+  markAllNotificationsAsRead: () => {
+    set((state) => {
+      const updated = state.notifications.map(n => ({ ...n, read: true }))
+      saveNotifications(updated)
+      return { notifications: updated }
+    })
   },
   clearAllNotifications: () => {
+    saveNotifications([])
     set({ notifications: [] })
   },
 }))

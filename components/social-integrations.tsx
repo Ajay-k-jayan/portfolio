@@ -4,7 +4,7 @@ import { Github, Linkedin, Mail, Download, ExternalLink, Share2 } from 'lucide-r
 import { useAppStore } from '@/lib/store'
 
 export function SocialIntegrations() {
-  const { portfolioSettings } = useAppStore()
+  const { portfolioSettings, addNotification } = useAppStore()
   const socialLinks = [
     {
       name: 'GitHub',
@@ -32,6 +32,22 @@ export function SocialIntegrations() {
     link.href = '/resume.pdf' // Path to your resume
     link.download = 'Resume.pdf'
     link.click()
+    
+    // Show download started notification
+    addNotification({
+      title: 'Resume Download',
+      message: 'Resume download started: Resume.pdf',
+      type: 'info'
+    })
+    
+    // Show completion notification after a delay
+    setTimeout(() => {
+      addNotification({
+        title: 'Resume Download Complete',
+        message: 'Resume download completed successfully: Resume.pdf',
+        type: 'success'
+      })
+    }, 2000)
   }
 
   return (
