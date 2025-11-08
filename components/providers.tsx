@@ -1,10 +1,21 @@
 'use client'
 
+import { useEffect } from 'react'
 import { EnhancedThemeProvider } from '@/contexts/enhanced-theme-context'
 import { LanguageProvider } from '@/contexts/language-context'
+import { useAppStore } from '@/lib/store'
 import { Toaster } from 'react-hot-toast'
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const { initializeApp, isInitialized } = useAppStore()
+
+  useEffect(() => {
+    // Initialize app on mount - mark old notifications as read
+    if (!isInitialized) {
+      initializeApp()
+    }
+  }, [isInitialized, initializeApp])
+
   return (
     <EnhancedThemeProvider>
       <LanguageProvider>

@@ -14,7 +14,8 @@ import {
   Share2,
   MessageSquare,
   History,
-  Settings
+  Settings,
+  Mail
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { useLanguage } from '@/contexts/language-context'
@@ -37,7 +38,7 @@ const getMenuItems = (t: (key: string) => string) => [
   { id: 'achievement', label: t('achievements'), icon: Trophy },
   { id: 'experience', label: t('experience'), icon: Briefcase },
   { id: 'certifications', label: t('certifications'), icon: Award },
-  { id: 'social-medias', label: t('socialMedias'), icon: Share2 },
+  { id: 'contact', label: 'Contact', icon: Mail },
   { id: 'recommendation', label: t('recommendations'), icon: MessageSquare },
   { id: 'project', label: t('projects'), icon: FolderOpen },
   { id: 'blogs', label: t('blogs'), icon: BookOpen },

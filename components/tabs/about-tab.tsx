@@ -1,5 +1,7 @@
 'use client'
 
+import { ProfileAvatar } from '@/components/profile-avatar'
+
 export function AboutTab() {
   return (
     <div className="h-full p-8 overflow-auto">
@@ -8,9 +10,7 @@ export function AboutTab() {
           <h1 className="text-3xl font-bold text-vscode-text mb-4">About Me</h1>
           <div className="prose prose-invert max-w-none space-y-4 text-vscode-text">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-24 h-24 bg-vscode-blue rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                AKJ
-              </div>
+              <ProfileAvatar size="lg" />
               <div>
                 <h2 className="text-2xl font-bold text-vscode-text mb-1">Ajay K J</h2>
                 <p className="text-vscode-text-secondary">Software Engineer</p>

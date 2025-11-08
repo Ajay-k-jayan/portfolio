@@ -7,37 +7,64 @@ import { useAppStore } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
 
 export function NotificationToast() {
-  const { notifications, markNotificationAsRead } = useAppStore()
+  const { notifications, markNotificationAsRead, removeNotification } = useAppStore()
   const { currentTheme } = useEnhancedTheme()
   const [showToast, setShowToast] = useState(false)
   const [currentNotification, setCurrentNotification] = useState<any>(null)
   const previousNotificationsLength = useRef(0)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    // Check if a new notification was added
-    if (notifications.length > previousNotificationsLength.current) {
-      // Get the latest notification (first one in the array)
-      const latestNotification = notifications[0]
-      if (latestNotification && !latestNotification.read) {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+
+    // Only show unread notifications
+    const unreadNotifications = notifications.filter(n => !n.read)
+    
+    // Check if a new unread notification was added
+    if (unreadNotifications.length > 0) {
+      // Get the latest unread notification
+      const latestNotification = unreadNotifications[0]
+      
+      // Only show if it's a new notification (not already showing)
+      if (latestNotification && latestNotification.id !== currentNotification?.id) {
         setCurrentNotification(latestNotification)
         setShowToast(true)
         
-        // Auto-hide after 5 seconds
-        const timer = setTimeout(() => {
+        // Auto-hide after 3 seconds
+        timerRef.current = setTimeout(() => {
           setShowToast(false)
           // Mark as read after hiding
           markNotificationAsRead(latestNotification.id)
           setTimeout(() => {
             setCurrentNotification(null)
           }, 300)
-        }, 5000)
-        
-        previousNotificationsLength.current = notifications.length
-        return () => clearTimeout(timer)
+          timerRef.current = null
+        }, 3000)
+      }
+    } else {
+      // If no unread notifications, hide toast
+      setShowToast(false)
+      if (currentNotification) {
+        setCurrentNotification(null)
+      }
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
       }
     }
+    
     previousNotificationsLength.current = notifications.length
-  }, [notifications, markNotificationAsRead])
+
+    // Cleanup function
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
+  }, [notifications, markNotificationAsRead, currentNotification])
 
   // Get theme-aware colors
   const getThemeColors = () => {
@@ -221,6 +248,10 @@ export function NotificationToast() {
                     </h3>
                     <button
                       onClick={() => {
+                        if (timerRef.current) {
+                          clearTimeout(timerRef.current)
+                          timerRef.current = null
+                        }
                         setShowToast(false)
                         markNotificationAsRead(currentNotification.id)
                         setTimeout(() => {
@@ -258,7 +289,7 @@ export function NotificationToast() {
             <motion.div
               initial={{ width: '100%' }}
               animate={{ width: '0%' }}
-              transition={{ duration: 5, ease: 'linear' }}
+              transition={{ duration: 3, ease: 'linear' }}
               className="h-0.5 absolute bottom-0 left-0"
               style={{ backgroundColor: styles.borderLeft }}
             />

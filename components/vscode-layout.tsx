@@ -15,10 +15,10 @@ import { AchievementsView } from './sidebar-views/achievements-view'
 import { CertificationsView } from './sidebar-views/certifications-view'
 import { ExperienceTab } from './tabs/experience-tab'
 import { BlogSystem } from './blog-system'
-import { SocialMediasTab } from './tabs/social-medias-tab'
 import { RecommendationsTab } from './tabs/recommendations-tab'
 import { SettingsView } from './sidebar-views/settings-view'
 import { NotificationToast } from './notification-toast'
+import { ContactTab } from './tabs/contact-tab'
 
 export function VSCodeLayout({ children }: { children: React.ReactNode }) {
   const { tabs, activeTabId, sidebarCollapsed, activeMenuItem, portfolioSettings } = useAppStore()
@@ -64,7 +64,7 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
       'experience': <ExperienceTab />,
       'certifications': <CertificationsView />,
       'blogs': <BlogSystem />,
-      'social-medias': <SocialMediasTab />,
+      'contact': <ContactTab />,
       'recommendation': <RecommendationsTab />,
       'settings': <SettingsView />,
     }

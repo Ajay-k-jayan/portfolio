@@ -104,6 +104,7 @@ interface AppState {
   fileExploreExpanded: boolean
   portfolioSettings: PortfolioSettings
   notifications: Notification[]
+  isInitialized: boolean
   openSidebarView: (view: string) => void
   closeSidebarView: () => void
   addTab: (tab: Tab) => void
@@ -112,13 +113,14 @@ interface AppState {
   toggleSidebar: () => void
   setActiveMenuItem: (menuId: string) => void
   toggleFileExplore: () => void
-  updateSettings: (settings: Partial<PortfolioSettings>) => void
+  updateSettings: (settings: Partial<PortfolioSettings>, silent?: boolean) => void
   resetSettings: () => void
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void
   removeNotification: (id: string) => void
   markNotificationAsRead: (id: string) => void
   markAllNotificationsAsRead: () => void
   clearAllNotifications: () => void
+  initializeApp: () => void
 }
 
 // Load recently selected from localStorage
@@ -139,7 +141,7 @@ const loadRecentlySelected = (): string[] => {
   return []
 }
 
-// Load notifications from localStorage
+// Load notifications from localStorage and mark old ones as read
 const loadNotifications = (): Notification[] => {
   if (typeof window !== 'undefined') {
     try {
@@ -147,10 +149,20 @@ const loadNotifications = (): Notification[] => {
       if (saved) {
         const parsed = JSON.parse(saved)
         if (Array.isArray(parsed)) {
-          return parsed.map(n => ({
-            ...n,
-            timestamp: new Date(n.timestamp)
-          }))
+          // Mark all old notifications as read (from previous sessions)
+          const now = new Date()
+          const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000)
+          
+          return parsed.map(n => {
+            const notificationDate = new Date(n.timestamp)
+            // Mark as read if older than 1 hour or if already read
+            const shouldBeRead = notificationDate < oneHourAgo || n.read
+            return {
+              ...n,
+              timestamp: notificationDate,
+              read: shouldBeRead
+            }
+          })
         }
       }
     } catch (e) {
@@ -182,6 +194,17 @@ export const useAppStore = create<AppState>((set, get) => ({
   fileExploreExpanded: false,
   portfolioSettings: loadSettings(),
   notifications: loadNotifications(),
+  isInitialized: false,
+  initializeApp: () => {
+    // Mark this as initialized and mark all old notifications as read
+    const notifications = get().notifications
+    const updatedNotifications = notifications.map(n => ({ ...n, read: true }))
+    saveNotifications(updatedNotifications)
+    set({ 
+      isInitialized: true,
+      notifications: updatedNotifications
+    })
+  },
   openSidebarView: (view) => set({ activeSidebarView: view, sidebarCollapsed: false }),
   closeSidebarView: () => set({ activeSidebarView: '' }),
   addTab: (tab) => set((state) => {
@@ -229,7 +252,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   }),
   toggleFileExplore: () => set((state) => ({ fileExploreExpanded: !state.fileExploreExpanded })),
-  updateSettings: (newSettings) => {
+  updateSettings: (newSettings, silent = false) => {
     const currentSettings = get().portfolioSettings
     const updatedSettings = { ...currentSettings, ...newSettings }
     set({ portfolioSettings: updatedSettings })
@@ -244,6 +267,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       // Dispatch custom event for theme change
       window.dispatchEvent(new CustomEvent('themeChange', { detail: newSettings.theme }))
     }
+
+    // Only add notification if not silent (silent = true for initial loads)
+    if (silent) return
 
     // Add notification for settings update
     const settingLabels: Record<string, string> = {

@@ -5,7 +5,7 @@ import {
   Share2, Mail as MailIcon, MessageSquare as MessageSquareIcon, Check, Loader2,
   User, Search, X, Send, Mail, Code, AlertCircle, AlertTriangle, ChevronRight, ChevronDown,
   Github, Linkedin, Instagram, Facebook, MessageCircle, Briefcase, Bell,
-  ExternalLink, Filter, Star, TrendingUp, Activity, Layers, Zap
+  ExternalLink, Filter, Star, TrendingUp, Activity, Layers, Zap, Users
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from '@/components/ui/tooltip'
@@ -378,274 +378,390 @@ export function SocialMediasTab() {
 
   return (
     <div className="h-full overflow-auto bg-vscode-bg text-vscode-text">
-      <div className="w-full">
-        {/* Main Content */}
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto p-6 space-y-6">
-            {/* Header */}
-            <div className="flex items-start justify-between border-b border-vscode-border pb-4">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Hero Header - Modern Design */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="relative mb-8 overflow-hidden rounded-2xl"
+        >
+          {/* Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-vscode-blue/10 via-purple-500/5 to-transparent" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-vscode-blue/20 via-transparent to-transparent" />
+          
+          <div className="relative bg-vscode-sidebar/80 backdrop-blur-sm border border-vscode-border/50 rounded-2xl p-8 sm:p-10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-vscode-blue/20 rounded-lg">
-                    <Share2 className="text-vscode-blue" size={20} />
-                  </div>
-                  <h1 className="text-2xl font-semibold text-vscode-text">Social Medias</h1>
-                  <span className="px-2.5 py-0.5 bg-blue-500/20 border border-blue-500/30 rounded-full text-xs font-semibold text-blue-400">
-                    {filteredPlatforms.length}
-                  </span>
-                  {githubLoading && (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    >
-                      <Loader2 size={16} className="text-vscode-text-secondary" />
-                    </motion.div>
-                  )}
-                </div>
-                <p className="text-sm text-vscode-text-secondary ml-[52px]">
-                  Connect with me across various social media platforms
-                </p>
-              </div>
-            </div>
-
-            {/* Search and Filters */}
-            <div className="bg-vscode-sidebar border border-vscode-border rounded p-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary" size={16} />
-                  <input
-                    type="text"
-                    placeholder="Search platforms..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-9 pl-10 pr-8 bg-vscode-active border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue transition-colors"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary hover:text-vscode-text"
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex gap-2 flex-wrap">
-                  {categories.map((cat) => {
-                    const Icon = cat.icon
-                    const isActive = selectedCategory === cat.id
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedCategory(cat.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-                          isActive
-                            ? 'bg-vscode-blue text-white'
-                            : 'bg-vscode-active text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
-                        }`}
-                      >
-                        <Icon size={14} />
-                        {cat.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Error State */}
-              {githubError && (
-                <AlertBox
-                  type="warning"
-                  title="Warning"
-                  message={githubError}
-                  onClose={() => setGithubError(null)}
-                  showCloseButton={true}
-                />
-              )}
-
-            {/* Social Platforms Section */}
-            <div className="bg-vscode-sidebar border border-vscode-border rounded">
-              <button
-                onClick={() => toggleSection('platforms')}
-                className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
-              >
-                <div className="flex items-center gap-2">
-                  <Share2 className="text-vscode-blue" size={16} />
-                  <span className="text-sm font-medium text-vscode-text">SOCIAL PLATFORMS</span>
-                  <span className="px-1.5 py-0.5 bg-vscode-border rounded text-[10px] text-vscode-text-secondary">
-                    {filteredPlatforms.length}
-                  </span>
-                </div>
-                {expandedSections.has('platforms') ? (
-                  <ChevronDown className="text-vscode-text-secondary" size={16} />
-                ) : (
-                  <ChevronRight className="text-vscode-text-secondary" size={16} />
-                )}
-              </button>
-              <AnimatePresence>
-                {expandedSections.has('platforms') && (
+                <div className="flex items-center gap-4 mb-3">
                   <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2, type: 'spring' }}
+                    className="p-3 bg-gradient-to-br from-vscode-blue/30 to-purple-500/20 rounded-xl"
                   >
-                    <div className="p-4">
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {filteredPlatforms.map((platform, index) => {
-                          const IconComponent = platform.iconComponent
-                          return (
-                            <motion.a
-                              key={platform.id}
-                              href={platform.url}
-                              target={platform.id === 'email' ? undefined : '_blank'}
-                              rel={platform.id === 'email' ? undefined : 'noopener noreferrer'}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ duration: 0.2, delay: index * 0.03 }}
-                              className="group"
+                    <Share2 className="text-vscode-blue" size={24} />
+                  </motion.div>
+                  <div>
+                    <motion.h1
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="text-3xl sm:text-4xl lg:text-5xl font-bold text-vscode-text mb-1"
+                    >
+                      Social Media
+                    </motion.h1>
+                    <motion.p
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.4 }}
+                      className="text-sm sm:text-base text-vscode-text-secondary"
+                    >
+                      Connect with me across various platforms
+                    </motion.p>
+                  </div>
+                </div>
+              </div>
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="flex items-center gap-3"
+              >
+                <div className="px-4 py-2 bg-gradient-to-r from-vscode-blue/20 to-purple-500/20 border border-vscode-border/50 rounded-full backdrop-blur-sm">
+                  <div className="flex items-center gap-2">
+                    {githubLoading && (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      >
+                        <Loader2 size={16} className="text-vscode-blue" />
+                      </motion.div>
+                    )}
+                    <span className="text-sm font-semibold text-vscode-text">
+                      {filteredPlatforms.length} Platforms
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Search and Filters - Modern Design */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="bg-vscode-sidebar/80 backdrop-blur-sm border border-vscode-border/50 rounded-xl p-5 shadow-lg mb-6"
+        >
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary" size={18} />
+              <input
+                type="text"
+                placeholder="Search platforms..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-11 pl-12 pr-10 bg-vscode-active/50 border border-vscode-border/50 rounded-xl text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:bg-vscode-active transition-all backdrop-blur-sm"
+              />
+              {searchQuery && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 text-vscode-text-secondary hover:text-vscode-text hover:bg-vscode-hover rounded-lg transition-colors"
+                >
+                  <X size={16} />
+                </motion.button>
+              )}
+            </div>
+
+            <div className="flex gap-2 flex-wrap">
+              {categories.map((cat, index) => {
+                const Icon = cat.icon
+                const isActive = selectedCategory === cat.id
+                return (
+                  <motion.button
+                    key={cat.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2, delay: 0.4 + index * 0.05 }}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'bg-gradient-to-r from-vscode-blue to-blue-600 text-white shadow-lg shadow-vscode-blue/30'
+                        : 'bg-vscode-active/50 text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text border border-vscode-border/50'
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {cat.label}
+                  </motion.button>
+                )
+              })}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Error State */}
+        {githubError && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <AlertBox
+              type="warning"
+              title="Warning"
+              message={githubError}
+              onClose={() => setGithubError(null)}
+              showCloseButton={true}
+            />
+          </motion.div>
+        )}
+
+        {/* Social Platforms Section - Modern Cards */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="bg-vscode-sidebar/80 backdrop-blur-sm border border-vscode-border/50 rounded-xl overflow-hidden shadow-lg mb-6"
+        >
+          <button
+            onClick={() => toggleSection('platforms')}
+            className="w-full flex items-center justify-between px-5 py-4 bg-gradient-to-r from-vscode-active/50 to-vscode-active/30 hover:from-vscode-hover/50 hover:to-vscode-hover/30 transition-all border-b border-vscode-border/50"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-vscode-blue/30 to-purple-500/20 rounded-lg">
+                <Share2 className="text-vscode-blue" size={18} />
+              </div>
+              <span className="text-sm font-bold uppercase tracking-wide text-vscode-text">Social Platforms</span>
+              <span className="px-2.5 py-1 bg-vscode-blue/20 border border-vscode-blue/30 rounded-full text-xs font-semibold text-vscode-blue">
+                {filteredPlatforms.length}
+              </span>
+            </div>
+            {expandedSections.has('platforms') ? (
+              <ChevronDown className="text-vscode-text-secondary" size={18} />
+            ) : (
+              <ChevronRight className="text-vscode-text-secondary" size={18} />
+            )}
+          </button>
+          <AnimatePresence>
+            {expandedSections.has('platforms') && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="p-5">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {filteredPlatforms.map((platform, index) => {
+                      const IconComponent = platform.iconComponent
+                      return (
+                        <motion.a
+                          key={platform.id}
+                          href={platform.url}
+                          target={platform.id === 'email' ? undefined : '_blank'}
+                          rel={platform.id === 'email' ? undefined : 'noopener noreferrer'}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.2, delay: index * 0.05 }}
+                          whileHover={{ y: -4, scale: 1.02 }}
+                          className="group"
+                        >
+                          <div className="h-full p-5 bg-gradient-to-br from-vscode-active/50 to-vscode-active/30 border border-vscode-border/50 rounded-xl hover:border-vscode-blue/50 transition-all cursor-pointer flex flex-col items-center justify-center relative overflow-hidden min-h-[160px] backdrop-blur-sm">
+                            {/* Gradient overlay on hover */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-vscode-blue/0 to-vscode-blue/0 group-hover:from-vscode-blue/5 group-hover:to-transparent transition-all" />
+                            
+                            {/* Icon Container */}
+                            <motion.div
+                              whileHover={{ scale: 1.15, rotate: 5 }}
+                              className={`w-14 h-14 flex items-center justify-center rounded-xl ${platform.bgColor} text-white group-hover:shadow-2xl transition-all relative z-10 mb-4`}
                             >
-                              <div className={`h-full p-4 bg-vscode-active border border-vscode-border rounded-lg hover:border-vscode-blue transition-all cursor-pointer flex flex-col items-center justify-center relative overflow-hidden min-h-[140px]`}>
-                                {/* Icon Container */}
-                                <div className={`w-12 h-12 flex items-center justify-center rounded-lg ${platform.bgColor} text-white group-hover:scale-110 group-hover:shadow-lg transition-all relative z-10 mb-3`}>
-                                  <IconComponent className="w-6 h-6" />
-                                </div>
+                              <IconComponent className="w-7 h-7" />
+                            </motion.div>
 
-                                {/* Platform Name */}
-                                <div className="flex items-center gap-1.5 relative z-10 mb-1">
-                                  <span className="text-xs font-semibold text-vscode-text group-hover:text-vscode-blue transition-colors">
-                                    {platform.name}
-                                  </span>
-                                  {platform.verified && (
-                                    <Tooltip content="Verified" position="top">
-                                      <Check className="size-3 text-vscode-blue flex-shrink-0" />
-                                    </Tooltip>
-                                  )}
-                                </div>
+                            {/* Platform Name */}
+                            <div className="flex items-center gap-1.5 relative z-10 mb-2">
+                              <span className="text-sm font-bold text-vscode-text group-hover:text-vscode-blue transition-colors">
+                                {platform.name}
+                              </span>
+                              {platform.verified && (
+                                <Tooltip content="Verified" position="top">
+                                  <motion.div
+                                    whileHover={{ scale: 1.2 }}
+                                    className="p-0.5 bg-vscode-blue/20 rounded-full"
+                                  >
+                                    <Check className="size-3 text-vscode-blue flex-shrink-0" />
+                                  </motion.div>
+                                </Tooltip>
+                              )}
+                            </div>
 
-                                {/* Description */}
-                                {platform.description && (
-                                  <p className="text-[10px] text-vscode-text-secondary text-center line-clamp-2">
-                                    {platform.description}
-                                  </p>
-                                )}
+                            {/* Description */}
+                            {platform.description && (
+                              <p className="text-xs text-vscode-text-secondary text-center line-clamp-2 mb-2 relative z-10">
+                                {platform.description}
+                              </p>
+                            )}
 
-                                {/* Stats */}
-                                {platform.followers !== undefined && (
-                                  <div className="mt-2 flex items-center gap-1 text-[10px] text-vscode-text-secondary">
-                                    <TrendingUp size={10} />
-                                    <span>{platform.followers} followers</span>
-                                  </div>
-                                )}
+                            {/* Stats */}
+                            {platform.followers !== undefined && (
+                              <div className="mt-auto flex items-center gap-1.5 text-xs text-vscode-text-secondary relative z-10">
+                                <TrendingUp size={12} className="text-green-400" />
+                                <span className="font-medium">{platform.followers} followers</span>
+                              </div>
+                            )}
 
-                                <ExternalLink size={12} className="absolute top-2 right-2 text-vscode-text-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              whileHover={{ opacity: 1, scale: 1 }}
+                              className="absolute top-3 right-3 p-1.5 bg-vscode-sidebar/80 rounded-lg backdrop-blur-sm"
+                            >
+                              <ExternalLink size={14} className="text-vscode-text-secondary" />
+                            </motion.div>
+                          </div>
+                        </motion.a>
+                      )
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* GitHub Integration Section - Modern Design */}
+        {githubData && portfolioSettings.showGitHubStats && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+            className="bg-vscode-sidebar/80 backdrop-blur-sm border border-vscode-border/50 rounded-xl overflow-hidden shadow-lg mb-6"
+          >
+            <button
+              onClick={() => toggleSection('github')}
+              className="w-full flex items-center justify-between px-5 py-4 bg-gradient-to-r from-vscode-active/50 to-vscode-active/30 hover:from-vscode-hover/50 hover:to-vscode-hover/30 transition-all border-b border-vscode-border/50"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-gray-900/50 to-gray-800/30 rounded-lg">
+                  <Github className="text-vscode-text" size={18} />
+                </div>
+                <span className="text-sm font-bold uppercase tracking-wide text-vscode-text">GitHub Profile</span>
+                {githubData.followers !== undefined && (
+                  <span className="px-2.5 py-1 bg-vscode-blue/20 border border-vscode-blue/30 rounded-full text-xs font-semibold text-vscode-blue">
+                    {githubData.followers} followers
+                  </span>
+                )}
+              </div>
+              {expandedSections.has('github') ? (
+                <ChevronDown className="text-vscode-text-secondary" size={18} />
+              ) : (
+                <ChevronRight className="text-vscode-text-secondary" size={18} />
+              )}
+            </button>
+            <AnimatePresence>
+              {expandedSections.has('github') && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-5 space-y-5">
+                    {/* GitHub Stats - Modern Cards */}
+                    <div className="grid grid-cols-3 gap-4">
+                      {[
+                        { label: 'Repositories', value: githubData.public_repos || 0, icon: Code, color: 'text-blue-400' },
+                        { label: 'Followers', value: githubData.followers || 0, icon: Users, color: 'text-green-400' },
+                        { label: 'Following', value: githubData.following || 0, icon: Activity, color: 'text-purple-400' },
+                      ].map((stat, index) => {
+                        const Icon = stat.icon
+                        return (
+                          <motion.div
+                            key={stat.label}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
+                            whileHover={{ scale: 1.05, y: -4 }}
+                            className="bg-gradient-to-br from-vscode-active/50 to-vscode-active/30 border border-vscode-border/50 rounded-xl p-4 text-center backdrop-blur-sm"
+                          >
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                              <Icon className={stat.color} size={18} />
+                            </div>
+                            <div className="text-2xl font-bold text-vscode-text mb-1">{stat.value}</div>
+                            <div className="text-xs text-vscode-text-secondary font-medium">{stat.label}</div>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Recent Repositories - Modern Cards */}
+                    {repositories.length > 0 && (
+                      <div>
+                        <h3 className="text-sm font-bold text-vscode-text mb-4 flex items-center gap-2">
+                          <Star className="text-vscode-blue" size={16} />
+                          Recent Repositories
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {repositories.slice(0, 3).map((repo, index) => (
+                            <motion.a
+                              key={index}
+                              href={repo.html_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3, delay: 0.7 + index * 0.1 }}
+                              whileHover={{ y: -4, scale: 1.02 }}
+                              className="block p-4 bg-gradient-to-br from-vscode-active/50 to-vscode-active/30 border border-vscode-border/50 rounded-xl hover:border-vscode-blue/50 transition-all group backdrop-blur-sm"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-semibold text-vscode-text group-hover:text-vscode-blue transition-colors">{repo.name}</span>
+                                <ExternalLink size={14} className="text-vscode-text-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                              <p className="text-xs text-vscode-text-secondary line-clamp-2 mb-3">{repo.description}</p>
+                              <div className="flex items-center gap-3 text-xs text-vscode-text-secondary">
+                                <span className="px-2 py-1 bg-vscode-blue/20 rounded text-vscode-blue font-medium">{repo.language}</span>
+                                <span className="flex items-center gap-1">
+                                  <Star size={12} className="text-yellow-400" />
+                                  <span>{repo.stars}</span>
+                                </span>
                               </div>
                             </motion.a>
-                          )
-                        })}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* GitHub Integration Section */}
-            {githubData && portfolioSettings.showGitHubStats && (
-              <div className="bg-vscode-sidebar border border-vscode-border rounded">
-                <button
-                  onClick={() => toggleSection('github')}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-vscode-active hover:bg-vscode-hover transition-colors border-b border-vscode-border"
-                >
-                  <div className="flex items-center gap-2">
-                    <Github className="text-vscode-blue" size={16} />
-                    <span className="text-sm font-medium text-vscode-text">GITHUB PROFILE</span>
-                    {githubData.followers !== undefined && (
-                      <span className="px-1.5 py-0.5 bg-vscode-border rounded text-[10px] text-vscode-text-secondary">
-                        {githubData.followers} followers
-                      </span>
                     )}
                   </div>
-                  {expandedSections.has('github') ? (
-                    <ChevronDown className="text-vscode-text-secondary" size={16} />
-                  ) : (
-                    <ChevronRight className="text-vscode-text-secondary" size={16} />
-                  )}
-                </button>
-                <AnimatePresence>
-                  {expandedSections.has('github') && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="p-4 space-y-4">
-                        {/* GitHub Stats */}
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="bg-vscode-active rounded p-3 text-center">
-                            <div className="text-lg font-bold text-vscode-text">{githubData.public_repos || 0}</div>
-                            <div className="text-xs text-vscode-text-secondary">Repositories</div>
-                          </div>
-                          <div className="bg-vscode-active rounded p-3 text-center">
-                            <div className="text-lg font-bold text-vscode-text">{githubData.followers || 0}</div>
-                            <div className="text-xs text-vscode-text-secondary">Followers</div>
-                          </div>
-                          <div className="bg-vscode-active rounded p-3 text-center">
-                            <div className="text-lg font-bold text-vscode-text">{githubData.following || 0}</div>
-                            <div className="text-xs text-vscode-text-secondary">Following</div>
-                          </div>
-                        </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
-                        {/* Recent Repositories */}
-                        {repositories.length > 0 && (
-                          <div>
-                            <h3 className="text-xs font-semibold text-vscode-text mb-2">Recent Repositories</h3>
-                            <div className="space-y-2">
-                              {repositories.slice(0, 3).map((repo, index) => (
-                                <a
-                                  key={index}
-                                  href={repo.html_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block p-2 bg-vscode-active hover:bg-vscode-hover rounded border border-vscode-border hover:border-vscode-blue transition-all group"
-                                >
-                                  <div className="flex items-center justify-between mb-1">
-                                    <span className="text-xs font-medium text-vscode-text group-hover:text-vscode-blue">{repo.name}</span>
-                                    <ExternalLink size={12} className="text-vscode-text-secondary opacity-0 group-hover:opacity-100" />
-                                  </div>
-                                  <p className="text-[10px] text-vscode-text-secondary line-clamp-1">{repo.description}</p>
-                                  <div className="flex items-center gap-3 mt-1 text-[10px] text-vscode-text-secondary">
-                                    <span>{repo.language}</span>
-                                    <span className="flex items-center gap-1">
-                                      <Star size={10} />
-                                      {repo.stars}
-                                    </span>
-                                  </div>
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+        {/* Contact Form Section - Modern Design */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="bg-vscode-sidebar/80 backdrop-blur-sm border border-vscode-border/50 rounded-xl overflow-hidden shadow-lg"
+        >
+          <div className="px-5 py-4 bg-gradient-to-r from-vscode-active/50 to-vscode-active/30 border-b border-vscode-border/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-emerald-500/30 to-emerald-600/20 rounded-lg">
+                <MailIcon className="text-emerald-400" size={18} />
               </div>
-            )}
-
-            {/* Contact Form Section */}
-            <div className="bg-vscode-sidebar border border-vscode-border rounded">
-              <div className="px-4 py-3 bg-vscode-active border-b border-vscode-border">
-                <div className="flex items-center gap-2">
-                  <MailIcon className="text-vscode-blue" size={16} />
-                  <span className="text-sm font-medium text-vscode-text">CONTACT FORM</span>
-                </div>
-              </div>
-              <div className="p-6">
+              <span className="text-sm font-bold uppercase tracking-wide text-vscode-text">Contact Form</span>
+            </div>
+          </div>
+          <div className="p-6 sm:p-8">
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                   {formStatus === 'success' && (
                     <AlertBox
@@ -672,8 +788,8 @@ export function SocialMediasTab() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-1.5">
-                        <User size={12} className="inline mr-1" />
+                      <label className="block text-xs font-semibold text-vscode-text-secondary mb-2 flex items-center gap-2">
+                        <User size={14} className="text-vscode-blue" />
                         Your Name *
                       </label>
                       <input
@@ -682,14 +798,14 @@ export function SocialMediasTab() {
                         value={formData.name}
                         onChange={handleFormChange}
                         placeholder="John Doe"
-                        className="w-full bg-vscode-active border border-vscode-border rounded px-3 py-2 text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:border-vscode-blue transition-colors"
+                        className="w-full bg-vscode-active/50 border border-vscode-border/50 rounded-xl px-4 py-3 text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:border-vscode-blue focus:bg-vscode-active transition-all backdrop-blur-sm"
                         disabled={formStatus === 'sending'}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs text-vscode-text-secondary mb-1.5">
-                        <MailIcon size={12} className="inline mr-1" />
+                      <label className="block text-xs font-semibold text-vscode-text-secondary mb-2 flex items-center gap-2">
+                        <MailIcon size={14} className="text-vscode-blue" />
                         Your Email *
                       </label>
                       <input
@@ -698,14 +814,14 @@ export function SocialMediasTab() {
                         value={formData.email}
                         onChange={handleFormChange}
                         placeholder="john@example.com"
-                        className="w-full bg-vscode-active border border-vscode-border rounded px-3 py-2 text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:border-vscode-blue transition-colors"
+                        className="w-full bg-vscode-active/50 border border-vscode-border/50 rounded-xl px-4 py-3 text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:border-vscode-blue focus:bg-vscode-active transition-all backdrop-blur-sm"
                         disabled={formStatus === 'sending'}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs text-vscode-text-secondary mb-1.5">
+                    <label className="block text-xs font-semibold text-vscode-text-secondary mb-2">
                       Subject *
                     </label>
                     <input
@@ -714,14 +830,14 @@ export function SocialMediasTab() {
                       value={formData.subject}
                       onChange={handleFormChange}
                       placeholder="e.g., Project Collaboration Inquiry"
-                      className="w-full bg-vscode-active border border-vscode-border rounded px-3 py-2 text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:border-vscode-blue transition-colors"
+                      className="w-full bg-vscode-active/50 border border-vscode-border/50 rounded-xl px-4 py-3 text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:border-vscode-blue focus:bg-vscode-active transition-all backdrop-blur-sm"
                       disabled={formStatus === 'sending'}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs text-vscode-text-secondary mb-1.5">
-                      <MessageSquareIcon size={12} className="inline mr-1" />
+                    <label className="block text-xs font-semibold text-vscode-text-secondary mb-2 flex items-center gap-2">
+                      <MessageSquareIcon size={14} className="text-vscode-blue" />
                       Message *
                     </label>
                     <textarea
@@ -730,47 +846,49 @@ export function SocialMediasTab() {
                       onChange={handleFormChange}
                       rows={6}
                       placeholder="Write your message here... (minimum 10 characters)"
-                      className="w-full bg-vscode-active border border-vscode-border rounded px-3 py-2 text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:border-vscode-blue transition-colors resize-none"
+                      className="w-full bg-vscode-active/50 border border-vscode-border/50 rounded-xl px-4 py-3 text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:border-vscode-blue focus:bg-vscode-active transition-all resize-none backdrop-blur-sm"
                       disabled={formStatus === 'sending'}
                     />
-                    <p className="text-xs text-vscode-text-secondary mt-1">
-                      {formData.message.length} characters (minimum 10 required)
+                    <p className="text-xs text-vscode-text-secondary mt-2 flex items-center gap-2">
+                      <span className={`px-2 py-1 rounded ${formData.message.length >= 10 ? 'bg-green-500/20 text-green-400' : 'bg-vscode-border/50 text-vscode-text-secondary'}`}>
+                        {formData.message.length} characters
+                      </span>
+                      <span className="text-vscode-text-secondary">(minimum 10 required)</span>
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-vscode-border/50">
                     <p className="text-xs text-vscode-text-secondary">
                       * Required fields. Your default email client will open to send this message.
                     </p>
-                    <button
+                    <motion.button
                       type="submit"
                       disabled={formStatus === 'sending' || formStatus === 'success'}
-                      className="flex items-center gap-2 px-6 py-2 bg-vscode-blue hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      whileHover={{ scale: formStatus === 'sending' || formStatus === 'success' ? 1 : 1.05 }}
+                      whileTap={{ scale: formStatus === 'sending' || formStatus === 'success' ? 1 : 0.95 }}
+                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-vscode-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-vscode-blue/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                     >
                       {formStatus === 'sending' ? (
                         <>
-                          <Loader2 size={16} className="animate-spin" />
+                          <Loader2 size={18} className="animate-spin" />
                           <span>Opening Email...</span>
                         </>
                       ) : formStatus === 'success' ? (
                         <>
-                          <Check size={16} />
+                          <Check size={18} />
                           <span>Email Opened!</span>
                         </>
                       ) : (
                         <>
-                          <Send size={16} />
+                          <Send size={18} />
                           <span>Send Email</span>
                         </>
                       )}
-                    </button>
+                    </motion.button>
                   </div>
                 </form>
               </div>
-            </div>
-          </div>
-        </div>
-
+            </motion.div>
       </div>
     </div>
   )
