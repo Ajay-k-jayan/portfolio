@@ -17,6 +17,7 @@ import {
   Settings
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
+import { useLanguage } from '@/contexts/language-context'
 import { WelcomeTab } from './tabs/welcome-tab'
 import { SkillsTab } from './tabs/skills-tab'
 import { ProjectsTab } from './tabs/projects-tab'
@@ -28,19 +29,19 @@ import { SocialIntegrations } from './social-integrations'
 import { FileExplorer } from './file-explorer'
 import { Tooltip } from './ui/tooltip'
 
-// Menu items configuration
-const menuItems = [
-  { id: 'welcome', label: 'Welcome', icon: Home },
+// Menu items configuration - will be translated in component
+const getMenuItems = (t: (key: string) => string) => [
+  { id: 'welcome', label: t('welcome'), icon: Home },
   { id: 'file-explore', label: 'File Explore', icon: Folder },
-  { id: 'skills', label: 'Skills', icon: Code },
-  { id: 'achievement', label: 'Achievement', icon: Trophy },
-  { id: 'experience', label: 'Experience', icon: Briefcase },
-  { id: 'certifications', label: 'Certifications', icon: Award },
-  { id: 'social-medias', label: 'Social Medias', icon: Share2 },
-  { id: 'recommendation', label: 'Recommendation', icon: MessageSquare },
-  { id: 'project', label: 'Project', icon: FolderOpen },
-  { id: 'blogs', label: 'Blogs', icon: BookOpen },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'skills', label: t('skills'), icon: Code },
+  { id: 'achievement', label: t('achievements'), icon: Trophy },
+  { id: 'experience', label: t('experience'), icon: Briefcase },
+  { id: 'certifications', label: t('certifications'), icon: Award },
+  { id: 'social-medias', label: t('socialMedias'), icon: Share2 },
+  { id: 'recommendation', label: t('recommendations'), icon: MessageSquare },
+  { id: 'project', label: t('projects'), icon: FolderOpen },
+  { id: 'blogs', label: t('blogs'), icon: BookOpen },
+  { id: 'settings', label: t('settings'), icon: Settings },
 ]
 
 export function NewSidebar() {
@@ -54,6 +55,8 @@ export function NewSidebar() {
     tabs,
     portfolioSettings
   } = useAppStore()
+  const { t } = useLanguage()
+  const menuItems = getMenuItems(t)
   const [mounted, setMounted] = useState(false)
 
   // Handle SSR - only show recently selected after mount

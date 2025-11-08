@@ -1,64 +1,50 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-
-type Language = 'en' | 'ml'
+import { LanguageCode, languages, translations, getTranslation, type Translations } from '@/lib/translations'
 
 interface LanguageContextType {
-  language: Language
-  setLanguage: (lang: Language) => void
-  t: (key: string) => string
-}
-
-const translations = {
-  en: {
-    searchPlaceholder: 'Search',
-    changeLanguage: 'Change Language',
-    theme: 'Theme',
-    welcome: 'Welcome',
-    about: 'About',
-    projects: 'Projects',
-    skills: 'Skills',
-    experience: 'Experience',
-    contact: 'Contact',
-  },
-  ml: {
-    searchPlaceholder: 'തിരയുക',
-    changeLanguage: 'ഭാഷ മാറ്റുക',
-    theme: 'തീം',
-    welcome: 'സ്വാഗതം',
-    about: 'അബൗട്ട്',
-    projects: 'പ്രോജക്റ്റുകൾ',
-    skills: 'വൈദഗ്ദ്ധ്യങ്ങൾ',
-    experience: 'അനുഭവം',
-    contact: 'ബന്ധപ്പെടുക',
-  },
+  language: LanguageCode
+  setLanguage: (lang: LanguageCode) => void
+  t: (key: keyof Translations) => string
+  currentLanguage: typeof languages[0] | undefined
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('en')
+  const [language, setLanguage] = useState<LanguageCode>('en-US')
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('language') as Language | null
-    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ml')) {
+    const savedLanguage = localStorage.getItem('language') as LanguageCode | null
+    if (savedLanguage && languages.some(l => l.code === savedLanguage)) {
       setLanguage(savedLanguage)
+    } else {
+      // Try to detect browser language
+      const browserLang = navigator.language || 'en-US'
+      const detectedLang = languages.find(l => l.code === browserLang) || languages.find(l => l.code.startsWith(browserLang.split('-')[0]))
+      if (detectedLang) {
+        setLanguage(detectedLang.code)
+      }
     }
   }, [])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('language', language)
+      // Update document language attribute
+      document.documentElement.lang = language.split('-')[0]
     }
   }, [language])
 
-  const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations.en] || key
+  const t = (key: keyof Translations): string => {
+    return getTranslation(language, key)
   }
 
+  const currentLanguage = languages.find(l => l.code === language)
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, currentLanguage }}>
       {children}
     </LanguageContext.Provider>
   )
@@ -71,4 +57,3 @@ export function useLanguage() {
   }
   return context
 }
-

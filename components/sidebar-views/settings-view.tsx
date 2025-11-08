@@ -12,6 +12,8 @@ import {
 } from 'lucide-react'
 import { useAppStore, PortfolioSettings, defaultSettings } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
+import { useLanguage } from '@/contexts/language-context'
+import { languages } from '@/lib/translations'
 import { AlertBox } from '@/components/ui/alert-box'
 
 // Visual Preview Components
@@ -284,6 +286,7 @@ const settingsCategories: SettingsCategory[] = [
       iconColor: 'text-purple-400',
       settings: [
         { key: 'theme', label: 'Theme', description: 'Choose color theme' },
+        { key: 'language', label: 'Language', description: 'Select interface language' },
         { key: 'fontSize', label: 'Font Size', description: 'Adjust text size' },
         { key: 'fontFamily', label: 'Font Family', description: 'Choose font style' },
       ]
@@ -349,6 +352,7 @@ const settingsCategories: SettingsCategory[] = [
 export function SettingsView() {
   const { portfolioSettings, updateSettings, resetSettings, addNotification } = useAppStore()
   const { themes, setTheme, currentTheme } = useEnhancedTheme()
+  const { language, setLanguage, t } = useLanguage()
   // All categories expanded by default
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(settingsCategories.map(cat => cat.id))
@@ -854,6 +858,39 @@ export function SettingsView() {
                                         />
                                       ))}
                                     </div>
+                                  </div>
+                                )}
+
+                                {/* Language Selection */}
+                                {category.settings.find(s => s.key === 'language') && (
+                                  <div>
+                                    <label className="block text-xs font-medium text-vscode-text-secondary mb-2">
+                                      Select Language
+                                    </label>
+                                    <div className="relative">
+                                      <select
+                                        value={language}
+                                        onChange={(e) => {
+                                          setLanguage(e.target.value as any)
+                                          addNotification({
+                                            title: 'Setting Changed',
+                                            message: `Language updated to ${languages.find(l => l.code === e.target.value)?.nativeName || e.target.value}`,
+                                            type: 'info'
+                                          })
+                                        }}
+                                        className="w-full px-3 py-2 bg-vscode-active border border-vscode-border rounded-lg text-sm text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:border-vscode-blue appearance-none cursor-pointer"
+                                      >
+                                        {languages.map((lang) => (
+                                          <option key={lang.code} value={lang.code}>
+                                            {lang.flag} {lang.nativeName} {lang.name !== lang.nativeName ? `(${lang.name})` : ''}
+                                          </option>
+                                        ))}
+                                      </select>
+                                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary pointer-events-none" size={16} />
+                                    </div>
+                                    <p className="mt-1.5 text-[10px] text-vscode-text-secondary">
+                                      Selected: {languages.find(l => l.code === language)?.nativeName || language}
+                                    </p>
                                   </div>
                                 )}
 

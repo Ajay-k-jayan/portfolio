@@ -6,6 +6,7 @@ import { CodePreview } from '@/components/code-preview'
 import { LiveDemo } from '@/components/live-demo'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from '../ui/tooltip'
+import { useLanguage } from '@/contexts/language-context'
 
 interface Project {
   id: string
@@ -54,6 +55,7 @@ type SortOption = 'title-asc' | 'title-desc' | 'period-desc' | 'period-asc'
 type ViewMode = 'grid' | 'list'
 
 export function ProjectsTab() {
+  const { t } = useLanguage()
   const [expandedProject, setExpandedProject] = useState<string | null>(null)
   const [showCodePreview, setShowCodePreview] = useState<string | null>(null)
   const [showLiveDemo, setShowLiveDemo] = useState<string | null>(null)
@@ -115,7 +117,7 @@ export function ProjectsTab() {
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
                   <FolderOpen className="text-vscode-blue" size={20} />
-                  Featured Projects
+                  {t('featuredProjects')}
                 </h1>
                 <div className="relative">
                   <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">
@@ -139,12 +141,12 @@ export function ProjectsTab() {
                 </div>
               </div>
               <p className="text-sm text-vscode-text-secondary">
-                Showcase of my portfolio projects and case studies
+                {t('projectsPageDescription')}
               </p>
             </div>
             <div className="flex items-center gap-1 ml-4">
               {/* Grid/List View Toggle */}
-              <Tooltip content={viewMode === 'grid' ? 'Switch to List View' : 'Switch to Grid View'} position="bottom">
+              <Tooltip content={viewMode === 'grid' ? t('listView') : t('gridView')} position="bottom">
                 <motion.button
                   onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                   className="relative w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover hover:border-vscode-border/80 transition-all duration-200 group"

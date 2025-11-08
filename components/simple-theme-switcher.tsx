@@ -5,9 +5,11 @@ import { Moon, Sun, ChevronDown, Check, Palette, Sparkles, Droplet, Paintbrush, 
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from './ui/tooltip'
+import { useAppStore } from '@/lib/store'
 
 export function SimpleThemeSwitcher() {
   const { currentTheme, themes, setTheme } = useEnhancedTheme()
+  const { addNotification } = useAppStore()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -86,8 +88,18 @@ export function SimpleThemeSwitcher() {
                   <button
                     key={theme.id}
                     onClick={() => {
+                      const previousTheme = currentTheme?.id
                       setTheme(theme.id)
                       setIsOpen(false)
+                      
+                      // Show notification when theme changes
+                      if (previousTheme !== theme.id) {
+                        addNotification({
+                          title: 'Theme Changed',
+                          message: `Theme updated to ${theme.name}`,
+                          type: 'info'
+                        })
+                      }
                     }}
                     className={`w-full flex items-center justify-between px-3 py-1.5 text-xs hover:bg-vscode-active transition-colors ${
                       currentTheme?.id === theme.id
