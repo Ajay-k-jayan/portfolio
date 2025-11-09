@@ -50,8 +50,8 @@ export function SimpleLanguageSwitcher() {
           aria-label="Change Language"
         >
           <Globe size={16} />
-          <span className="text-xs font-medium hidden sm:inline">{currentLang.flag}</span>
-          <ChevronDown size={12} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <span className="text-xs font-medium hidden md:inline">{currentLang.flag}</span>
+          <ChevronDown size={12} className={`transition-transform hidden md:block ${isOpen ? 'rotate-180' : ''}`} />
         </button>
       </Tooltip>
 

@@ -25,9 +25,24 @@ export function StatusBar() {
   return (
     <>
       {/* Main Status Bar */}
-      <div className="h-7 bg-vscode-blue text-white text-xs flex items-center justify-between px-2 relative overflow-hidden">
-        {/* Left Section - System Info */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+      <div className="h-10 md:h-7 bg-vscode-blue text-white text-xs flex items-center justify-between px-3 md:px-2 relative overflow-hidden">
+        {/* Mobile: Prioritize Clickable Items First */}
+        <div className="flex items-center gap-3 md:hidden flex-1">
+          {/* Social Links & Resume Download - Priority on Mobile */}
+          {portfolioSettings.showSocialLinksWidget && (
+            <div className="flex items-center gap-2">
+              <SocialLinksWidget />
+            </div>
+          )}
+
+          {/* Notifications - Priority on Mobile */}
+          <div className="ml-auto">
+            <Notifications />
+          </div>
+        </div>
+
+        {/* Desktop: Left Section - System Info */}
+        <div className="hidden md:flex items-center gap-3 flex-shrink-0">
           {/* Date/Time Widget */}
           {portfolioSettings.showDateTimeWidget && <DateTimeWidget />}
 
@@ -46,8 +61,8 @@ export function StatusBar() {
           {portfolioSettings.showNetworkStatusWidget && <NetworkStatusWidget />}
         </div>
 
-        {/* Right Section - Actions & Info */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Desktop: Right Section - Actions & Info */}
+        <div className="hidden md:flex items-center gap-2 flex-shrink-0">
           {/* System Info Widget */}
           {portfolioSettings.showSystemInfoWidget && <SystemInfoWidget />}
 

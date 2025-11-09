@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { Search, X, FileText, Code, Briefcase, BookOpen, Trophy, Award, Mail, MessageSquare, Mic, Sparkles, User, MapPin, Phone, Github, Linkedin, Calendar, Building2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
@@ -346,39 +346,7 @@ export function EnhancedSearch() {
     setSelectedIndex(-1)
   }, [query, searchIndex])
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsFocused(false)
-      }
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsFocused(false)
-        inputRef.current?.blur()
-      } else if (e.key === 'ArrowDown' && results.length > 0) {
-        e.preventDefault()
-        setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0))
-      } else if (e.key === 'ArrowUp' && results.length > 0) {
-        e.preventDefault()
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1))
-      } else if (e.key === 'Enter' && selectedIndex >= 0 && results[selectedIndex]) {
-        e.preventDefault()
-        handleResultClick(results[selectedIndex])
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [results, selectedIndex])
-
-  const handleResultClick = (result: SearchResult) => {
+  const handleResultClick = useCallback((result: SearchResult) => {
     // Handle different result types
     if (result.type === 'chat') {
       // Trigger chat
@@ -432,7 +400,39 @@ export function EnhancedSearch() {
     
     setQuery('')
     setIsFocused(false)
-  }
+  }, [setActiveMenuItem, addNotification])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsFocused(false)
+      }
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsFocused(false)
+        inputRef.current?.blur()
+      } else if (e.key === 'ArrowDown' && results.length > 0) {
+        e.preventDefault()
+        setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0))
+      } else if (e.key === 'ArrowUp' && results.length > 0) {
+        e.preventDefault()
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1))
+      } else if (e.key === 'Enter' && selectedIndex >= 0 && results[selectedIndex]) {
+        e.preventDefault()
+        handleResultClick(results[selectedIndex])
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [results, selectedIndex, handleResultClick])
 
   const clearSearch = () => {
     setQuery('')

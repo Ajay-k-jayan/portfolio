@@ -415,14 +415,16 @@ export function ContactTab() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search"
-                className="w-full pl-10 pr-8 h-full bg-transparent border-0 outline-none text-sm font-normal text-vscode-text placeholder:text-vscode-text-secondary focus:outline-none focus:ring-0"
+                aria-label="Search contact methods and social platforms"
+                className="w-full pl-10 pr-8 h-full bg-transparent border-0 outline-none text-sm font-normal text-vscode-text placeholder:text-vscode-text-secondary focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 p-1 hover:bg-vscode-hover rounded transition-colors flex items-center justify-center"
+                  aria-label="Clear search"
+                  className="absolute right-2 p-1 hover:bg-vscode-hover rounded transition-colors flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue"
                 >
-                  <X size={14} className="text-vscode-text-secondary" />
+                  <X size={14} className="text-vscode-text-secondary" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -434,14 +436,16 @@ export function ContactTab() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="px-3 h-8 bg-vscode-sidebar border border-vscode-border rounded text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue"
+            aria-label="Sort contact items"
+            className="px-3 h-8 bg-vscode-sidebar border border-vscode-border rounded text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1"
           >
             <option value="name-asc">Sort by Name (A-Z)</option>
             <option value="name-desc">Sort by Name (Z-A)</option>
           </select>
           <button
             onClick={() => setSortBy(sortBy === 'name-asc' ? 'name-desc' : 'name-asc')}
-            className="w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover transition-colors"
+            aria-label={`Sort ${sortBy === 'name-asc' ? 'descending' : 'ascending'}`}
+            className="w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-1"
           >
             {sortBy === 'name-asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
           </button>
@@ -454,7 +458,8 @@ export function ContactTab() {
               <p className="text-vscode-text-secondary mb-2">No items found matching your search.</p>
               <button
                 onClick={() => setSearchQuery('')}
-                className="text-vscode-blue hover:text-vscode-blue-accent text-sm transition-colors"
+                aria-label="Clear search filters"
+                className="text-vscode-blue hover:text-vscode-blue-accent text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-1 rounded px-2 py-1"
               >
                 Clear search
               </button>
@@ -472,7 +477,15 @@ export function ContactTab() {
                       e.stopPropagation()
                       toggleSection(sectionKey)
                     }}
-                    className="w-full flex items-center gap-2.5 px-0 py-2 text-left hover:opacity-80 transition-opacity group cursor-pointer"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        toggleSection(sectionKey)
+                      }
+                    }}
+                    aria-expanded={isExpanded}
+                    aria-controls={`section-${sectionKey}`}
+                    className="w-full flex items-center gap-2.5 px-0 py-2 text-left hover:opacity-80 transition-opacity group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-2 rounded"
                   >
                     <motion.div
                       animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -481,7 +494,7 @@ export function ContactTab() {
                     >
                       <ChevronRight size={14} className="text-vscode-text-secondary" />
                     </motion.div>
-                    <span className="text-sm font-medium text-vscode-text uppercase tracking-wide flex-1 text-left">
+                    <span id={`section-header-${sectionKey}`} className="text-sm font-medium text-vscode-text uppercase tracking-wide flex-1 text-left">
                       {category.name}
                     </span>
                     <span className="text-xs text-vscode-text-secondary bg-[#2d2d30] border border-[#3e3e42] px-2 py-0.5 rounded font-medium">
@@ -492,11 +505,14 @@ export function ContactTab() {
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
+                        id={`section-${sectionKey}`}
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
+                        role="region"
+                        aria-labelledby={`section-header-${sectionKey}`}
                       >
                         {viewMode === 'grid' ? (
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -506,10 +522,17 @@ export function ContactTab() {
                                 <motion.button
                                   key={item.id}
                                   onClick={() => handleItemClick(item)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      handleItemClick(item)
+                                    }
+                                  }}
+                                  aria-label={`${item.name}: ${item.description}`}
                                   initial={{ opacity: 0, scale: 0.95 }}
                                   animate={{ opacity: 1, scale: 1 }}
                                   transition={{ delay: index * 0.05 }}
-                                  className="group relative overflow-hidden rounded-lg border border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50 hover:bg-vscode-hover transition-all p-4 text-left"
+                                  className="group relative overflow-hidden rounded-lg border border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50 hover:bg-vscode-hover transition-all p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-2"
                                   whileHover={{ scale: 1.02, y: -2 }}
                                   whileTap={{ scale: 0.98 }}
                                 >
@@ -546,10 +569,17 @@ export function ContactTab() {
                                 <motion.button
                                   key={item.id}
                                   onClick={() => handleItemClick(item)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      handleItemClick(item)
+                                    }
+                                  }}
+                                  aria-label={`${item.name}: ${item.description}`}
                                   initial={{ opacity: 0, x: -10 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ delay: index * 0.03 }}
-                                  className="w-full flex items-center gap-3 p-3 rounded border border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50 hover:bg-vscode-hover transition-all text-left group"
+                                  className="w-full flex items-center gap-3 p-3 rounded border border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50 hover:bg-vscode-hover transition-all text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-2"
                                   whileHover={{ x: 4 }}
                                 >
                                   <div className={`p-2 rounded-lg ${item.bgColor} flex-shrink-0`}>
@@ -589,11 +619,13 @@ export function ContactTab() {
         <div className="mt-8 bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="w-full px-4 py-3 bg-vscode-active/50 border-b border-vscode-border flex items-center justify-between hover:bg-vscode-hover transition-colors"
+            aria-expanded={showForm}
+            aria-controls="contact-form-content"
+            className="w-full px-4 py-3 bg-vscode-active/50 border-b border-vscode-border flex items-center justify-between hover:bg-vscode-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-1"
           >
             <div className="flex items-center gap-3">
               <Send className="text-vscode-blue" size={18} />
-              <span className="text-sm font-semibold text-vscode-text">
+              <span id="contact-form-header" className="text-sm font-semibold text-vscode-text">
                 Contact Form
               </span>
             </div>
@@ -608,13 +640,16 @@ export function ContactTab() {
           <AnimatePresence>
             {showForm && (
               <motion.div
+                id="contact-form-content"
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
+                role="region"
+                aria-labelledby="contact-form-header"
               >
-                <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleFormSubmit} className="p-6 space-y-4" aria-label="Contact form">
                   {formError && formStatus === 'error' && (
                     <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
                       <AlertCircle size={16} />
@@ -630,58 +665,70 @@ export function ContactTab() {
                   )}
 
                   <div>
-                    <label className="block text-xs font-medium mb-2 text-vscode-text-secondary">
-                      Name <span className="text-red-400">*</span>
+                    <label htmlFor="contact-name" className="block text-xs font-medium mb-2 text-vscode-text-secondary">
+                      Name <span className="text-red-400" aria-label="required">*</span>
                     </label>
                     <input
                       type="text"
+                      id="contact-name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-1 focus:ring-vscode-blue transition-all"
+                      className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1 transition-all"
                       placeholder="Your name"
                       required
+                      aria-required="true"
+                      aria-invalid={formStatus === 'error' && !formData.name.trim()}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium mb-2 text-vscode-text-secondary">
-                      Email <span className="text-red-400">*</span>
+                    <label htmlFor="contact-email" className="block text-xs font-medium mb-2 text-vscode-text-secondary">
+                      Email <span className="text-red-400" aria-label="required">*</span>
                     </label>
                     <input
                       type="email"
+                      id="contact-email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-1 focus:ring-vscode-blue transition-all"
+                      className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1 transition-all"
                       placeholder="your.email@example.com"
                       required
+                      aria-required="true"
+                      aria-invalid={formStatus === 'error' && !formData.email.trim()}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium mb-2 text-vscode-text-secondary">
-                      Subject <span className="text-red-400">*</span>
+                    <label htmlFor="contact-subject" className="block text-xs font-medium mb-2 text-vscode-text-secondary">
+                      Subject <span className="text-red-400" aria-label="required">*</span>
                     </label>
                     <input
                       type="text"
+                      id="contact-subject"
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-1 focus:ring-vscode-blue transition-all"
+                      className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1 transition-all"
                       placeholder="What's this about?"
                       required
+                      aria-required="true"
+                      aria-invalid={formStatus === 'error' && !formData.subject.trim()}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium mb-2 text-vscode-text-secondary">
-                      Message <span className="text-red-400">*</span>
+                    <label htmlFor="contact-message" className="block text-xs font-medium mb-2 text-vscode-text-secondary">
+                      Message <span className="text-red-400" aria-label="required">*</span>
                     </label>
                     <textarea
+                      id="contact-message"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       rows={5}
-                      className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-1 focus:ring-vscode-blue transition-all resize-none"
+                      className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1 transition-all resize-none"
                       placeholder="Tell me about your project or just say hello..."
                       required
+                      aria-required="true"
+                      aria-invalid={formStatus === 'error' && !formData.message.trim()}
                     />
                   </div>
 

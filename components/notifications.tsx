@@ -78,14 +78,15 @@ export function Notifications() {
         <button
           data-notification-button
           onClick={() => setShowPanel(!showPanel)}
-          className="relative p-2 hover:bg-blue-600/80 rounded transition-colors"
+          className="relative p-2 md:p-2 p-2.5 hover:bg-blue-600/80 rounded transition-colors touch-manipulation"
+          aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
         >
-          <Bell size={16} />
+          <Bell size={16} className="md:w-4 md:h-4 w-5 h-5" />
           {unreadCount > 0 && (
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute top-0 right-0 bg-red-500 text-white text-[10px] rounded-full min-w-[16px] h-4 flex items-center justify-center font-semibold px-1 leading-none"
+              className="absolute top-0 right-0 bg-red-500 text-white text-[10px] md:text-[10px] text-xs rounded-full min-w-[16px] md:min-w-[16px] min-w-[18px] h-4 md:h-4 h-5 flex items-center justify-center font-semibold px-1 leading-none"
               style={{ transform: 'translate(25%, -25%)' }}
             >
               {unreadCount > 99 ? '99+' : unreadCount}
@@ -102,7 +103,7 @@ export function Notifications() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-8 right-2 w-[420px] bg-[#1e1e1e] border border-[#3e3e3e] rounded shadow-2xl z-[100] overflow-hidden flex flex-col max-h-[600px]"
+            className="fixed bottom-8 md:bottom-8 bottom-16 right-2 md:right-2 right-4 w-[calc(100vw-2rem)] md:w-[420px] max-w-[420px] bg-[#1e1e1e] border border-[#3e3e3e] rounded shadow-2xl z-[100] overflow-hidden flex flex-col max-h-[600px]"
             style={{ boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)' }}
           >
             {/* Header - VSCode Style */}

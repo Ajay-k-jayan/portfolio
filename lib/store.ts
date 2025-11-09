@@ -105,6 +105,7 @@ interface AppState {
   portfolioSettings: PortfolioSettings
   notifications: Notification[]
   isInitialized: boolean
+  mobileMenuOpen: boolean
   openSidebarView: (view: string) => void
   closeSidebarView: () => void
   addTab: (tab: Tab) => void
@@ -113,6 +114,7 @@ interface AppState {
   toggleSidebar: () => void
   setActiveMenuItem: (menuId: string) => void
   toggleFileExplore: () => void
+  setMobileMenuOpen: (open: boolean) => void
   updateSettings: (settings: Partial<PortfolioSettings>, silent?: boolean) => void
   resetSettings: () => void
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void
@@ -195,6 +197,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   portfolioSettings: loadSettings(),
   notifications: loadNotifications(),
   isInitialized: false,
+  mobileMenuOpen: false,
+  setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
   initializeApp: () => {
     // Mark this as initialized and mark all old notifications as read
     const notifications = get().notifications

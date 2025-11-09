@@ -82,7 +82,14 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
       <ParticleBackground />
       <PortfolioHeader />
       <div className="flex flex-1 overflow-hidden">
-        <NewSidebar />
+        {/* Sidebar - visible on desktop, mobile menu drawer on mobile */}
+        <div className="hidden md:block">
+          <NewSidebar />
+        </div>
+        {/* Mobile sidebar (always rendered for menu drawer) */}
+        <div className="md:hidden">
+          <NewSidebar />
+        </div>
         <div className="flex flex-col flex-1 overflow-hidden">
           {/* Only show TabBar if there are tabs from file explorer */}
           {tabs.length > 0 && <TabBar />}

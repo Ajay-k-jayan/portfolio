@@ -7,29 +7,34 @@ import { SimpleThemeSwitcher } from './simple-theme-switcher'
 import { SimpleLanguageSwitcher } from './simple-language-switcher'
 import { AIChatbot } from './ai-chatbot'
 import { VoiceAssistant } from './voice-assistant'
-import { Sparkles, Mic } from 'lucide-react'
+import { Sparkles, Mic, Search } from 'lucide-react'
 import { Tooltip } from './ui/tooltip'
 import { useAppStore } from '@/lib/store'
+import { MobileMenuButton } from './new-sidebar'
 
 export function PortfolioHeader() {
-  const { portfolioSettings } = useAppStore()
+  const { portfolioSettings, mobileMenuOpen, setMobileMenuOpen } = useAppStore()
   const [showSearchMobile, setShowSearchMobile] = useState(false)
   const [showChatbot, setShowChatbot] = useState(false)
 
   return (
     <>
-      <header className="h-12 bg-vscode-sidebar border-b border-vscode-border flex items-center px-3 py-1.5 relative z-50">
-        {/* Left: Portfolio Brand */}
-        <div className="flex-shrink-0">
+      <header className="h-12 bg-vscode-sidebar border-b border-vscode-border flex items-center justify-between px-3 py-1.5 relative z-50">
+        {/* Left: Mobile Menu Button + Portfolio Brand */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <MobileMenuButton 
+            isOpen={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          />
           <h1 className="text-sm font-semibold text-vscode-text">
             <span className="text-vscode-blue">Ajay</span>{' '}
             <span className="text-vscode-text">Portfolio</span>
           </h1>
         </div>
 
-        {/* Center: Enhanced Global Search Bar with AI Assistant */}
-        <div className="flex-1 flex justify-center px-3">
-          <div className="w-full max-w-2xl hidden md:flex items-center gap-2 justify-center">
+        {/* Center: Enhanced Global Search Bar with AI Assistant (Desktop Only) */}
+        <div className="flex-1 flex justify-center px-3 hidden md:flex">
+          <div className="w-full max-w-2xl flex items-center gap-2 justify-center">
             <div className="flex-1 max-w-md">
               <EnhancedSearch />
             </div>
@@ -65,24 +70,21 @@ export function PortfolioHeader() {
               </motion.button>
             </Tooltip>
           </div>
+        </div>
 
+        {/* Right: Theme, Language & Search (Mobile) */}
+        <div className="flex-shrink-0 flex items-center gap-2">
           {/* Mobile Search Toggle */}
           <motion.button
             onClick={() => setShowSearchMobile(!showSearchMobile)}
-            className="md:hidden ml-2 p-2.5 rounded-lg bg-vscode-active/50 backdrop-blur-sm border border-vscode-border/50 hover:bg-vscode-active text-vscode-text-secondary hover:text-vscode-text transition-all"
+            className="md:hidden p-2 rounded hover:bg-vscode-active text-vscode-text-secondary hover:text-vscode-text transition-colors"
             aria-label="Toggle Search"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.35-4.35" />
-            </svg>
+            <Search size={18} />
           </motion.button>
-        </div>
 
-        {/* Right: Theme & Language Changers */}
-        <div className="flex-shrink-0 flex items-center gap-2">
           {/* Simple Theme Switcher */}
           {portfolioSettings.showThemeSwitcher && <SimpleThemeSwitcher />}
           

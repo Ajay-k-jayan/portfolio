@@ -52,7 +52,7 @@ export function SocialLinksWidget() {
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 md:gap-1 gap-2">
       {socialLinks.map((social) => {
         const Icon = social.icon
         return (
@@ -73,11 +73,12 @@ export function SocialLinksWidget() {
               href={social.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={`p-1.5 rounded hover:bg-black/20 transition-colors cursor-pointer flex-shrink-0 ${social.color}`}
+              className={`p-1.5 md:p-1.5 p-2.5 rounded hover:bg-black/20 transition-colors cursor-pointer flex-shrink-0 ${social.color} touch-manipulation`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
+              aria-label={`Open ${social.name}`}
             >
-              <Icon size={12} />
+              <Icon size={12} className="md:w-3 md:h-3 w-4 h-4" />
             </motion.a>
           </Tooltip>
         )
@@ -94,11 +95,12 @@ export function SocialLinksWidget() {
         >
           <motion.button
             onClick={handleDownloadResume}
-            className="p-1.5 rounded hover:bg-black/20 transition-colors cursor-pointer hover:text-green-400 flex-shrink-0"
+            className="p-1.5 md:p-1.5 p-2.5 rounded hover:bg-black/20 transition-colors cursor-pointer hover:text-green-400 flex-shrink-0 touch-manipulation"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
+            aria-label="Download Resume"
           >
-            <Download size={12} />
+            <Download size={12} className="md:w-3 md:h-3 w-4 h-4" />
           </motion.button>
         </Tooltip>
       )}

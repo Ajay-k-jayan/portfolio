@@ -60,12 +60,13 @@ export function SimpleThemeSwitcher() {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-1.5 px-2 py-1 h-7 rounded-sm hover:bg-vscode-hover transition-colors"
+          aria-label="Change Theme"
         >
           <Icon size={13} className="text-vscode-text-secondary" />
-          <span className="text-xs text-vscode-text">{currentTheme?.name || 'Theme'}</span>
+          <span className="text-xs text-vscode-text hidden md:inline">{currentTheme?.name || 'Theme'}</span>
           <ChevronDown 
             size={11} 
-            className={`text-vscode-text-secondary transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+            className={`text-vscode-text-secondary transition-transform hidden md:block ${isOpen ? 'rotate-180' : ''}`} 
           />
         </button>
       </Tooltip>

@@ -15,7 +15,9 @@ import {
   MessageSquare,
   History,
   Settings,
-  Mail
+  Mail,
+  Menu,
+  X
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { useLanguage } from '@/contexts/language-context'
@@ -54,15 +56,33 @@ export function NewSidebar() {
     toggleSidebar,
     closeTab,
     tabs,
-    portfolioSettings
+    portfolioSettings,
+    mobileMenuOpen,
+    setMobileMenuOpen
   } = useAppStore()
   const { t } = useLanguage()
   const menuItems = getMenuItems(t)
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState<boolean | null>(null) // null = not determined yet
 
   // Handle SSR - only show recently selected after mount
   useEffect(() => {
     setMounted(true)
+    
+    // Check if mobile - set immediately to prevent layout shift
+    const checkMobile = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth < 768)
+      }
+    }
+    
+    // Set immediately on mount
+    checkMobile()
+    
+    // Listen for resize
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   const handleMenuItemClick = (menuId: string) => {
@@ -74,9 +94,149 @@ export function NewSidebar() {
     }
     
     setActiveMenuItem(menuId)
+    // Close mobile menu after selection
+    if (isMobile) {
+      setMobileMenuOpen(false)
+    }
     // Don't create tabs - content will be shown directly in main area
   }
 
+
+  // Mobile view - return mobile menu drawer only (button is in header)
+  // Use CSS to hide on desktop, show on mobile
+  if (isMobile === null) {
+    // During SSR or initial render, return null to prevent hydration mismatch
+    return null
+  }
+
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile Menu Drawer */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileMenuOpen(false)}
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+              />
+              
+              {/* Menu Drawer */}
+              <motion.div
+                initial={{ x: -300, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -300, opacity: 0 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed top-12 left-0 bottom-0 w-72 bg-vscode-sidebar border-r border-vscode-border z-50 md:hidden overflow-y-auto custom-scrollbar shadow-2xl"
+              >
+                {/* Header */}
+                <div className="px-4 py-3 border-b border-vscode-border flex items-center justify-between bg-vscode-active/50">
+                  <h2 className="text-sm font-semibold text-vscode-text uppercase tracking-wide">
+                    Menu
+                  </h2>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-1.5 rounded hover:bg-vscode-hover transition-colors"
+                    aria-label="Close menu"
+                  >
+                    <X size={18} className="text-vscode-text-secondary" />
+                  </button>
+                </div>
+
+                {/* Recently Selected */}
+                {mounted && portfolioSettings.showRecentlyViewed && recentlySelected.length > 0 && (
+                  <div className="px-4 py-3 border-b border-vscode-border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <History size={14} className="text-vscode-text-secondary" />
+                      <span className="text-xs font-medium text-vscode-text-secondary uppercase tracking-wide">
+                        Recent
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {recentlySelected.slice(0, 5).map((menuId) => {
+                        const item = menuItems.find(m => m.id === menuId)
+                        if (!item) return null
+                        
+                        const Icon = item.icon
+                        const isActive = activeMenuItem === menuId
+                        
+                        return (
+                          <motion.button
+                            key={menuId}
+                            onClick={() => handleMenuItemClick(menuId)}
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors text-left ${
+                              isActive
+                                ? 'bg-vscode-blue text-white'
+                                : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                            }`}
+                            whileHover={{ x: 4 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <Icon size={18} />
+                            <span className="text-sm">{item.label}</span>
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Main Menu Items */}
+                <div className="px-4 py-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Menu size={14} className="text-vscode-text-secondary" />
+                    <span className="text-xs font-medium text-vscode-text-secondary uppercase tracking-wide">
+                      Navigation
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {menuItems.map((item) => {
+                      const Icon = item.icon
+                      const isActive = activeMenuItem === item.id
+                      
+                      return (
+                        <motion.button
+                          key={item.id}
+                          onClick={() => handleMenuItemClick(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors text-left ${
+                            isActive
+                              ? 'bg-vscode-blue text-white'
+                              : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                          }`}
+                          whileHover={{ x: 4 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Icon size={18} />
+                          <span className="text-sm">{item.label}</span>
+                          {isActive && (
+                            <motion.div
+                              layoutId="mobileActiveIndicator"
+                              className="ml-auto w-1.5 h-1.5 rounded-full bg-white"
+                            />
+                          )}
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* File Explorer Panel (if active) */}
+                {activeMenuItem === 'file-explore' && (
+                  <div className="px-4 py-3 border-t border-vscode-border mt-auto">
+                    <FileExplorer />
+                  </div>
+                )}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </>
+    )
+  }
 
   // Collapsed view - compact icon-only sidebar
   if (sidebarCollapsed) {
@@ -263,4 +423,37 @@ export function NewSidebar() {
       </AnimatePresence>
     </div>
   )
+}
+
+// Mobile Menu Button Component (to be used in PortfolioHeader)
+export function MobileMenuButton({ 
+  isOpen, 
+  onClick 
+}: { 
+  isOpen: boolean
+  onClick: () => void 
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      className="md:hidden p-2 rounded hover:bg-vscode-active transition-colors text-vscode-text-secondary hover:text-vscode-text"
+      aria-label={isOpen ? "Close menu" : "Open menu"}
+      aria-expanded={isOpen}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <motion.div
+        animate={{ rotate: isOpen ? 90 : 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        {isOpen ? <X size={20} /> : <Menu size={20} />}
+      </motion.div>
+    </motion.button>
+  )
+}
+
+// Export hook to control mobile menu from header
+export function useMobileMenu() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  return { mobileMenuOpen, setMobileMenuOpen }
 }
