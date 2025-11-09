@@ -349,7 +349,7 @@ export function EnhancedSearch() {
   const handleResultClick = useCallback((result: SearchResult) => {
     // Handle different result types
     if (result.type === 'chat') {
-      // Trigger chat
+      // Trigger chat via custom event
       const event = new CustomEvent('openChat')
       window.dispatchEvent(event)
       addNotification({

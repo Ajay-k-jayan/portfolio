@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EnhancedSearch } from './enhanced-search'
 import { SimpleThemeSwitcher } from './simple-theme-switcher'
@@ -16,6 +16,30 @@ export function PortfolioHeader() {
   const { portfolioSettings, mobileMenuOpen, setMobileMenuOpen } = useAppStore()
   const [showSearchMobile, setShowSearchMobile] = useState(false)
   const [showChatbot, setShowChatbot] = useState(false)
+  const [isVoiceListening, setIsVoiceListening] = useState(false)
+
+  // Listen for openChat event from search
+  useEffect(() => {
+    const handleOpenChat = () => {
+      setShowChatbot(true)
+    }
+    
+    window.addEventListener('openChat', handleOpenChat)
+    return () => window.removeEventListener('openChat', handleOpenChat)
+  }, [])
+
+  // Listen for voice assistant state changes
+  useEffect(() => {
+    const checkVoiceState = () => {
+      const listening = (window as any).isVoiceListening
+      if (listening !== undefined) {
+        setIsVoiceListening(listening)
+      }
+    }
+    
+    const interval = setInterval(checkVoiceState, 100)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <>
@@ -54,7 +78,7 @@ export function PortfolioHeader() {
             </Tooltip>
 
             {/* Voice Assistant Button */}
-            <Tooltip content="Voice Assistant" position="bottom">
+            <Tooltip content={isVoiceListening ? "Stop Listening" : "Voice Assistant"} position="bottom">
               <motion.button
                 onClick={() => {
                   const trigger = (window as any).triggerVoiceAssistant
@@ -62,11 +86,20 @@ export function PortfolioHeader() {
                     trigger()
                   }
                 }}
-                className="p-2 rounded hover:bg-vscode-active text-vscode-text-secondary hover:text-vscode-text transition-colors"
+                className={`p-2 rounded hover:bg-vscode-active transition-colors relative ${
+                  isVoiceListening 
+                    ? 'bg-red-500/20 text-red-400' 
+                    : 'text-vscode-text-secondary hover:text-vscode-text'
+                }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                animate={isVoiceListening ? { scale: [1, 1.1, 1] } : {}}
+                transition={{ repeat: isVoiceListening ? Infinity : 0, duration: 1 }}
               >
                 <Mic size={18} />
+                {isVoiceListening && (
+                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                )}
               </motion.button>
             </Tooltip>
           </div>
