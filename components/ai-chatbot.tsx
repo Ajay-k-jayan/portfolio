@@ -312,7 +312,10 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                 <button
                   onClick={() => {
                     setInput('Tell me about the portfolio')
-                    inputRef.current?.focus()
+                    setTimeout(() => {
+                      inputRef.current?.focus()
+                      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                    }, 100)
                   }}
                   className="text-vscode-blue hover:text-blue-400 text-sm underline transition-colors"
                 >

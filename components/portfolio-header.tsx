@@ -18,7 +18,7 @@ export function PortfolioHeader() {
   const [showChatbot, setShowChatbot] = useState(false)
   const [isVoiceListening, setIsVoiceListening] = useState(false)
 
-  // Listen for openChat event from search
+  // Listen for openChat event from search or other components
   useEffect(() => {
     const handleOpenChat = () => {
       setShowChatbot(true)
@@ -26,6 +26,16 @@ export function PortfolioHeader() {
     
     window.addEventListener('openChat', handleOpenChat)
     return () => window.removeEventListener('openChat', handleOpenChat)
+  }, [])
+
+  // Expose function to open chatbot globally
+  useEffect(() => {
+    ;(window as any).openChatbot = () => {
+      setShowChatbot(true)
+    }
+    return () => {
+      delete (window as any).openChatbot
+    }
   }, [])
 
   // Listen for voice assistant state changes

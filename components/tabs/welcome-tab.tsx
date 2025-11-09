@@ -72,6 +72,27 @@ export function WelcomeTab() {
       icon: MessageSquare,
       action: () => setActiveMenuItem('contact'),
     },
+    { 
+      id: 'ai-assistant',
+      label: 'Generate Agent Instructions...',
+      icon: Sparkles,
+      action: () => {
+        // Open chatbot via global function
+        const openChatbot = (window as any).openChatbot
+        if (openChatbot) {
+          openChatbot()
+        } else {
+          // Fallback: trigger openChat event
+          const event = new CustomEvent('openChat')
+          window.dispatchEvent(event)
+        }
+        addNotification({
+          title: 'AI Assistant',
+          message: 'Opening AI Chatbot',
+          type: 'info'
+        })
+      },
+    },
   ]
 
   // Recent items - VS Code style with file paths
