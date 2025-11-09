@@ -1,7 +1,12 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { X, Send, Bot, User, Sparkles, Copy, Check, Loader2, Plus, RotateCcw, Settings, MoreHorizontal, Maximize2, Minimize2, Paperclip, ChevronDown } from 'lucide-react'
+import { 
+  X, Send, Bot, User, Sparkles, Copy, Check, Loader2, Plus, RotateCcw, Settings, 
+  MoreHorizontal, Maximize2, Minimize2, Paperclip, ChevronDown, Mic, Download,
+  FileText, Zap, Brain, Code, MessageSquare, History, Trash2, Save, Edit3,
+  Sliders, Volume2, VolumeX, ChevronRight, ChevronLeft, Info
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { portfolioData } from '@/lib/portfolio-data'
 import { useAppStore } from '@/lib/store'
@@ -13,38 +18,146 @@ interface Message {
   timestamp: Date
 }
 
+interface ChatSettings {
+  model: 'gpt-3.5-turbo' | 'gpt-4' | 'gpt-4-turbo' | 'gpt-4o' | 'claude-3-opus' | 'claude-3-sonnet'
+  temperature: number
+  maxTokens: number
+  systemPrompt: string
+  responseStyle: 'concise' | 'detailed' | 'creative' | 'technical'
+  enableCodeFormatting: boolean
+  enableVoiceInput: boolean
+  contextWindow: number
+}
+
+const defaultSettings: ChatSettings = {
+  model: 'gpt-4',
+  temperature: 0.7,
+  maxTokens: 2000,
+  systemPrompt: `You are an AI assistant helping users explore ${portfolioData.profile.name}'s portfolio. Provide helpful, accurate information about projects, skills, experience, and achievements.`,
+  responseStyle: 'detailed',
+  enableCodeFormatting: true,
+  enableVoiceInput: false,
+  contextWindow: 10,
+}
+
 export function AIChatbot({ onClose }: { onClose: () => void }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [isMinimized, setIsMinimized] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const [settings, setSettings] = useState<ChatSettings>(defaultSettings)
+  const [chatHistory, setChatHistory] = useState<Message[][]>([])
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const settingsPanelRef = useRef<HTMLDivElement>(null)
   const { setActiveMenuItem, addNotification } = useAppStore()
+
+  // Load settings from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('aiChatbotSettings')
+    if (saved) {
+      try {
+        setSettings({ ...defaultSettings, ...JSON.parse(saved) })
+      } catch (e) {
+        console.error('Failed to load settings:', e)
+      }
+    }
+  }, [])
+
+  // Save settings to localStorage
+  useEffect(() => {
+    localStorage.setItem('aiChatbotSettings', JSON.stringify(settings))
+  }, [settings])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isTyping])
 
   useEffect(() => {
-    // Focus input when chatbot opens
-    if (!isMinimized) {
+    if (!isMinimized && !showSettings) {
       inputRef.current?.focus()
     }
-  }, [isMinimized])
+  }, [isMinimized, showSettings])
 
   const copyToClipboard = useCallback((text: string, messageId: string) => {
     navigator.clipboard.writeText(text)
     setCopiedId(messageId)
     setTimeout(() => setCopiedId(null), 2000)
-  }, [])
+    addNotification({
+      title: 'Copied',
+      message: 'Message copied to clipboard',
+      type: 'success'
+    })
+  }, [addNotification])
 
   const clearChat = useCallback(() => {
+    if (messages.length > 0) {
+      // Save to history before clearing
+      setChatHistory(prev => [...prev, messages])
+    }
     setMessages([])
+    setCurrentChatId(null)
     addNotification({
       title: 'Chat Cleared',
       message: 'Chat history has been cleared',
+      type: 'info'
+    })
+  }, [messages, addNotification])
+
+  const newChat = useCallback(() => {
+    if (messages.length > 0) {
+      setChatHistory(prev => [...prev, messages])
+    }
+    setMessages([])
+    setCurrentChatId(Date.now().toString())
+    addNotification({
+      title: 'New Chat',
+      message: 'Started a new conversation',
+      type: 'info'
+    })
+  }, [messages, addNotification])
+
+  const exportChat = useCallback(() => {
+    if (messages.length === 0) {
+      addNotification({
+        title: 'Export Failed',
+        message: 'No messages to export',
+        type: 'error'
+      })
+      return
+    }
+
+    const chatText = messages.map(msg => {
+      const role = msg.role === 'user' ? 'You' : 'Assistant'
+      const time = msg.timestamp.toLocaleString()
+      return `[${time}] ${role}: ${msg.content}\n`
+    }).join('\n')
+
+    const blob = new Blob([chatText], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `chat-export-${Date.now()}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    addNotification({
+      title: 'Export Successful',
+      message: 'Chat exported to file',
+      type: 'success'
+    })
+  }, [messages, addNotification])
+
+  const loadChatFromHistory = useCallback((chat: Message[]) => {
+    setMessages(chat)
+    setShowHistory(false)
+    addNotification({
+      title: 'Chat Loaded',
+      message: 'Loaded chat from history',
       type: 'info'
     })
   }, [addNotification])
@@ -167,11 +280,18 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // Default response
-    return {
-      content: `I can help you explore ${portfolioData.profile.name}'s portfolio. You can ask me about:\n\n• Projects and work experience\n• Skills and technologies\n• Contact information\n• Achievements and certifications\n• Education background\n\nTry asking: "Tell me about projects" or "What are the skills?"`
+    // Default response based on style
+    const styleResponses = {
+      concise: `I can help you explore ${portfolioData.profile.name}'s portfolio. Ask about projects, skills, experience, contact info, achievements, or certifications.`,
+      detailed: `I can help you explore ${portfolioData.profile.name}'s portfolio. You can ask me about:\n\n• Projects and work experience\n• Skills and technologies\n• Contact information\n• Achievements and certifications\n• Education background\n\nTry asking: "Tell me about projects" or "What are the skills?"`,
+      creative: `✨ Welcome! I'm your creative AI assistant for ${portfolioData.profile.name}'s portfolio. Let's explore together! 🚀\n\nI can help you discover:\n🎯 Projects & Case Studies\n💡 Skills & Technologies\n📈 Experience & Career\n📞 Contact Information\n🏆 Achievements & Certifications\n\nWhat would you like to explore?`,
+      technical: `I'm an AI assistant specialized in ${portfolioData.profile.name}'s technical portfolio.\n\nAvailable data:\n- Projects: ${portfolioData.projects.length}\n- Experience: ${portfolioData.experience.length} positions\n- Certifications: ${portfolioData.certifications.length}\n- Skills: Multiple categories\n\nQuery format: "Show [category] details" or "Explain [topic]"`,
     }
-  }, [setActiveMenuItem, addNotification])
+    
+    return {
+      content: styleResponses[settings.responseStyle] || styleResponses.detailed
+    }
+  }, [setActiveMenuItem, addNotification, settings.responseStyle])
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isTyping) return
@@ -187,8 +307,9 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
     setInput('')
     setIsTyping(true)
 
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 800))
+    // Simulate AI processing delay (based on model complexity)
+    const delay = settings.model.includes('gpt-4') ? 1200 : 800
+    await new Promise(resolve => setTimeout(resolve, delay))
 
     const response = generateContextualResponse(userMessage.content)
     
@@ -207,9 +328,8 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       setTimeout(() => response.action!(), 500)
     }
 
-    // Focus input after sending
     setTimeout(() => inputRef.current?.focus(), 100)
-  }, [input, isTyping, generateContextualResponse])
+  }, [input, isTyping, generateContextualResponse, settings.model])
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -225,51 +345,67 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className={`fixed bottom-20 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[600px] ${
-        isMinimized ? 'h-12' : 'h-[calc(100vh-8rem)] md:h-[700px]'
-      } max-h-[700px] bg-vscode-sidebar border border-vscode-border rounded-lg shadow-2xl flex flex-col z-[100] overflow-hidden transition-all duration-300`}
+      className={`fixed bottom-20 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[700px] ${
+        isMinimized ? 'h-12' : 'h-[calc(100vh-8rem)] md:h-[750px]'
+      } max-h-[750px] bg-vscode-sidebar border border-vscode-border rounded-lg shadow-2xl flex flex-col z-[100] overflow-hidden transition-all duration-300`}
     >
       {/* Header Bar */}
       <div className="flex items-center justify-between px-4 h-12 bg-vscode-active/30 border-b border-vscode-border">
         <div className="flex items-center gap-4">
-          <h3 className="text-sm font-medium text-vscode-text border-b-2 border-vscode-blue pb-1">
-            CHAT
-          </h3>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-gradient-to-br from-vscode-blue to-blue-600 rounded">
+              <Sparkles size={14} className="text-white" />
+            </div>
+            <h3 className="text-sm font-medium text-vscode-text border-b-2 border-vscode-blue pb-1">
+              AI ASSISTANT
+            </h3>
+          </div>
+          {messages.length > 0 && (
+            <div className="flex items-center gap-2 text-xs text-vscode-text-secondary">
+              <MessageSquare size={12} />
+              <span>{messages.length} messages</span>
+            </div>
+          )}
         </div>
         
         <div className="flex items-center gap-1">
           <button
-            onClick={() => setMessages([])}
+            onClick={newChat}
             className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
             aria-label="New Chat"
-            title="New Chat"
+            title="New Chat (Ctrl+N)"
           >
             <Plus size={16} />
           </button>
           
           <button
-            onClick={clearChat}
+            onClick={() => setShowHistory(!showHistory)}
             className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
-            aria-label="Clear History"
-            title="Clear History"
+            aria-label="Chat History"
+            title="Chat History"
           >
-            <RotateCcw size={16} />
+            <History size={16} />
           </button>
           
           <button
-            className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
+            onClick={exportChat}
+            disabled={messages.length === 0}
+            className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Export Chat"
+            title="Export Chat"
+          >
+            <Download size={16} />
+          </button>
+          
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className={`p-1.5 hover:bg-vscode-hover rounded transition-colors ${
+              showSettings ? 'bg-vscode-hover text-vscode-blue' : 'text-vscode-text-secondary hover:text-vscode-text'
+            }`}
             aria-label="Settings"
-            title="Settings"
+            title="Advanced Settings"
           >
-            <Settings size={16} />
-          </button>
-          
-          <button
-            className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
-            aria-label="More Options"
-            title="More Options"
-          >
-            <MoreHorizontal size={16} />
+            <Sliders size={16} />
           </button>
           
           <button
@@ -293,169 +429,418 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       </div>
 
       {!isMinimized && (
-        <>
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-vscode-border scrollbar-track-transparent">
-            {showWelcome ? (
-              <div className="flex flex-col items-center justify-center h-full text-center">
-                <div className="mb-6">
-                  <div className="w-24 h-24 rounded-full border-2 border-vscode-text-secondary/30 flex items-center justify-center mb-4">
-                    <Sparkles size={40} className="text-vscode-text-secondary/50" strokeWidth={1.5} />
-                  </div>
-                </div>
-                <h2 className="text-2xl font-semibold text-vscode-text mb-2">
-                  Ask about your portfolio
-                </h2>
-                <p className="text-sm text-vscode-text-secondary mb-6">
-                  AI responses may be inaccurate.
-                </p>
-                <button
-                  onClick={() => {
-                    setInput('Tell me about the portfolio')
-                    setTimeout(() => {
-                      inputRef.current?.focus()
-                      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                    }, 100)
-                  }}
-                  className="text-vscode-blue hover:text-blue-400 text-sm underline transition-colors"
-                >
-                  Generate Agent Instructions to onboard AI onto your codebase.
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <AnimatePresence>
-                  {messages.map((message, index) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      {message.role === 'assistant' && (
-                        <div className="w-8 h-8 rounded-full bg-vscode-active border border-vscode-border flex items-center justify-center flex-shrink-0">
-                          <Bot className="text-vscode-text-secondary" size={18} />
-                        </div>
-                      )}
-                      <div className="flex flex-col gap-2 max-w-[80%]">
-                        <div
-                          className={`rounded-lg p-4 ${
-                            message.role === 'user'
-                              ? 'bg-vscode-blue text-white'
-                              : 'bg-vscode-active text-vscode-text border border-vscode-border'
-                          }`}
-                        >
-                          <div className="text-sm whitespace-pre-wrap break-words">
-                            {message.content.split('\n').map((line, i) => (
-                              <span key={i}>
-                                {line}
-                                {i < message.content.split('\n').length - 1 && <br />}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 px-1">
-                          <span className="text-xs text-vscode-text-secondary">
-                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                          {message.role === 'assistant' && (
-                            <button
-                              onClick={() => copyToClipboard(message.content, message.id)}
-                              className="p-1 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
-                              aria-label="Copy message"
-                            >
-                              {copiedId === message.id ? (
-                                <Check size={12} className="text-green-500" />
-                              ) : (
-                                <Copy size={12} />
-                              )}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      {message.role === 'user' && (
-                        <div className="w-8 h-8 rounded-full bg-vscode-border flex items-center justify-center flex-shrink-0">
-                          <User className="text-vscode-text-secondary" size={18} />
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                
-                {isTyping && (
+        <div className="flex flex-1 overflow-hidden">
+          {/* Main Content */}
+          <div className={`flex-1 flex flex-col transition-all duration-300 ${showSettings ? 'md:w-2/3' : 'w-full'}`}>
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-vscode-border scrollbar-track-transparent">
+              {showWelcome ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex gap-4 justify-start"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="mb-8"
                   >
-                    <div className="w-8 h-8 rounded-full bg-vscode-active border border-vscode-border flex items-center justify-center">
-                      <Bot className="text-vscode-text-secondary" size={18} />
-                    </div>
-                    <div className="bg-vscode-active rounded-lg p-4 border border-vscode-border">
-                      <div className="flex gap-1.5">
-                        <div className="w-2 h-2 bg-vscode-text-secondary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-2 h-2 bg-vscode-text-secondary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-2 h-2 bg-vscode-text-secondary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </div>
+                    <div className="w-32 h-32 rounded-full border-2 border-vscode-blue/30 flex items-center justify-center mb-6 bg-gradient-to-br from-vscode-blue/10 to-blue-600/10">
+                      <Sparkles size={48} className="text-vscode-blue" strokeWidth={1.5} />
                     </div>
                   </motion.div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-          </div>
-
-          {/* Input Area */}
-          <div className="border-t border-vscode-border bg-vscode-active/20 p-4">
-            <div className="flex flex-col gap-2">
-              <button className="flex items-center gap-2 text-sm text-vscode-text-secondary hover:text-vscode-text transition-colors self-start">
-                <Paperclip size={16} />
-                <span>Add Context...</span>
-              </button>
-              
-              <div className="flex items-center gap-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask about your portfolio..."
-                  disabled={isTyping}
-                  className="flex-1 bg-vscode-sidebar border border-vscode-border rounded px-4 py-2.5 text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Chat input"
-                />
-                
-                <div className="flex items-center gap-1">
-                  <button className="flex items-center gap-1 px-3 py-2.5 bg-vscode-sidebar border border-vscode-border rounded text-sm text-vscode-text hover:bg-vscode-hover transition-colors">
-                    <span>Ask</span>
-                    <ChevronDown size={14} />
-                  </button>
-                  
-                  <button className="flex items-center gap-1 px-3 py-2.5 bg-vscode-sidebar border border-vscode-border rounded text-sm text-vscode-text hover:bg-vscode-hover transition-colors">
-                    <span>GPT-4</span>
-                    <ChevronDown size={14} />
-                  </button>
-                  
+                  <h2 className="text-3xl font-semibold text-vscode-text mb-3">
+                    Ask about your portfolio
+                  </h2>
+                  <p className="text-sm text-vscode-text-secondary mb-8 max-w-md">
+                    AI responses may be inaccurate. Use advanced settings to customize your experience.
+                  </p>
+                  <div className="flex flex-wrap gap-3 justify-center mb-8">
+                    {['Tell me about projects', 'What are your skills?', 'Show experience', 'Contact information'].map((suggestion, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setInput(suggestion)
+                          inputRef.current?.focus()
+                        }}
+                        className="px-4 py-2 text-sm bg-vscode-active border border-vscode-border rounded-lg hover:bg-vscode-hover hover:border-vscode-blue/50 text-vscode-text transition-all"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
                   <button
-                    onClick={handleSend}
-                    disabled={!input.trim() || isTyping}
-                    className="p-2.5 bg-vscode-blue hover:bg-blue-600 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                    aria-label="Send message"
+                    onClick={() => {
+                      setInput('Tell me about the portfolio')
+                      setTimeout(() => {
+                        inputRef.current?.focus()
+                        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                      }, 100)
+                    }}
+                    className="text-vscode-blue hover:text-blue-400 text-sm underline transition-colors"
                   >
-                    {isTyping ? (
-                      <Loader2 size={18} className="animate-spin" />
-                    ) : (
-                      <Send size={18} />
-                    )}
+                    Generate Agent Instructions to onboard AI onto your codebase.
                   </button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <AnimatePresence>
+                    {messages.map((message, index) => (
+                      <motion.div
+                        key={message.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ delay: index * 0.05 }}
+                        className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        {message.role === 'assistant' && (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-vscode-blue to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                            <Bot className="text-white" size={20} />
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-2 max-w-[80%]">
+                          <div
+                            className={`rounded-lg p-4 ${
+                              message.role === 'user'
+                                ? 'bg-vscode-blue text-white shadow-lg'
+                                : 'bg-vscode-active text-vscode-text border border-vscode-border'
+                            }`}
+                          >
+                            <div className={`text-sm whitespace-pre-wrap break-words ${
+                              settings.enableCodeFormatting && message.role === 'assistant' ? 'font-mono' : ''
+                            }`}>
+                              {message.content.split('\n').map((line, i) => (
+                                <span key={i}>
+                                  {line}
+                                  {i < message.content.split('\n').length - 1 && <br />}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 px-1">
+                            <span className="text-xs text-vscode-text-secondary">
+                              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            {message.role === 'assistant' && (
+                              <>
+                                <button
+                                  onClick={() => copyToClipboard(message.content, message.id)}
+                                  className="p-1 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
+                                  aria-label="Copy message"
+                                >
+                                  {copiedId === message.id ? (
+                                    <Check size={12} className="text-green-500" />
+                                  ) : (
+                                    <Copy size={12} />
+                                  )}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        {message.role === 'user' && (
+                          <div className="w-10 h-10 rounded-full bg-vscode-border flex items-center justify-center flex-shrink-0">
+                            <User className="text-vscode-text-secondary" size={20} />
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  
+                  {isTyping && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex gap-4 justify-start"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-vscode-blue to-blue-600 flex items-center justify-center">
+                        <Bot className="text-white" size={20} />
+                      </div>
+                      <div className="bg-vscode-active rounded-lg p-4 border border-vscode-border">
+                        <div className="flex gap-1.5">
+                          <div className="w-2 h-2 bg-vscode-blue rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <div className="w-2 h-2 bg-vscode-blue rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <div className="w-2 h-2 bg-vscode-blue rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+
+            {/* Input Area */}
+            <div className="border-t border-vscode-border bg-vscode-active/20 p-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <button className="flex items-center gap-2 text-sm text-vscode-text-secondary hover:text-vscode-text transition-colors">
+                    <Paperclip size={16} />
+                    <span>Add Context...</span>
+                  </button>
+                  <div className="flex items-center gap-2 text-xs text-vscode-text-secondary">
+                    <span>Model: {settings.model}</span>
+                    <span>•</span>
+                    <span>Style: {settings.responseStyle}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask about your portfolio..."
+                    disabled={isTyping}
+                    className="flex-1 bg-vscode-sidebar border border-vscode-border rounded-lg px-4 py-3 text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Chat input"
+                  />
+                  
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={handleSend}
+                      disabled={!input.trim() || isTyping}
+                      className="p-3 bg-vscode-blue hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg"
+                      aria-label="Send message"
+                    >
+                      {isTyping ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <Send size={18} />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </>
+
+          {/* Advanced Settings Panel */}
+          <AnimatePresence>
+            {showSettings && (
+              <motion.div
+                ref={settingsPanelRef}
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: '33.333%', opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                className="hidden md:block border-l border-vscode-border bg-vscode-active/50 overflow-y-auto"
+              >
+                <div className="p-4 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-vscode-text flex items-center gap-2">
+                      <Sliders size={16} />
+                      Advanced Settings
+                    </h3>
+                    <button
+                      onClick={() => setShowSettings(false)}
+                      className="p-1 hover:bg-vscode-hover rounded"
+                    >
+                      <ChevronRight size={16} className="text-vscode-text-secondary" />
+                    </button>
+                  </div>
+
+                  {/* Model Selection */}
+                  <div>
+                    <label className="text-xs font-medium text-vscode-text-secondary mb-2 block">
+                      AI Model
+                    </label>
+                    <select
+                      value={settings.model}
+                      onChange={(e) => setSettings(prev => ({ ...prev, model: e.target.value as ChatSettings['model'] }))}
+                      className="w-full bg-vscode-sidebar border border-vscode-border rounded px-3 py-2 text-sm text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue"
+                    >
+                      <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                      <option value="gpt-4">GPT-4</option>
+                      <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                      <option value="gpt-4o">GPT-4o</option>
+                      <option value="claude-3-opus">Claude 3 Opus</option>
+                      <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                    </select>
+                  </div>
+
+                  {/* Temperature */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-medium text-vscode-text-secondary">
+                        Temperature (Creativity)
+                      </label>
+                      <span className="text-xs text-vscode-text">{settings.temperature}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      value={settings.temperature}
+                      onChange={(e) => setSettings(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-vscode-text-secondary mt-1">
+                      <span>Focused</span>
+                      <span>Balanced</span>
+                      <span>Creative</span>
+                    </div>
+                  </div>
+
+                  {/* Max Tokens */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-medium text-vscode-text-secondary">
+                        Max Tokens
+                      </label>
+                      <span className="text-xs text-vscode-text">{settings.maxTokens}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="500"
+                      max="4000"
+                      step="100"
+                      value={settings.maxTokens}
+                      onChange={(e) => setSettings(prev => ({ ...prev, maxTokens: parseInt(e.target.value) }))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Response Style */}
+                  <div>
+                    <label className="text-xs font-medium text-vscode-text-secondary mb-2 block">
+                      Response Style
+                    </label>
+                    <select
+                      value={settings.responseStyle}
+                      onChange={(e) => setSettings(prev => ({ ...prev, responseStyle: e.target.value as ChatSettings['responseStyle'] }))}
+                      className="w-full bg-vscode-sidebar border border-vscode-border rounded px-3 py-2 text-sm text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue"
+                    >
+                      <option value="concise">Concise</option>
+                      <option value="detailed">Detailed</option>
+                      <option value="creative">Creative</option>
+                      <option value="technical">Technical</option>
+                    </select>
+                  </div>
+
+                  {/* Context Window */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-medium text-vscode-text-secondary">
+                        Context Window (Messages)
+                      </label>
+                      <span className="text-xs text-vscode-text">{settings.contextWindow}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="5"
+                      max="50"
+                      step="5"
+                      value={settings.contextWindow}
+                      onChange={(e) => setSettings(prev => ({ ...prev, contextWindow: parseInt(e.target.value) }))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Toggle Options */}
+                  <div className="space-y-3">
+                    <label className="flex items-center justify-between cursor-pointer">
+                      <span className="text-xs font-medium text-vscode-text-secondary">Code Formatting</span>
+                      <input
+                        type="checkbox"
+                        checked={settings.enableCodeFormatting}
+                        onChange={(e) => setSettings(prev => ({ ...prev, enableCodeFormatting: e.target.checked }))}
+                        className="w-4 h-4 rounded border-vscode-border bg-vscode-sidebar text-vscode-blue focus:ring-vscode-blue"
+                      />
+                    </label>
+                    <label className="flex items-center justify-between cursor-pointer">
+                      <span className="text-xs font-medium text-vscode-text-secondary">Voice Input</span>
+                      <input
+                        type="checkbox"
+                        checked={settings.enableVoiceInput}
+                        onChange={(e) => setSettings(prev => ({ ...prev, enableVoiceInput: e.target.checked }))}
+                        className="w-4 h-4 rounded border-vscode-border bg-vscode-sidebar text-vscode-blue focus:ring-vscode-blue"
+                      />
+                    </label>
+                  </div>
+
+                  {/* System Prompt */}
+                  <div>
+                    <label className="text-xs font-medium text-vscode-text-secondary mb-2 block">
+                      System Prompt
+                    </label>
+                    <textarea
+                      value={settings.systemPrompt}
+                      onChange={(e) => setSettings(prev => ({ ...prev, systemPrompt: e.target.value }))}
+                      rows={4}
+                      className="w-full bg-vscode-sidebar border border-vscode-border rounded px-3 py-2 text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue resize-none font-mono"
+                      placeholder="Custom system prompt..."
+                    />
+                  </div>
+
+                  {/* Reset Button */}
+                  <button
+                    onClick={() => {
+                      setSettings(defaultSettings)
+                      addNotification({
+                        title: 'Settings Reset',
+                        message: 'All settings restored to defaults',
+                        type: 'info'
+                      })
+                    }}
+                    className="w-full px-4 py-2 bg-vscode-sidebar border border-vscode-border rounded text-sm text-vscode-text hover:bg-vscode-hover transition-colors"
+                  >
+                    Reset to Defaults
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Chat History Panel */}
+          <AnimatePresence>
+            {showHistory && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: '33.333%', opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                className="hidden md:block border-l border-vscode-border bg-vscode-active/50 overflow-y-auto"
+              >
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-vscode-text flex items-center gap-2">
+                      <History size={16} />
+                      Chat History
+                    </h3>
+                    <button
+                      onClick={() => setShowHistory(false)}
+                      className="p-1 hover:bg-vscode-hover rounded"
+                    >
+                      <ChevronRight size={16} className="text-vscode-text-secondary" />
+                    </button>
+                  </div>
+                  {chatHistory.length > 0 ? (
+                    <div className="space-y-2">
+                      {chatHistory.map((chat, index) => (
+                        <button
+                          key={index}
+                          onClick={() => loadChatFromHistory(chat)}
+                          className="w-full text-left p-3 bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover transition-colors"
+                        >
+                          <div className="text-xs font-medium text-vscode-text mb-1">
+                            Chat {index + 1}
+                          </div>
+                          <div className="text-xs text-vscode-text-secondary">
+                            {chat.length} messages
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-vscode-text-secondary text-center py-8">
+                      No chat history yet
+                    </p>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       )}
     </motion.div>
   )
