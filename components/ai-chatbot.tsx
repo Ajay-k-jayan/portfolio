@@ -53,7 +53,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const settingsPanelRef = useRef<HTMLDivElement>(null)
   const { setActiveMenuItem, addNotification } = useAppStore()
 
   // Load settings from localStorage
@@ -78,10 +77,10 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
   }, [messages, isTyping])
 
   useEffect(() => {
-    if (!isMinimized && !showSettings) {
+    if (!isMinimized && !showSettings && !showHistory) {
       inputRef.current?.focus()
     }
-  }, [isMinimized, showSettings])
+  }, [isMinimized, showSettings, showHistory])
 
   const copyToClipboard = useCallback((text: string, messageId: string) => {
     navigator.clipboard.writeText(text)
@@ -96,7 +95,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
 
   const clearChat = useCallback(() => {
     if (messages.length > 0) {
-      // Save to history before clearing
       setChatHistory(prev => [...prev, messages])
     }
     setMessages([])
@@ -165,7 +163,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
   const generateContextualResponse = useCallback((userInput: string): { content: string; action?: () => void } => {
     const lower = userInput.toLowerCase()
     
-    // Projects
     if (lower.includes('project')) {
       const project = portfolioData.projects[0]
       return {
@@ -181,7 +178,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // Skills
     if (lower.includes('skill') || lower.includes('technology') || lower.includes('tech stack')) {
       return {
         content: `${portfolioData.profile.name} is a ${portfolioData.profile.title} with expertise in ${portfolioData.profile.subtitle}. The portfolio includes detailed information about technical skills, frameworks, and tools. Would you like me to open the Skills section?`,
@@ -196,7 +192,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // Experience
     if (lower.includes('experience') || lower.includes('work') || lower.includes('job') || lower.includes('career')) {
       const exp = portfolioData.experience[0]
       return {
@@ -212,7 +207,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // Contact
     if (lower.includes('contact') || lower.includes('email') || lower.includes('hire') || lower.includes('reach')) {
       return {
         content: `You can contact ${portfolioData.profile.name} via:\n\n📧 Email: ${portfolioData.profile.email}\n📱 Phone: ${portfolioData.profile.phone}\n💼 LinkedIn: ${portfolioData.profile.linkedin}\n🔗 GitHub: ${portfolioData.profile.github}\n\nWould you like me to open the Contact section?`,
@@ -227,7 +221,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // About/Bio
     if (lower.includes('about') || lower.includes('who') || lower.includes('bio') || lower.includes('introduction')) {
       return {
         content: `${portfolioData.profile.bio}\n\n${portfolioData.profile.name} is located in ${portfolioData.profile.location} and has ${portfolioData.profile.experience} of experience. Would you like me to open the About section?`,
@@ -242,7 +235,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // Achievements
     if (lower.includes('achievement') || lower.includes('award') || lower.includes('recognition')) {
       const achievement = portfolioData.achievements[0]
       return {
@@ -258,7 +250,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // Certifications
     if (lower.includes('certification') || lower.includes('certificate') || lower.includes('course')) {
       return {
         content: `${portfolioData.profile.name} has ${portfolioData.certifications.length} certifications from platforms like Coursera, Meta, and Google. These include courses on JavaScript, React, Version Control, and more. Would you like me to open the Certifications section?`,
@@ -273,14 +264,12 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // Education
     if (lower.includes('education') || lower.includes('degree') || lower.includes('university') || lower.includes('college')) {
       return {
         content: `${portfolioData.profile.name} completed a **${portfolioData.education.degree}** from ${portfolioData.education.institution} (${portfolioData.education.period}) in ${portfolioData.education.location}.`,
       }
     }
     
-    // Default response based on style
     const styleResponses = {
       concise: `I can help you explore ${portfolioData.profile.name}'s portfolio. Ask about projects, skills, experience, contact info, achievements, or certifications.`,
       detailed: `I can help you explore ${portfolioData.profile.name}'s portfolio. You can ask me about:\n\n• Projects and work experience\n• Skills and technologies\n• Contact information\n• Achievements and certifications\n• Education background\n\nTry asking: "Tell me about projects" or "What are the skills?"`,
@@ -307,7 +296,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
     setInput('')
     setIsTyping(true)
 
-    // Simulate AI processing delay (based on model complexity)
     const delay = settings.model.includes('gpt-4') ? 1200 : 800
     await new Promise(resolve => setTimeout(resolve, delay))
 
@@ -323,7 +311,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
     setMessages(prev => [...prev, assistantMessage])
     setIsTyping(false)
 
-    // Execute action if available
     if (response.action) {
       setTimeout(() => response.action!(), 500)
     }
@@ -345,46 +332,49 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className={`fixed bottom-20 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[700px] ${
-        isMinimized ? 'h-12' : 'h-[calc(100vh-8rem)] md:h-[750px]'
-      } max-h-[750px] bg-vscode-sidebar border border-vscode-border rounded-lg shadow-2xl flex flex-col z-[100] overflow-hidden transition-all duration-300`}
+      className={`fixed bottom-20 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-[600px] ${
+        isMinimized ? 'h-12' : 'h-[calc(100vh-8rem)] md:h-[650px]'
+      } max-h-[650px] bg-vscode-sidebar border border-vscode-border rounded-lg shadow-2xl flex flex-col z-[100] overflow-hidden transition-all duration-300`}
     >
       {/* Header Bar */}
-      <div className="flex items-center justify-between px-4 h-12 bg-vscode-active/30 border-b border-vscode-border">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-gradient-to-br from-vscode-blue to-blue-600 rounded">
+      <div className="flex items-center justify-between px-3 md:px-4 h-12 bg-vscode-active/30 border-b border-vscode-border flex-shrink-0">
+        <div className="flex items-center gap-2 md:gap-4 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 bg-gradient-to-br from-vscode-blue to-blue-600 rounded flex-shrink-0">
               <Sparkles size={14} className="text-white" />
             </div>
-            <h3 className="text-sm font-medium text-vscode-text border-b-2 border-vscode-blue pb-1">
-              AI ASSISTANT
+            <h3 className="text-xs md:text-sm font-medium text-vscode-text border-b-2 border-vscode-blue pb-1 whitespace-nowrap">
+              CHAT
             </h3>
           </div>
           {messages.length > 0 && (
-            <div className="flex items-center gap-2 text-xs text-vscode-text-secondary">
+            <div className="hidden md:flex items-center gap-2 text-xs text-vscode-text-secondary">
               <MessageSquare size={12} />
-              <span>{messages.length} messages</span>
+              <span>{messages.length}</span>
             </div>
           )}
         </div>
         
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
           <button
             onClick={newChat}
             className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
             aria-label="New Chat"
-            title="New Chat (Ctrl+N)"
+            title="New Chat"
           >
-            <Plus size={16} />
+            <Plus size={14} className="md:w-4 md:h-4" />
           </button>
           
           <button
-            onClick={() => setShowHistory(!showHistory)}
+            onClick={() => {
+              setShowHistory(!showHistory)
+              setShowSettings(false)
+            }}
             className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
             aria-label="Chat History"
             title="Chat History"
           >
-            <History size={16} />
+            <History size={14} className="md:w-4 md:h-4" />
           </button>
           
           <button
@@ -394,18 +384,21 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
             aria-label="Export Chat"
             title="Export Chat"
           >
-            <Download size={16} />
+            <Download size={14} className="md:w-4 md:h-4" />
           </button>
           
           <button
-            onClick={() => setShowSettings(!showSettings)}
+            onClick={() => {
+              setShowSettings(!showSettings)
+              setShowHistory(false)
+            }}
             className={`p-1.5 hover:bg-vscode-hover rounded transition-colors ${
               showSettings ? 'bg-vscode-hover text-vscode-blue' : 'text-vscode-text-secondary hover:text-vscode-text'
             }`}
             aria-label="Settings"
             title="Advanced Settings"
           >
-            <Sliders size={16} />
+            <Sliders size={14} className="md:w-4 md:h-4" />
           </button>
           
           <button
@@ -414,7 +407,7 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
             aria-label={isMinimized ? "Maximize" : "Minimize"}
             title={isMinimized ? "Maximize" : "Minimize"}
           >
-            {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+            {isMinimized ? <Maximize2 size={14} className="md:w-4 md:h-4" /> : <Minimize2 size={14} className="md:w-4 md:h-4" />}
           </button>
           
           <button
@@ -423,36 +416,38 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
             aria-label="Close"
             title="Close"
           >
-            <X size={16} />
+            <X size={14} className="md:w-4 md:h-4" />
           </button>
         </div>
       </div>
 
       {!isMinimized && (
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden relative">
           {/* Main Content */}
-          <div className={`flex-1 flex flex-col transition-all duration-300 ${showSettings ? 'md:w-2/3' : 'w-full'}`}>
+          <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
+            showSettings || showHistory ? 'md:mr-[300px]' : ''
+          }`}>
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-vscode-border scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 scrollbar-thin scrollbar-thumb-vscode-border scrollbar-track-transparent">
               {showWelcome ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="flex flex-col items-center justify-center h-full text-center px-4">
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="mb-8"
+                    className="mb-6 md:mb-8"
                   >
-                    <div className="w-32 h-32 rounded-full border-2 border-vscode-blue/30 flex items-center justify-center mb-6 bg-gradient-to-br from-vscode-blue/10 to-blue-600/10">
-                      <Sparkles size={48} className="text-vscode-blue" strokeWidth={1.5} />
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-vscode-blue/30 flex items-center justify-center mb-4 md:mb-6 bg-gradient-to-br from-vscode-blue/10 to-blue-600/10">
+                      <Sparkles size={36} className="md:w-12 md:h-12 text-vscode-blue" strokeWidth={1.5} />
                     </div>
                   </motion.div>
-                  <h2 className="text-3xl font-semibold text-vscode-text mb-3">
+                  <h2 className="text-2xl md:text-3xl font-semibold text-vscode-text mb-2 md:mb-3">
                     Ask about your portfolio
                   </h2>
-                  <p className="text-sm text-vscode-text-secondary mb-8 max-w-md">
+                  <p className="text-xs md:text-sm text-vscode-text-secondary mb-6 md:mb-8 max-w-md">
                     AI responses may be inaccurate. Use advanced settings to customize your experience.
                   </p>
-                  <div className="flex flex-wrap gap-3 justify-center mb-8">
+                  <div className="flex flex-wrap gap-2 md:gap-3 justify-center mb-6 md:mb-8 w-full max-w-md">
                     {['Tell me about projects', 'What are your skills?', 'Show experience', 'Contact information'].map((suggestion, i) => (
                       <button
                         key={i}
@@ -460,7 +455,7 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                           setInput(suggestion)
                           inputRef.current?.focus()
                         }}
-                        className="px-4 py-2 text-sm bg-vscode-active border border-vscode-border rounded-lg hover:bg-vscode-hover hover:border-vscode-blue/50 text-vscode-text transition-all"
+                        className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm bg-vscode-active border border-vscode-border rounded-lg hover:bg-vscode-hover hover:border-vscode-blue/50 text-vscode-text transition-all"
                       >
                         {suggestion}
                       </button>
@@ -474,13 +469,13 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                         inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                       }, 100)
                     }}
-                    className="text-vscode-blue hover:text-blue-400 text-sm underline transition-colors"
+                    className="text-vscode-blue hover:text-blue-400 text-xs md:text-sm underline transition-colors"
                   >
                     Generate Agent Instructions to onboard AI onto your codebase.
                   </button>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                   <AnimatePresence>
                     {messages.map((message, index) => (
                       <motion.div
@@ -489,22 +484,22 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ delay: index * 0.05 }}
-                        className={`flex gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        className={`flex gap-3 md:gap-4 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       >
                         {message.role === 'assistant' && (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-vscode-blue to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                            <Bot className="text-white" size={20} />
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-vscode-blue to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                            <Bot className="text-white" size={16} />
                           </div>
                         )}
-                        <div className="flex flex-col gap-2 max-w-[80%]">
+                        <div className="flex flex-col gap-2 max-w-[85%] md:max-w-[80%] min-w-0">
                           <div
-                            className={`rounded-lg p-4 ${
+                            className={`rounded-lg p-3 md:p-4 ${
                               message.role === 'user'
                                 ? 'bg-vscode-blue text-white shadow-lg'
                                 : 'bg-vscode-active text-vscode-text border border-vscode-border'
                             }`}
                           >
-                            <div className={`text-sm whitespace-pre-wrap break-words ${
+                            <div className={`text-xs md:text-sm whitespace-pre-wrap break-words ${
                               settings.enableCodeFormatting && message.role === 'assistant' ? 'font-mono' : ''
                             }`}>
                               {message.content.split('\n').map((line, i) => (
@@ -516,29 +511,27 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                             </div>
                           </div>
                           <div className="flex items-center gap-2 px-1">
-                            <span className="text-xs text-vscode-text-secondary">
+                            <span className="text-[10px] md:text-xs text-vscode-text-secondary">
                               {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             {message.role === 'assistant' && (
-                              <>
-                                <button
-                                  onClick={() => copyToClipboard(message.content, message.id)}
-                                  className="p-1 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
-                                  aria-label="Copy message"
-                                >
-                                  {copiedId === message.id ? (
-                                    <Check size={12} className="text-green-500" />
-                                  ) : (
-                                    <Copy size={12} />
-                                  )}
-                                </button>
-                              </>
+                              <button
+                                onClick={() => copyToClipboard(message.content, message.id)}
+                                className="p-1 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
+                                aria-label="Copy message"
+                              >
+                                {copiedId === message.id ? (
+                                  <Check size={10} className="md:w-3 md:h-3 text-green-500" />
+                                ) : (
+                                  <Copy size={10} className="md:w-3 md:h-3" />
+                                )}
+                              </button>
                             )}
                           </div>
                         </div>
                         {message.role === 'user' && (
-                          <div className="w-10 h-10 rounded-full bg-vscode-border flex items-center justify-center flex-shrink-0">
-                            <User className="text-vscode-text-secondary" size={20} />
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-vscode-border flex items-center justify-center flex-shrink-0">
+                            <User className="text-vscode-text-secondary" size={16} />
                           </div>
                         )}
                       </motion.div>
@@ -549,12 +542,12 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex gap-4 justify-start"
+                      className="flex gap-3 md:gap-4 justify-start"
                     >
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-vscode-blue to-blue-600 flex items-center justify-center">
-                        <Bot className="text-white" size={20} />
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-vscode-blue to-blue-600 flex items-center justify-center">
+                        <Bot className="text-white" size={16} />
                       </div>
-                      <div className="bg-vscode-active rounded-lg p-4 border border-vscode-border">
+                      <div className="bg-vscode-active rounded-lg p-3 md:p-4 border border-vscode-border">
                         <div className="flex gap-1.5">
                           <div className="w-2 h-2 bg-vscode-blue rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                           <div className="w-2 h-2 bg-vscode-blue rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -569,14 +562,14 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Input Area */}
-            <div className="border-t border-vscode-border bg-vscode-active/20 p-4">
+            <div className="border-t border-vscode-border bg-vscode-active/20 p-3 md:p-4 flex-shrink-0">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <button className="flex items-center gap-2 text-sm text-vscode-text-secondary hover:text-vscode-text transition-colors">
-                    <Paperclip size={16} />
-                    <span>Add Context...</span>
+                  <button className="flex items-center gap-2 text-xs md:text-sm text-vscode-text-secondary hover:text-vscode-text transition-colors">
+                    <Paperclip size={14} className="md:w-4 md:h-4" />
+                    <span className="hidden md:inline">Add Context...</span>
                   </button>
-                  <div className="flex items-center gap-2 text-xs text-vscode-text-secondary">
+                  <div className="hidden md:flex items-center gap-2 text-xs text-vscode-text-secondary">
                     <span>Model: {settings.model}</span>
                     <span>•</span>
                     <span>Style: {settings.responseStyle}</span>
@@ -592,38 +585,35 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     onKeyPress={handleKeyPress}
                     placeholder="Ask about your portfolio..."
                     disabled={isTyping}
-                    className="flex-1 bg-vscode-sidebar border border-vscode-border rounded-lg px-4 py-3 text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-vscode-sidebar border border-vscode-border rounded-lg px-3 md:px-4 py-2 md:py-3 text-xs md:text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Chat input"
                   />
                   
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={handleSend}
-                      disabled={!input.trim() || isTyping}
-                      className="p-3 bg-vscode-blue hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg"
-                      aria-label="Send message"
-                    >
-                      {isTyping ? (
-                        <Loader2 size={18} className="animate-spin" />
-                      ) : (
-                        <Send size={18} />
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleSend}
+                    disabled={!input.trim() || isTyping}
+                    className="p-2.5 md:p-3 bg-vscode-blue hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg flex-shrink-0"
+                    aria-label="Send message"
+                  >
+                    {isTyping ? (
+                      <Loader2 size={16} className="md:w-[18px] md:h-[18px] animate-spin" />
+                    ) : (
+                      <Send size={16} className="md:w-[18px] md:h-[18px]" />
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Advanced Settings Panel */}
+          {/* Advanced Settings Panel - Fixed Position */}
           <AnimatePresence>
             {showSettings && (
               <motion.div
-                ref={settingsPanelRef}
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: '33.333%', opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                className="hidden md:block border-l border-vscode-border bg-vscode-active/50 overflow-y-auto"
+                initial={{ x: '100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '100%', opacity: 0 }}
+                className="hidden md:block absolute top-0 right-0 w-[300px] h-full border-l border-vscode-border bg-vscode-active/80 backdrop-blur-sm overflow-y-auto z-10"
               >
                 <div className="p-4 space-y-6">
                   <div className="flex items-center justify-between">
@@ -639,7 +629,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     </button>
                   </div>
 
-                  {/* Model Selection */}
                   <div>
                     <label className="text-xs font-medium text-vscode-text-secondary mb-2 block">
                       AI Model
@@ -658,11 +647,10 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     </select>
                   </div>
 
-                  {/* Temperature */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs font-medium text-vscode-text-secondary">
-                        Temperature (Creativity)
+                        Temperature
                       </label>
                       <span className="text-xs text-vscode-text">{settings.temperature}</span>
                     </div>
@@ -675,14 +663,8 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                       onChange={(e) => setSettings(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
                       className="w-full"
                     />
-                    <div className="flex justify-between text-xs text-vscode-text-secondary mt-1">
-                      <span>Focused</span>
-                      <span>Balanced</span>
-                      <span>Creative</span>
-                    </div>
                   </div>
 
-                  {/* Max Tokens */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs font-medium text-vscode-text-secondary">
@@ -701,7 +683,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     />
                   </div>
 
-                  {/* Response Style */}
                   <div>
                     <label className="text-xs font-medium text-vscode-text-secondary mb-2 block">
                       Response Style
@@ -718,11 +699,10 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     </select>
                   </div>
 
-                  {/* Context Window */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs font-medium text-vscode-text-secondary">
-                        Context Window (Messages)
+                        Context Window
                       </label>
                       <span className="text-xs text-vscode-text">{settings.contextWindow}</span>
                     </div>
@@ -737,7 +717,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     />
                   </div>
 
-                  {/* Toggle Options */}
                   <div className="space-y-3">
                     <label className="flex items-center justify-between cursor-pointer">
                       <span className="text-xs font-medium text-vscode-text-secondary">Code Formatting</span>
@@ -759,7 +738,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     </label>
                   </div>
 
-                  {/* System Prompt */}
                   <div>
                     <label className="text-xs font-medium text-vscode-text-secondary mb-2 block">
                       System Prompt
@@ -773,7 +751,6 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
                     />
                   </div>
 
-                  {/* Reset Button */}
                   <button
                     onClick={() => {
                       setSettings(defaultSettings)
@@ -792,14 +769,14 @@ export function AIChatbot({ onClose }: { onClose: () => void }) {
             )}
           </AnimatePresence>
 
-          {/* Chat History Panel */}
+          {/* Chat History Panel - Fixed Position */}
           <AnimatePresence>
             {showHistory && (
               <motion.div
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: '33.333%', opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                className="hidden md:block border-l border-vscode-border bg-vscode-active/50 overflow-y-auto"
+                initial={{ x: '100%', opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: '100%', opacity: 0 }}
+                className="hidden md:block absolute top-0 right-0 w-[300px] h-full border-l border-vscode-border bg-vscode-active/80 backdrop-blur-sm overflow-y-auto z-10"
               >
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-4">
