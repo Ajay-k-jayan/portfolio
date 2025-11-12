@@ -17,7 +17,8 @@ import {
   Settings,
   Mail,
   Menu,
-  X
+  X,
+  Calendar
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { useLanguage } from '@/contexts/language-context'
@@ -43,6 +44,7 @@ const getMenuItems = (t: (key: string) => string) => [
   { id: 'contact', label: 'Contact', icon: Mail },
   { id: 'recommendation', label: t('recommendations'), icon: MessageSquare },
   { id: 'project', label: t('projects'), icon: FolderOpen },
+  { id: 'timeline', label: 'Timeline', icon: Calendar },
   { id: 'blogs', label: t('blogs'), icon: BookOpen },
   { id: 'settings', label: t('settings'), icon: Settings },
 ]

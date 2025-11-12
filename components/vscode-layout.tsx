@@ -13,6 +13,7 @@ import { SkillsTab } from './tabs/skills-tab'
 import { ProjectsTab } from './tabs/projects-tab'
 import { AchievementsView } from './sidebar-views/achievements-view'
 import { CertificationsView } from './sidebar-views/certifications-view'
+import { PortfolioTimeline } from './sidebar-views/portfolio-timeline'
 import { ExperienceTab } from './tabs/experience-tab'
 import { BlogSystem } from './blog-system'
 import { RecommendationsTab } from './tabs/recommendations-tab'
@@ -58,6 +59,7 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
   const getContentFromMenuItem = () => {
     const contentMap: Record<string, React.ReactNode> = {
       'welcome': <WelcomeTab />,
+      'timeline': <PortfolioTimeline />,
       'skills': <SkillsTab />,
       'project': <ProjectsTab />,
       'achievement': <AchievementsView />,
