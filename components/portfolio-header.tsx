@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { EnhancedSearch } from './enhanced-search'
 import { SimpleThemeSwitcher } from './simple-theme-switcher'
 import { SimpleLanguageSwitcher } from './simple-language-switcher'
-import { AIChatbot } from './ai-chatbot'
+import { AdvancedAIAssistant } from './advanced-ai-assistant'
 import { VoiceAssistant } from './voice-assistant'
 import { Sparkles, Mic, Search } from 'lucide-react'
 import { Tooltip } from './ui/tooltip'
@@ -117,6 +117,21 @@ export function PortfolioHeader() {
 
         {/* Right: Theme, Language & Search (Mobile) */}
         <div className="flex-shrink-0 flex items-center gap-2">
+          {/* Mobile AI Assistant Button */}
+          <Tooltip content="AI Assistant" position="bottom">
+            <motion.button
+              onClick={() => setShowChatbot(!showChatbot)}
+              className={`md:hidden p-2 rounded hover:bg-vscode-active transition-colors ${
+                showChatbot ? 'bg-vscode-active text-vscode-blue' : 'text-vscode-text-secondary hover:text-vscode-text'
+              }`}
+              aria-label="Open AI Assistant"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Sparkles size={18} />
+            </motion.button>
+          </Tooltip>
+
           {/* Mobile Search Toggle */}
           <motion.button
             onClick={() => setShowSearchMobile(!showSearchMobile)}
@@ -139,10 +154,10 @@ export function PortfolioHeader() {
       {/* Voice Assistant Component (invisible button, handles voice recognition) */}
       <VoiceAssistant onTriggerClick={() => {}} />
 
-      {/* AI Chatbot Panel */}
+      {/* AI Assistance Panel */}
       <AnimatePresence>
         {showChatbot && (
-          <AIChatbot onClose={() => setShowChatbot(false)} />
+          <AdvancedAIAssistant onClose={() => setShowChatbot(false)} />
         )}
       </AnimatePresence>
 
