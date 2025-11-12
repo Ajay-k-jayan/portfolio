@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from '@/components/providers'
+import { ClientLoaderWrapper } from '@/components/client-loader-wrapper'
 
 export const metadata: Metadata = {
   title: 'Ajay K J - Software Engineer | VS Code Portfolio',
@@ -24,7 +25,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="font-mono antialiased">
         <Providers>
+          <ClientLoaderWrapper>
           {children}
+          </ClientLoaderWrapper>
         </Providers>
       </body>
     </html>
