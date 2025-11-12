@@ -13,6 +13,8 @@ import { portfolioData } from '@/lib/portfolio-data'
 import { recommendationsData } from '@/lib/recommendations-data'
 import { useAppStore } from '@/lib/store'
 import { useLanguage } from '@/contexts/language-context'
+import { aiAnalytics } from '@/lib/ai-analytics'
+import { recommendationEngine } from '@/lib/ai-recommendations'
 
 // NLP: Intent Classification
 enum Intent {
@@ -531,12 +533,52 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
 
     addMessage('user', userInput)
 
+    // Track interaction for analytics
+    aiAnalytics.trackInteraction({
+      type: 'query',
+      data: {
+        query: userInput,
+        intent: undefined, // Will be set after intent recognition
+      },
+      visitorProfile: dialogueState.visitorProfile,
+      sentiment: undefined
+    })
+
     setInput('')
     setIsTyping(true)
 
     setTimeout(() => {
       const response = generateResponse(userInput, dialogueState)
-      addMessage('assistant', response.content, response.intent, response.sentiment, response.suggestions, response.quickActions)
+      
+      // Update analytics with recognized intent
+      aiAnalytics.trackInteraction({
+        type: 'query',
+        data: {
+          query: userInput,
+          intent: response.intent,
+          section: response.navigateTo
+        },
+        visitorProfile: dialogueState.visitorProfile,
+        sentiment: response.sentiment
+      })
+
+      // Get ML-based recommendations
+      const analytics = aiAnalytics.getAnalytics()
+      const recentInteractions = aiAnalytics['getStoredInteractions']?.() || []
+      recommendationEngine.updateInteractions(recentInteractions.slice(-10))
+
+      const aiRecommendations = recommendationEngine.generateRecommendations(
+        dialogueState.visitorProfile,
+        response.intent
+      )
+
+      // Enhance suggestions with ML recommendations
+      const enhancedSuggestions = [
+        ...(response.suggestions || []),
+        ...aiRecommendations.slice(0, 2).map(r => r.title)
+      ]
+
+      addMessage('assistant', response.content, response.intent, response.sentiment, enhancedSuggestions, response.quickActions)
       setIsTyping(false)
 
       if (response.navigateTo) {
