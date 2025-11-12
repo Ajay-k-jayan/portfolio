@@ -230,13 +230,13 @@ export function PortfolioTimeline() {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-1">
             <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
-              <Calendar className="text-vscode-blue" size={24} />
-              Portfolio Timeline
+              <Calendar className="text-vscode-blue" size={20} />
+              Timeline
             </h1>
           </div>
-          <p className="text-sm text-vscode-text-secondary">
+          <p className="text-sm text-vscode-text-secondary mt-1">
             Visual timeline of career journey, projects, and achievements
           </p>
         </div>

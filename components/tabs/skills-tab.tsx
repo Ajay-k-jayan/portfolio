@@ -451,8 +451,8 @@ export function SkillsTab() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
-                  <Layers className="text-vscode-blue" size={20} />
-                  Skills & Expertise
+                  <Code className="text-vscode-blue" size={20} />
+                  {t('skills')}
                 </h1>
                 <div className="relative">
                   <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">

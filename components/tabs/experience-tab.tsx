@@ -132,7 +132,7 @@ export function ExperienceTab() {
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
                   <Briefcase className="text-vscode-blue" size={20} />
-                  {t('workExperience')}
+                  {t('experience')}
                 </h1>
                 <div className="relative">
                   <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">
@@ -155,7 +155,7 @@ export function ExperienceTab() {
                   />
                 </div>
               </div>
-              <p className="text-sm text-vscode-text-secondary">
+              <p className="text-sm text-vscode-text-secondary mt-1">
                 {t('experiencePageDescription')}
               </p>
             </div>

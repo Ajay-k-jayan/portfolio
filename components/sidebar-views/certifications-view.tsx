@@ -4,6 +4,7 @@ import { Award, ExternalLink, Calendar, Search, ArrowUpDown, LayoutGrid, LayoutL
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from '../ui/tooltip'
+import { useLanguage } from '@/contexts/language-context'
 
 type ViewMode = 'grid' | 'list'
 
@@ -89,6 +90,7 @@ const certifications: Certification[] = [
 ]
 
 export function CertificationsView() {
+  const { t } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'issuer'>('date')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')

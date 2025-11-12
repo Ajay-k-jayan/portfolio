@@ -4,6 +4,7 @@ import { Trophy, ExternalLink, Calendar, Search, ArrowUpDown, LayoutGrid, Layout
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from '../ui/tooltip'
+import { useLanguage } from '@/contexts/language-context'
 
 type ViewMode = 'grid' | 'list'
 
@@ -36,6 +37,7 @@ const achievements: Achievement[] = [
 ]
 
 export function AchievementsView() {
+  const { t } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'issuer'>('date')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
@@ -169,7 +171,7 @@ export function AchievementsView() {
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
                   <Trophy className="text-vscode-blue" size={20} />
-                  Achievements
+                  {t('achievements')}
                 </h1>
                 {/* Count Badge */}
                 <div className="relative">

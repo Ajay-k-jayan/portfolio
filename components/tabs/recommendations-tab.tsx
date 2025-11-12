@@ -18,11 +18,13 @@ import {
 } from 'lucide-react'
 import { Tooltip } from '../ui/tooltip'
 import { recommendationsData } from '@/lib/recommendations-data'
+import { useLanguage } from '@/contexts/language-context'
 
 type SortOption = 'date-desc' | 'date-asc' | 'name-asc' | 'name-desc'
 type ViewMode = 'grid' | 'list'
 
 export function RecommendationsTab() {
+  const { t } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('date-desc')
   const [viewMode, setViewMode] = useState<ViewMode>('list')
@@ -73,7 +75,7 @@ export function RecommendationsTab() {
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
                   <MessageSquare className="text-vscode-blue" size={20} />
-                  Recommendations
+                  {t('recommendations')}
                 </h1>
                 <div className="relative">
                   <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">

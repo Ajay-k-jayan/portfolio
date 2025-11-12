@@ -565,7 +565,7 @@ export function SettingsView() {
                 <Settings className="text-vscode-blue" size={24} />
               </div>
               <div>
-                <h1 className="text-2xl font-semibold text-vscode-text">Settings</h1>
+                <h1 className="text-3xl font-bold text-vscode-text">{t('settings')}</h1>
                 <p className="text-sm text-vscode-text-secondary mt-1">
                   Visual settings - see your changes instantly
                 </p>
