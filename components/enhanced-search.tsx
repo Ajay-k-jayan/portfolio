@@ -380,10 +380,46 @@ const popularSuggestions = [
 
 // Quick action suggestions
 const quickActions = [
-  { text: 'Open AI Assistant', type: 'chat', icon: Sparkles, action: () => window.dispatchEvent(new CustomEvent('openChat')) },
-  { text: 'Voice Assistant', type: 'voice', icon: Mic, action: () => (window as any).triggerVoiceAssistant?.() },
-  { text: 'View LinkedIn', type: 'contact', icon: Linkedin, action: () => window.open(portfolioData.profile.linkedin, '_blank') },
-  { text: 'View GitHub', type: 'contact', icon: Github, action: () => window.open(portfolioData.profile.github, '_blank') },
+  { 
+    text: 'Open AI Assistant', 
+    type: 'chat', 
+    icon: Sparkles, 
+    action: () => {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('openChat'))
+      }
+    }
+  },
+  { 
+    text: 'Voice Assistant', 
+    type: 'voice', 
+    icon: Mic, 
+    action: () => {
+      if (typeof window !== 'undefined' && (window as any).triggerVoiceAssistant) {
+        (window as any).triggerVoiceAssistant()
+      }
+    }
+  },
+  { 
+    text: 'View LinkedIn', 
+    type: 'contact', 
+    icon: Linkedin, 
+    action: () => {
+      if (typeof window !== 'undefined' && portfolioData?.profile?.linkedin) {
+        window.open(portfolioData.profile.linkedin, '_blank', 'noopener noreferrer')
+      }
+    }
+  },
+  { 
+    text: 'View GitHub', 
+    type: 'contact', 
+    icon: Github, 
+    action: () => {
+      if (typeof window !== 'undefined' && portfolioData?.profile?.github) {
+        window.open(portfolioData.profile.github, '_blank', 'noopener noreferrer')
+      }
+    }
+  },
 ]
 
 export function EnhancedSearch() {
@@ -397,8 +433,15 @@ export function EnhancedSearch() {
   const { t } = useLanguage()
   const { setActiveMenuItem, addNotification } = useAppStore()
 
-  // Build search index once
-  const searchIndex = useMemo(() => buildSearchIndex(), [])
+  // Build search index once with error handling
+  const searchIndex = useMemo(() => {
+    try {
+      return buildSearchIndex()
+    } catch (error) {
+      console.error('Error building search index:', error)
+      return []
+    }
+  }, [])
 
   // Generate intelligent suggestions based on query - only when there's a query
   const generateSuggestions = useCallback((searchTerm: string) => {
@@ -522,81 +565,106 @@ export function EnhancedSearch() {
   }, [query, searchIndex, generateSuggestions])
 
   const handleResultClick = useCallback((result: SearchResult) => {
-    // Handle different result types
-    if (result.type === 'chat') {
-      // Trigger chat via custom event
-      const event = new CustomEvent('openChat')
-      window.dispatchEvent(event)
-      addNotification({
-        title: 'AI Chat',
-        message: 'Opening AI Chat Assistant',
-        type: 'info',
-      })
-    } else if (result.type === 'voice') {
-      // Trigger voice assistant
-      const trigger = (window as any).triggerVoiceAssistant
-      if (trigger) {
-        trigger()
-      } else {
+    try {
+      // Handle different result types
+      if (result.type === 'chat') {
+        // Trigger chat via custom event
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('openChat')
+          window.dispatchEvent(event)
+        }
         addNotification({
-          title: 'Voice Assistant',
-          message: 'Voice assistant is available. Click the microphone icon to activate.',
+          title: 'AI Chat',
+          message: 'Opening AI Chat Assistant',
           type: 'info',
         })
-      }
-    } else if (result.url?.startsWith('mailto:') || result.url?.startsWith('tel:')) {
-      window.location.href = result.url
-    } else if (result.url?.startsWith('http')) {
-      window.open(result.url, '_blank', 'noopener noreferrer')
-    } else if (result.url?.startsWith('#')) {
-      // Navigate to internal page
-      const menuItem = result.url.substring(1)
-      const menuMap: Record<string, string> = {
-        'project': 'project',
-        'skills': 'skills',
-        'experience': 'experience',
-        'achievement': 'achievement',
-        'certifications': 'certifications',
-        'blogs': 'blogs',
-        'contact': 'contact',
-        'about': 'welcome',
-        'welcome': 'welcome',
+      } else if (result.type === 'voice') {
+        // Trigger voice assistant
+        if (typeof window !== 'undefined') {
+          const trigger = (window as any).triggerVoiceAssistant
+          if (trigger && typeof trigger === 'function') {
+            trigger()
+          } else {
+            addNotification({
+              title: 'Voice Assistant',
+              message: 'Voice assistant is available. Click the microphone icon to activate.',
+              type: 'info',
+            })
+          }
+        }
+      } else if (result.url?.startsWith('mailto:') || result.url?.startsWith('tel:')) {
+        if (typeof window !== 'undefined') {
+          window.location.href = result.url
+        }
+      } else if (result.url?.startsWith('http')) {
+        if (typeof window !== 'undefined') {
+          window.open(result.url, '_blank', 'noopener noreferrer')
+        }
+      } else if (result.url?.startsWith('#')) {
+        // Navigate to internal page
+        const menuItem = result.url.substring(1)
+        const menuMap: Record<string, string> = {
+          'project': 'project',
+          'skills': 'skills',
+          'experience': 'experience',
+          'achievement': 'achievement',
+          'certifications': 'certifications',
+          'blogs': 'blogs',
+          'contact': 'contact',
+          'about': 'welcome',
+          'welcome': 'welcome',
+        }
+        
+        const targetMenuItem = menuMap[menuItem] || menuItem
+        if (targetMenuItem) {
+          setActiveMenuItem(targetMenuItem)
+          
+        // Navigation - no notification needed
+        }
       }
       
-      const targetMenuItem = menuMap[menuItem] || menuItem
-      setActiveMenuItem(targetMenuItem)
-      
+      setQuery('')
+      setIsFocused(false)
+    } catch (error) {
+      console.error('Error handling search result click:', error)
       addNotification({
-        title: 'Navigation',
-        message: `Navigated to ${result.title}`,
-        type: 'info',
+        title: 'Error',
+        message: 'Failed to process search result. Please try again.',
+        type: 'error',
       })
     }
-    
-    setQuery('')
-    setIsFocused(false)
   }, [setActiveMenuItem, addNotification])
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsFocused(false)
+      try {
+        if (searchRef.current && event.target && !searchRef.current.contains(event.target as Node)) {
+          setIsFocused(false)
+        }
+      } catch (error) {
+        console.error('Error handling click outside:', error)
       }
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsFocused(false)
-        inputRef.current?.blur()
-      } else if (e.key === 'ArrowDown' && results.length > 0) {
-        e.preventDefault()
-        setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0))
-      } else if (e.key === 'ArrowUp' && results.length > 0) {
-        e.preventDefault()
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1))
-      } else if (e.key === 'Enter' && selectedIndex >= 0 && results[selectedIndex]) {
-        e.preventDefault()
-        handleResultClick(results[selectedIndex])
+      try {
+        if (e.key === 'Escape') {
+          setIsFocused(false)
+          inputRef.current?.blur()
+        } else if (e.key === 'ArrowDown' && results.length > 0) {
+          e.preventDefault()
+          setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0))
+        } else if (e.key === 'ArrowUp' && results.length > 0) {
+          e.preventDefault()
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1))
+        } else if (e.key === 'Enter' && selectedIndex >= 0 && results[selectedIndex]) {
+          e.preventDefault()
+          handleResultClick(results[selectedIndex])
+        }
+      } catch (error) {
+        console.error('Error handling keyboard event:', error)
       }
     }
 

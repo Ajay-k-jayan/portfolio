@@ -206,8 +206,8 @@ export function CertificationsView() {
   }
 
   return (
-    <div className="h-full p-8 overflow-auto">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="h-full overflow-auto">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start justify-between mb-2">

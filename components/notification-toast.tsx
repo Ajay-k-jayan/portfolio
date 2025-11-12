@@ -32,17 +32,7 @@ export function NotificationToast() {
       if (latestNotification && latestNotification.id !== currentNotification?.id) {
         setCurrentNotification(latestNotification)
         setShowToast(true)
-        
-        // Auto-hide after 3 seconds
-        timerRef.current = setTimeout(() => {
-          setShowToast(false)
-          // Mark as read after hiding
-          markNotificationAsRead(latestNotification.id)
-          setTimeout(() => {
-            setCurrentNotification(null)
-          }, 300)
-          timerRef.current = null
-        }, 3000)
+        // No auto-hide - user must manually close
       }
     } else {
       // If no unread notifications, hide toast
@@ -285,14 +275,6 @@ export function NotificationToast() {
               </div>
             </div>
             
-            {/* Progress bar for auto-dismiss - theme-aware color */}
-            <motion.div
-              initial={{ width: '100%' }}
-              animate={{ width: '0%' }}
-              transition={{ duration: 3, ease: 'linear' }}
-              className="h-0.5 absolute bottom-0 left-0"
-              style={{ backgroundColor: styles.borderLeft }}
-            />
           </div>
         </motion.div>
       )}

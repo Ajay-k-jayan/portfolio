@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Mic, X, Volume2, CheckCircle, History, Settings } from 'lucide-react'
+import { Mic, X, Volume2, CheckCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { portfolioData } from '@/lib/portfolio-data'
@@ -24,8 +24,6 @@ export function VoiceAssistant() {
   const [showListeningPanel, setShowListeningPanel] = useState(false)
   const [lastCommand, setLastCommand] = useState<string | null>(null)
   const [commandHistory, setCommandHistory] = useState<VoiceCommand[]>([])
-  const [showHistory, setShowHistory] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [conversationContext, setConversationContext] = useState<string[]>([])
   const [autoSpeak, setAutoSpeak] = useState(true)
@@ -104,12 +102,12 @@ export function VoiceAssistant() {
         setConversationContext(prev => [...prev, 'skills'])
       } else if (lower.includes('experience') || lower.includes('work') || lower.includes('career')) {
         setActiveMenuItem('experience')
-        response = `Opening work experience section. ${portfolioData.profile.name} has ${portfolioData.profile.experience} of experience, currently working as ${portfolioData.profile.title} at ${portfolioData.profile.company}.`
+        response = `Opening work experience section. ${portfolioData?.profile?.name || 'The developer'} has ${portfolioData?.profile?.experience || 'extensive'} of experience, currently working as ${portfolioData?.profile?.title || 'Developer'} at ${portfolioData?.profile?.company || 'their company'}.`
         actionType = 'navigate'
         setConversationContext(prev => [...prev, 'experience'])
       } else if (lower.includes('about') || lower.includes('welcome') || lower.includes('who are you') || lower.includes('introduce')) {
         setActiveMenuItem('welcome')
-        response = `${portfolioData.profile.name} is a ${portfolioData.profile.title} with ${portfolioData.profile.experience} of experience. ${portfolioData.profile.bio}`
+        response = `${portfolioData?.profile?.name || 'The developer'} is a ${portfolioData?.profile?.title || 'Developer'} with ${portfolioData?.profile?.experience || 'extensive'} of experience. ${portfolioData?.profile?.bio || 'Experienced professional.'}`
         actionType = 'navigate'
         setConversationContext(prev => [...prev, 'about'])
       } else if (lower.includes('blog') || lower.includes('blogs')) {
@@ -119,22 +117,22 @@ export function VoiceAssistant() {
         setConversationContext(prev => [...prev, 'blogs'])
       } else if (lower.includes('contact') || lower.includes('contact information') || lower.includes('how to contact')) {
         setActiveMenuItem('contact')
-        response = `Opening contact section. You can reach ${portfolioData.profile.name} at ${portfolioData.profile.email} or phone ${portfolioData.profile.phone}.`
+        response = `Opening contact section. You can reach ${portfolioData?.profile?.name || 'the developer'} at ${portfolioData?.profile?.email || 'email'} or phone ${portfolioData?.profile?.phone || 'phone'}.`
         actionType = 'navigate'
         setConversationContext(prev => [...prev, 'contact'])
       } else if (lower.includes('achievement') || lower.includes('achievements') || lower.includes('award')) {
         setActiveMenuItem('achievement')
-        response = `${portfolioData.profile.name} has ${portfolioData.achievements.length} awards including the Beinex Excelencia Award, and ${portfolioData.certifications.length} professional certifications.`
+        response = `${portfolioData?.profile?.name || 'The developer'} has ${portfolioData?.achievements?.length || 0} awards including the Beinex Excelencia Award, and ${portfolioData?.certifications?.length || 0} professional certifications.`
         actionType = 'navigate'
         setConversationContext(prev => [...prev, 'achievements'])
       } else if (lower.includes('certification') || lower.includes('certifications')) {
         setActiveMenuItem('certifications')
-        response = `Opening certifications section. There are ${portfolioData.certifications.length} professional certifications.`
+        response = `Opening certifications section. There are ${portfolioData?.certifications?.length || 0} professional certifications.`
         actionType = 'navigate'
         setConversationContext(prev => [...prev, 'certifications'])
       } else if (lower.includes('recommendation') || lower.includes('recommendations') || lower.includes('testimonial')) {
         setActiveMenuItem('recommendation')
-        response = `Opening recommendations section. There are ${recommendationsData.length} professional recommendations from colleagues and collaborators.`
+        response = `Opening recommendations section. There are ${recommendationsData?.length || 0} professional recommendations from colleagues and collaborators.`
         actionType = 'navigate'
         setConversationContext(prev => [...prev, 'recommendations'])
       } else if (lower.includes('setting') || lower.includes('settings')) {
@@ -149,30 +147,44 @@ export function VoiceAssistant() {
     } else if (lower.includes('download resume') || lower.includes('get resume') || lower.includes('read resume') || lower.includes('show resume')) {
       response = 'Downloading resume. The resume includes complete work experience, technical skills, certifications, and educational background.'
       actionType = 'download'
-      const link = document.createElement('a')
-      link.href = '/resume.pdf'
-      link.download = `${portfolioData.profile.name}-Resume.pdf`
-      link.click()
+      if (typeof document !== 'undefined') {
+        const link = document.createElement('a')
+        link.href = '/resume.pdf'
+        link.download = `${portfolioData?.profile?.name || 'Resume'}-Resume.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
       setConversationContext(prev => [...prev, 'resume'])
     } else if (lower.includes('contact ajay') || lower.includes('email ajay') || lower.includes('reach out')) {
-      response = `You can contact ${portfolioData.profile.name} via email at ${portfolioData.profile.email}, phone at ${portfolioData.profile.phone}, or connect on LinkedIn.`
+      response = `You can contact ${portfolioData?.profile?.name || 'the developer'} via email at ${portfolioData?.profile?.email || 'email'}, phone at ${portfolioData?.profile?.phone || 'phone'}, or connect on LinkedIn.`
       actionType = 'contact'
       setActiveMenuItem('contact')
-      window.location.href = `mailto:${portfolioData.profile.email}`
+      if (typeof window !== 'undefined' && portfolioData?.profile?.email) {
+        window.location.href = `mailto:${portfolioData.profile.email}`
+      }
       setConversationContext(prev => [...prev, 'contact'])
     } else if (lower.includes('linkedin') || lower.includes('linked in')) {
       response = 'Opening LinkedIn profile in a new tab.'
       actionType = 'external'
-      window.open(portfolioData.profile.linkedin, '_blank')
+      if (typeof window !== 'undefined' && portfolioData?.profile?.linkedin) {
+        window.open(portfolioData.profile.linkedin, '_blank', 'noopener noreferrer')
+      }
       setConversationContext(prev => [...prev, 'linkedin'])
     } else if (lower.includes('github') || lower.includes('git hub')) {
       response = 'Opening GitHub profile in a new tab.'
       actionType = 'external'
-      window.open(portfolioData.profile.github, '_blank')
+      if (typeof window !== 'undefined' && portfolioData?.profile?.github) {
+        window.open(portfolioData.profile.github, '_blank', 'noopener noreferrer')
+      }
       setConversationContext(prev => [...prev, 'github'])
     } else if (lower.includes('aurex') || (conversationContext.includes('project') && (lower.includes('details') || lower.includes('about') || lower.includes('tell me')))) {
-      const project = portfolioData.projects[0]
-      response = `${project.name} is a ${project.description}. It was developed using ${project.technologies?.join(', ')} during ${project.period}. Key features include cloud-based analytics platform, risk and audit management integration, real-time data processing with WebSockets, advanced reporting capabilities, and responsive UI with Angular Material. The project solved challenges in data visualization, real-time communication, and performance optimization. Would you like to know more about specific technologies, features, challenges, or outcomes?`
+      const project = portfolioData?.projects?.[0]
+      if (project) {
+        response = `${project.name || 'The project'} is a ${project.description || 'professional project'}. It was developed using ${project.technologies?.join(', ') || 'modern technologies'} during ${project.period || 'recent period'}. Key features include cloud-based analytics platform, risk and audit management integration, real-time data processing with WebSockets, advanced reporting capabilities, and responsive UI with Angular Material. The project solved challenges in data visualization, real-time communication, and performance optimization. Would you like to know more about specific technologies, features, challenges, or outcomes?`
+      } else {
+        response = 'I can provide information about projects. Would you like to see the projects section?'
+      }
       actionType = 'navigate'
       setActiveMenuItem('project')
       setConversationContext(prev => [...prev, 'aurex'])
@@ -247,12 +259,14 @@ export function VoiceAssistant() {
     }
     setCommandHistory(prev => [...prev, voiceCommand].slice(-20))
 
-    // Show notification
-    addNotification({
-      title: 'Voice Command',
-      message: response,
-      type: actionType === 'navigate' || actionType === 'download' ? 'success' : 'info'
-    })
+    // Show notification only for non-navigation actions
+    if (actionType !== 'navigate') {
+      addNotification({
+        title: 'Voice Command',
+        message: response,
+        type: actionType === 'download' ? 'success' : 'info'
+      })
+    }
 
     // Speak response
     if (autoSpeak) {
@@ -262,26 +276,37 @@ export function VoiceAssistant() {
 
   // Initialize speech recognition
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window === 'undefined') return
+
+    try {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
       
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition()
-        recognitionRef.current.continuous = false
-        recognitionRef.current.interimResults = true
-        recognitionRef.current.lang = language
-        recognitionRef.current.maxAlternatives = 1
+      if (!SpeechRecognition) {
+        console.warn('Speech recognition not supported in this browser')
+        return
+      }
 
-        recognitionRef.current.onresult = (event: any) => {
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.continuous = false
+      recognitionRef.current.interimResults = true
+      recognitionRef.current.lang = language || 'en-US'
+      recognitionRef.current.maxAlternatives = 1
+
+      recognitionRef.current.onresult = (event: any) => {
+        try {
+          if (!event.results || event.results.length === 0) return
+
           let interim = ''
           let final = ''
           
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript
-            if (event.results[i].isFinal) {
-              final += transcript + ' '
-            } else {
-              interim += transcript
+          for (let i = event.resultIndex || 0; i < event.results.length; i++) {
+            if (event.results[i] && event.results[i][0] && event.results[i][0].transcript) {
+              const transcript = event.results[i][0].transcript
+              if (event.results[i].isFinal) {
+                final += transcript + ' '
+              } else {
+                interim += transcript
+              }
             }
           }
           
@@ -294,13 +319,22 @@ export function VoiceAssistant() {
             setTranscript(final.trim())
             handleVoiceCommand(final.trim())
           }
+        } catch (error) {
+          console.error('Error processing speech result:', error)
         }
+      }
 
-        recognitionRef.current.onerror = (event: any) => {
+      recognitionRef.current.onerror = (event: any) => {
+        try {
           console.error('Speech recognition error:', event.error)
           setIsListening(false)
           setShowListeningPanel(false)
           setInterimTranscript('')
+          
+          // Don't show error for user-initiated stops
+          if (event.error === 'aborted') {
+            return
+          }
           
           let errorMessage = 'Voice recognition error'
           if (event.error === 'no-speech') {
@@ -309,9 +343,8 @@ export function VoiceAssistant() {
             errorMessage = 'Microphone permission denied. Please allow microphone access.'
           } else if (event.error === 'network') {
             errorMessage = 'Network error. Please check your connection.'
-          } else if (event.error === 'aborted') {
-            // User stopped, don't show error
-            return
+          } else if (event.error === 'service-not-allowed') {
+            errorMessage = 'Speech recognition service not available.'
           }
           
           addNotification({
@@ -319,24 +352,28 @@ export function VoiceAssistant() {
             message: errorMessage,
             type: 'error'
           })
-        }
-
-        recognitionRef.current.onend = () => {
-          setIsListening(false)
-          // Keep panel open for a moment to show final result
-          setTimeout(() => {
-            setShowListeningPanel(false)
-            setInterimTranscript('')
-          }, 2000)
-        }
-
-        recognitionRef.current.onstart = () => {
-          setIsListening(true)
-          setShowListeningPanel(true)
-          setTranscript('')
-          setInterimTranscript('')
+        } catch (error) {
+          console.error('Error handling speech recognition error:', error)
         }
       }
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false)
+        // Keep panel open for a moment to show final result
+        setTimeout(() => {
+          setShowListeningPanel(false)
+          setInterimTranscript('')
+        }, 2000)
+      }
+
+      recognitionRef.current.onstart = () => {
+        setIsListening(true)
+        setShowListeningPanel(true)
+        setTranscript('')
+        setInterimTranscript('')
+      }
+    } catch (error) {
+      console.error('Error initializing speech recognition:', error)
     }
 
     return () => {
@@ -346,44 +383,10 @@ export function VoiceAssistant() {
         } catch (e) {
           // Ignore errors when stopping
         }
+        recognitionRef.current = null
       }
     }
-  }, [handleVoiceCommand, addNotification])
-
-  const startListening = useCallback(() => {
-    if (!recognitionRef.current) {
-      addNotification({
-        title: 'Voice Assistant',
-        message: 'Voice recognition not supported in your browser.',
-        type: 'error'
-      })
-      return
-    }
-
-    try {
-      recognitionRef.current.start()
-      setIsListening(true)
-      setShowListeningPanel(true)
-      setTranscript('')
-      setInterimTranscript('')
-      setLastCommand(null)
-    } catch (error: any) {
-      console.error('Error starting recognition:', error)
-      setIsListening(false)
-      setShowListeningPanel(false)
-      if (error.message?.includes('already started')) {
-        // Recognition already running, just update state
-        setIsListening(true)
-        setShowListeningPanel(true)
-      } else {
-        addNotification({
-          title: 'Voice Assistant Error',
-          message: 'Failed to start voice recognition. Please try again.',
-          type: 'error'
-        })
-      }
-    }
-  }, [addNotification])
+  }, [language, handleVoiceCommand, addNotification])
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current && isListening) {
@@ -398,19 +401,84 @@ export function VoiceAssistant() {
     setInterimTranscript('')
   }, [isListening])
 
-  // Expose trigger function and state to parent
-  useEffect(() => {
-    ;(window as any).triggerVoiceAssistant = () => {
-      if (!isListening) {
-        startListening()
-      } else {
+  const startListening = useCallback(() => {
+    if (typeof window === 'undefined') {
+      addNotification({
+        title: 'Voice Assistant',
+        message: 'Voice recognition requires a browser environment.',
+        type: 'error'
+      })
+      return
+    }
+
+    if (!recognitionRef.current) {
+      addNotification({
+        title: 'Voice Assistant',
+        message: 'Voice recognition not supported in your browser.',
+        type: 'error'
+      })
+      return
+    }
+
+    try {
+      // Check if already listening
+      if (isListening) {
         stopListening()
+        return
+      }
+
+      recognitionRef.current.start()
+      setIsListening(true)
+      setShowListeningPanel(true)
+      setTranscript('')
+      setInterimTranscript('')
+      setLastCommand(null)
+    } catch (error: any) {
+      console.error('Error starting recognition:', error)
+      setIsListening(false)
+      setShowListeningPanel(false)
+      
+      // Handle specific error cases
+      if (error.message?.includes('already started') || error.name === 'InvalidStateError') {
+        // Recognition already running, just update state
+        setIsListening(true)
+        setShowListeningPanel(true)
+      } else {
+        addNotification({
+          title: 'Voice Assistant Error',
+          message: error.message || 'Failed to start voice recognition. Please try again.',
+          type: 'error'
+        })
       }
     }
-    ;(window as any).isVoiceListening = isListening
+  }, [addNotification, isListening, stopListening])
+
+  // Expose trigger function and state to parent
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    try {
+      ;(window as any).triggerVoiceAssistant = () => {
+        if (!isListening) {
+          startListening()
+        } else {
+          stopListening()
+        }
+      }
+      ;(window as any).isVoiceListening = isListening
+    } catch (error) {
+      console.error('Error exposing voice assistant functions:', error)
+    }
+
     return () => {
-      delete (window as any).triggerVoiceAssistant
-      delete (window as any).isVoiceListening
+      try {
+        if (typeof window !== 'undefined') {
+          delete (window as any).triggerVoiceAssistant
+          delete (window as any).isVoiceListening
+        }
+      } catch (error) {
+        console.error('Error cleaning up voice assistant functions:', error)
+      }
     }
   }, [isListening, startListening, stopListening])
 
@@ -429,7 +497,7 @@ export function VoiceAssistant() {
           >
             {/* Main Circular Container with 3D Effect */}
             <div 
-              className="relative w-80 h-80 md:w-96 md:h-96"
+              className="relative w-48 h-48 md:w-56 md:h-56"
               style={{
                 transformStyle: 'preserve-3d',
               }}
@@ -496,7 +564,7 @@ export function VoiceAssistant() {
                 <motion.button
                   onClick={isListening ? stopListening : startListening}
                   disabled={isSpeaking && !isListening}
-                  className="relative w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center cursor-pointer group"
+                  className="relative w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center cursor-pointer group"
                   style={{
                     background: isListening
                       ? 'radial-gradient(circle at 30% 30%, rgba(239, 68, 68, 0.9), rgba(185, 28, 28, 0.9))'
@@ -546,9 +614,9 @@ export function VoiceAssistant() {
                     transition={{ duration: 0.8, repeat: isListening ? Infinity : 0 }}
                   >
                     {isListening ? (
-                      <Mic className="text-white" size={48} strokeWidth={2} />
+                      <Mic className="text-white" size={28} strokeWidth={2} />
                     ) : (
-                      <Mic className="text-white" size={48} strokeWidth={2} />
+                      <Mic className="text-white" size={28} strokeWidth={2} />
                     )}
                   </motion.div>
 
@@ -569,88 +637,64 @@ export function VoiceAssistant() {
                 </motion.button>
               </div>
 
-              {/* Status Text - Floating Around Circle */}
+              {/* Status Text - Floating Above Circle */}
               <motion.div
-                className="absolute top-8 left-1/2 -translate-x-1/2 text-center z-20"
+                className="absolute -top-12 left-1/2 -translate-x-1/2 text-center z-20 w-40"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
               >
-                <h3 className="text-sm font-semibold text-white mb-1 drop-shadow-lg">
+                <h3 className="text-xs font-semibold text-white mb-0.5 drop-shadow-lg">
                   {isListening ? 'Listening...' : 'Voice Assistant'}
                 </h3>
-                <p className="text-xs text-gray-300 drop-shadow-md">
+                <p className="text-[10px] text-gray-300 drop-shadow-md">
                   {isListening ? 'Speak your command' : 'Ready to listen'}
                 </p>
               </motion.div>
 
-              {/* Transcript Display - Floating Below */}
+              {/* Transcript Display - Floating Below Circle */}
               {(transcript || interimTranscript) && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="absolute bottom-8 left-1/2 -translate-x-1/2 w-64 z-20"
+                  className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-56 z-20"
                 >
                   <div
-                    className="bg-black/60 backdrop-blur-md rounded-lg p-3 border border-white/10"
+                    className="bg-black/80 backdrop-blur-md rounded-lg p-2.5 border border-white/20"
                     style={{
-                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+                      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.7)',
                     }}
                   >
                     {transcript ? (
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-xs text-green-400">
-                          <CheckCircle size={12} />
+                        <div className="flex items-center gap-1.5 text-[10px] text-green-400">
+                          <CheckCircle size={10} />
                           <span>Recognized</span>
                         </div>
-                        <p className="text-sm text-white font-medium">{transcript}</p>
+                        <p className="text-xs text-white font-medium break-words">{transcript}</p>
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-xs text-blue-400">
-                          <Volume2 size={12} />
+                        <div className="flex items-center gap-1.5 text-[10px] text-blue-400">
+                          <Volume2 size={10} />
                           <span>Listening...</span>
                         </div>
-                        <p className="text-sm text-white italic">{interimTranscript}</p>
+                        <p className="text-xs text-white italic break-words">{interimTranscript}</p>
                       </div>
                     )}
                   </div>
                 </motion.div>
               )}
 
-              {/* Control Buttons - Floating Around */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
-                <motion.button
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-all"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  style={{
-                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
-                  }}
-                  aria-label="Command History"
-                >
-                  <History size={14} />
-                </motion.button>
-                <motion.button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-all"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  style={{
-                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
-                  }}
-                  aria-label="Settings"
-                >
-                  <Settings size={14} />
-                </motion.button>
+              {/* Control Buttons - Floating Below Circle */}
+              <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
                 {isSpeaking && (
                   <motion.button
                     onClick={stopSpeaking}
-                    className="px-3 py-1.5 text-xs bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-full hover:bg-black/60 transition-all"
+                    className="px-2.5 py-1.5 text-[10px] bg-black/80 backdrop-blur-md border border-white/20 text-white rounded-full hover:bg-black/90 transition-all font-medium"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     style={{
-                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)',
                     }}
                   >
                     Stop
@@ -658,11 +702,11 @@ export function VoiceAssistant() {
                 )}
                 <motion.button
                   onClick={stopListening}
-                  className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/60 transition-all"
+                  className="w-7 h-7 rounded-full bg-black/80 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:text-white hover:bg-black/90 transition-all"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   style={{
-                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)',
                   }}
                   aria-label="Close"
                 >
@@ -670,163 +714,12 @@ export function VoiceAssistant() {
                 </motion.button>
               </div>
 
-              {/* Command Examples - Floating Cards */}
-              {!transcript && !interimTranscript && !isListening && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="absolute -left-32 top-1/2 -translate-y-1/2 z-20"
-                >
-                  <div className="space-y-2">
-                    <p className="text-xs text-white/60 mb-2">Try saying:</p>
-                    {['Open projects', 'Show skills', 'Go to contact'].map((cmd, idx) => (
-                      <motion.button
-                        key={cmd}
-                        onClick={() => {
-                          setTranscript(cmd)
-                          handleVoiceCommand(cmd)
-                        }}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        className="block w-full px-3 py-2 text-xs bg-black/40 backdrop-blur-md border border-white/10 text-white rounded-lg hover:bg-black/60 transition-all text-left"
-                        whileHover={{ scale: 1.05, x: 5 }}
-                        style={{
-                          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
-                        }}
-                      >
-                        {cmd}
-                      </motion.button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Command History Modal */}
-      <AnimatePresence>
-        {showHistory && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center"
-            onClick={() => setShowHistory(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-vscode-sidebar border border-vscode-border rounded-lg shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
-            >
-              <div className="p-4 border-b border-vscode-border flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-vscode-text">Command History</h3>
-                <button
-                  onClick={() => setShowHistory(false)}
-                  className="p-1 hover:bg-vscode-hover rounded"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="p-4 overflow-y-auto max-h-[60vh] space-y-3">
-                {commandHistory.length === 0 ? (
-                  <p className="text-sm text-vscode-text-secondary text-center py-8">
-                    No commands yet. Start using voice commands to see history.
-                  </p>
-                ) : (
-                  commandHistory.slice().reverse().map((cmd) => (
-                    <div key={cmd.id} className="bg-vscode-active rounded p-3 border border-vscode-border">
-                      <div className="flex items-start justify-between mb-2">
-                        <p className="text-sm text-vscode-text font-medium">{cmd.command}</p>
-                        <span className="text-xs text-vscode-text-secondary">
-                          {cmd.timestamp.toLocaleTimeString()}
-                        </span>
-                      </div>
-                      <p className="text-xs text-vscode-text-secondary">{cmd.response}</p>
-                      {cmd.action && (
-                        <span className="inline-block mt-2 text-xs px-2 py-0.5 bg-vscode-blue/20 text-vscode-blue rounded">
-                          {cmd.action}
-                        </span>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Settings Modal */}
-      <AnimatePresence>
-        {showSettings && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center"
-            onClick={() => setShowSettings(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-vscode-sidebar border border-vscode-border rounded-lg shadow-2xl w-full max-w-md"
-            >
-              <div className="p-4 border-b border-vscode-border flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-vscode-text">Voice Settings</h3>
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="p-1 hover:bg-vscode-hover rounded"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="p-4 space-y-4">
-                <div>
-                  <label className="text-xs text-vscode-text-secondary mb-2 block">Language</label>
-                  <select
-                    value={language}
-                    onChange={(e) => {
-                      setLanguage(e.target.value as any)
-                      if (recognitionRef.current) {
-                        recognitionRef.current.lang = e.target.value
-                      }
-                    }}
-                    className="w-full bg-vscode-active border border-vscode-border rounded px-3 py-2 text-sm text-vscode-text"
-                  >
-                    <option value="en-US">English (US)</option>
-                    <option value="ml-IN">Malayalam</option>
-                  </select>
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="text-xs text-vscode-text-secondary">Auto-speak responses</label>
-                  <button
-                    onClick={() => setAutoSpeak(!autoSpeak)}
-                    className={`w-12 h-6 rounded-full transition-colors ${
-                      autoSpeak ? 'bg-vscode-blue' : 'bg-vscode-active'
-                    } relative`}
-                  >
-                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${
-                      autoSpeak ? 'translate-x-6' : 'translate-x-0.5'
-                    }`} />
-                  </button>
-                </div>
-                <div className="pt-2 border-t border-vscode-border">
-                  <p className="text-xs text-vscode-text-secondary">
-                    Privacy: All voice processing happens locally in your browser. No data is sent to external servers.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   )
 }
+

@@ -128,24 +128,39 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
   }, [messages])
 
   useEffect(() => {
-    inputRef.current?.focus()
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = 'unset'
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+    
+    try {
+      inputRef.current?.focus()
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow || 'unset'
+      }
+    } catch (error) {
+      console.error('Error setting up AI assistant:', error)
     }
   }, [])
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault()
-        setInput('/')
-        inputRef.current?.focus()
+      try {
+        if (e.key === 'Escape') onClose()
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+          e.preventDefault()
+          setInput('/')
+          inputRef.current?.focus()
+        }
+      } catch (error) {
+        console.error('Error handling keyboard event:', error)
       }
     }
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [onClose])
 
   // NLP: Intent Recognition
@@ -504,8 +519,17 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
       icon: <Linkedin size={16} />,
       type: 'external',
       action: () => {
-        window.open(portfolioData.profile.linkedin, '_blank')
-        addMessage('assistant', 'Opening LinkedIn profile...')
+        try {
+          if (typeof window !== 'undefined' && portfolioData?.profile?.linkedin) {
+            window.open(portfolioData.profile.linkedin, '_blank', 'noopener noreferrer')
+            addMessage('assistant', 'Opening LinkedIn profile...')
+          } else {
+            addMessage('assistant', 'LinkedIn profile not available.')
+          }
+        } catch (error) {
+          console.error('Error opening LinkedIn:', error)
+          addMessage('assistant', 'Failed to open LinkedIn profile.')
+        }
       }
     },
     {
@@ -514,8 +538,17 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
       icon: <Github size={16} />,
       type: 'external',
       action: () => {
-        window.open(portfolioData.profile.github, '_blank')
-        addMessage('assistant', 'Opening GitHub profile...')
+        try {
+          if (typeof window !== 'undefined' && portfolioData?.profile?.github) {
+            window.open(portfolioData.profile.github, '_blank', 'noopener noreferrer')
+            addMessage('assistant', 'Opening GitHub profile...')
+          } else {
+            addMessage('assistant', 'GitHub profile not available.')
+          }
+        } catch (error) {
+          console.error('Error opening GitHub:', error)
+          addMessage('assistant', 'Failed to open GitHub profile.')
+        }
       }
     },
     {
@@ -650,49 +683,91 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
 
   // Voice Recognition (Web Speech API)
   const startVoiceRecognition = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      addMessage('assistant', 'Voice recognition is not supported in your browser.')
-      return
-    }
+    try {
+      if (typeof window === 'undefined') {
+        addMessage('assistant', 'Voice recognition requires a browser environment.')
+        return
+      }
 
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-    const recognition = new SpeechRecognition()
-    recognition.continuous = false
-    recognition.interimResults = false
-    recognition.lang = language
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        addMessage('assistant', 'Voice recognition is not supported in your browser.')
+        return
+      }
 
-    setIsListening(true)
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      if (!SpeechRecognition) {
+        addMessage('assistant', 'Voice recognition is not available.')
+        return
+      }
 
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript
-      setInput(transcript)
+      const recognition = new SpeechRecognition()
+      recognition.continuous = false
+      recognition.interimResults = false
+      recognition.lang = language || 'en-US'
+
+      setIsListening(true)
+
+      recognition.onresult = (event: any) => {
+        try {
+          if (event.results && event.results[0] && event.results[0][0]) {
+            const transcript = event.results[0][0].transcript
+            setInput(transcript)
+            setIsListening(false)
+            handleSend(transcript)
+          }
+        } catch (error) {
+          console.error('Error processing voice result:', error)
+          setIsListening(false)
+        }
+      }
+
+      recognition.onerror = (event: any) => {
+        setIsListening(false)
+        const errorMsg = event.error === 'no-speech' 
+          ? 'No speech detected. Please try again.'
+          : event.error === 'not-allowed'
+          ? 'Microphone permission denied.'
+          : 'Voice recognition error. Please try again.'
+        addMessage('assistant', errorMsg)
+      }
+
+      recognition.onend = () => {
+        setIsListening(false)
+      }
+
+      recognition.start()
+    } catch (error) {
+      console.error('Error starting voice recognition:', error)
       setIsListening(false)
-      handleSend(transcript)
+      addMessage('assistant', 'Failed to start voice recognition.')
     }
-
-    recognition.onerror = () => {
-      setIsListening(false)
-      addMessage('assistant', 'Voice recognition error. Please try again.')
-    }
-
-    recognition.onend = () => {
-      setIsListening(false)
-    }
-
-    recognition.start()
   }
 
   const exportConversation = () => {
-    const transcript = messages.map(m => 
-      `[${m.timestamp.toLocaleString()}] ${m.role === 'user' ? 'You' : 'Assistant'}: ${m.content}`
-    ).join('\n\n')
-    const blob = new Blob([transcript], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `portfolio-chat-${new Date().toISOString().split('T')[0]}.txt`
-    link.click()
-    addMessage('assistant', 'Conversation exported successfully!')
+    try {
+      if (typeof window === 'undefined' || typeof document === 'undefined') {
+        addMessage('assistant', 'Export not available in this environment.')
+        return
+      }
+
+      const transcript = messages.map(m => 
+        `[${m.timestamp.toLocaleString()}] ${m.role === 'user' ? 'You' : 'Assistant'}: ${m.content}`
+      ).join('\n\n')
+      
+      const blob = new Blob([transcript], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `portfolio-chat-${new Date().toISOString().split('T')[0]}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      addMessage('assistant', 'Conversation exported successfully!')
+    } catch (error) {
+      console.error('Error exporting conversation:', error)
+      addMessage('assistant', 'Failed to export conversation.')
+    }
   }
 
   return (

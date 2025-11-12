@@ -378,7 +378,7 @@ export function SocialMediasTab() {
 
   return (
     <div className="h-full overflow-auto bg-vscode-bg text-vscode-text">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Hero Header - Modern Design */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

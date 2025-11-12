@@ -13,8 +13,6 @@ import {
   Code,
   Trophy,
   ExternalLink,
-  ChevronDown,
-  ChevronUp,
   Filter,
   Search,
   X
@@ -228,8 +226,8 @@ export function PortfolioTimeline() {
   }, [timelineEvents])
 
   return (
-    <div className="h-full p-8 overflow-auto">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="h-full overflow-auto">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
@@ -334,7 +332,14 @@ export function PortfolioTimeline() {
                           </div>
 
                           {/* Event Card */}
-                          <div className={`flex-1 bg-vscode-sidebar border ${event.borderColor} rounded-lg p-5 hover:shadow-lg transition-all ${isExpanded ? 'border-vscode-blue/50 shadow-xl' : ''}`}>
+                          <div 
+                            className={`flex-1 bg-vscode-sidebar border ${event.borderColor} rounded-lg p-5 hover:shadow-lg transition-all cursor-pointer ${isExpanded ? 'border-vscode-blue/50 shadow-xl' : ''}`}
+                            onClick={() => {
+                              if (event.description || event.achievements || event.technologies) {
+                                toggleExpand(event.id)
+                              }
+                            }}
+                          >
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-2">
@@ -429,20 +434,6 @@ export function PortfolioTimeline() {
                                   )}
                                 </AnimatePresence>
                               </div>
-
-                              {/* Expand/Collapse Button */}
-                              {(event.description || event.achievements || event.technologies) && (
-                                <button
-                                  onClick={() => toggleExpand(event.id)}
-                                  className="p-2 hover:bg-vscode-hover rounded transition-colors flex-shrink-0"
-                                >
-                                  {isExpanded ? (
-                                    <ChevronUp size={18} className="text-vscode-text-secondary" />
-                                  ) : (
-                                    <ChevronDown size={18} className="text-vscode-text-secondary" />
-                                  )}
-                                </button>
-                              )}
                             </div>
                           </div>
                         </motion.div>

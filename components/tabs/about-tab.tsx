@@ -4,8 +4,8 @@ import { ProfileAvatar } from '@/components/profile-avatar'
 
 export function AboutTab() {
   return (
-    <div className="h-full p-8 overflow-auto">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="h-full overflow-auto">
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
         <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
           <h1 className="text-3xl font-bold text-vscode-text mb-4">About Me</h1>
           <div className="prose prose-invert max-w-none space-y-4 text-vscode-text">

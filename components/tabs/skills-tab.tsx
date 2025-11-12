@@ -444,7 +444,7 @@ export function SkillsTab() {
 
   return (
     <div className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start justify-between mb-2">

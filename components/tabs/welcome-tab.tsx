@@ -217,7 +217,7 @@ export function WelcomeTab() {
   return (
     <div className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto">
       {/* VS Code Welcome Screen Design */}
-      <div className="max-w-6xl mx-auto px-8 py-12">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Welcome Header */}
             <motion.div
           initial={{ opacity: 0, y: -10 }}

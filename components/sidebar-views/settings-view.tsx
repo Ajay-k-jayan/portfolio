@@ -556,7 +556,7 @@ export function SettingsView() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-6 border-b border-vscode-border pb-4">
           <div className="flex items-center justify-between">
