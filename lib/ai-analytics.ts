@@ -71,7 +71,7 @@ class AIAnalytics {
     }
   }
 
-  private getStoredInteractions(): VisitorInteraction[] {
+  getStoredInteractions(): VisitorInteraction[] {
     if (typeof window === 'undefined') return []
     
     try {

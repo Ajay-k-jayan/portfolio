@@ -563,9 +563,8 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
       })
 
       // Get ML-based recommendations
-      const analytics = aiAnalytics.getAnalytics()
-      const recentInteractions = aiAnalytics['getStoredInteractions']?.() || []
-      recommendationEngine.updateInteractions(recentInteractions.slice(-10))
+      const recentInteractions = aiAnalytics.getStoredInteractions().slice(-10)
+      recommendationEngine.updateInteractions(recentInteractions)
 
       const aiRecommendations = recommendationEngine.generateRecommendations(
         dialogueState.visitorProfile,
