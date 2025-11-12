@@ -82,20 +82,101 @@ const skillCategories = [
 function buildSearchIndex(): SearchResult[] {
   const results: SearchResult[] = []
 
-  // Projects
+  // Projects - Enhanced with complete details
   portfolioData.projects.forEach((project) => {
     results.push({
       id: `project-${project.id}`,
       type: 'project',
       title: project.name || project.title,
-      description: project.description,
+      description: `${project.description} | Duration: ${project.period} | Technologies: ${project.technologies?.join(', ') || 'N/A'}`,
       url: '#project',
       metadata: {
         technologies: project.technologies,
         period: project.period,
+        name: project.name || project.title,
+        description: project.description,
+        features: [
+          'Cloud-based analytics platform',
+          'Risk and audit management integration',
+          'Real-time data processing with WebSockets',
+          'Advanced reporting capabilities',
+          'Responsive UI with Angular Material',
+          'Interactive data visualizations using D3.js',
+          'Modular component architecture',
+          'Performance optimizations'
+        ],
+        challenges: [
+          'Complex data visualization requirements',
+          'Real-time communication implementation',
+          'Modular component development',
+          'Performance optimization',
+          'Custom reporting logic'
+        ],
+        outcomes: [
+          'Production-ready platform delivery',
+          'Improved data processing efficiency',
+          'Enhanced user experience',
+          'Contributed to business growth'
+        ]
       },
     })
+    
+    // Add individual technology searches for each project
+    project.technologies?.forEach((tech) => {
+      results.push({
+        id: `project-${project.id}-tech-${tech.toLowerCase()}`,
+        type: 'project',
+        title: `${tech} in ${project.name || project.title}`,
+        description: `${tech} is used in ${project.name || project.title} for ${getTechUsageInProject(tech)}`,
+        url: '#project',
+        metadata: {
+          technology: tech,
+          projectName: project.name || project.title,
+          projectId: project.id,
+        },
+      })
+    })
+    
+    // Add feature searches
+    const features = [
+      'Cloud-based analytics',
+      'Risk management',
+      'Audit management',
+      'Real-time processing',
+      'Data visualization',
+      'WebSockets',
+      'Reporting',
+      'Angular Material'
+    ]
+    features.forEach((feature) => {
+      results.push({
+        id: `project-${project.id}-feature-${feature.toLowerCase().replace(/\s+/g, '-')}`,
+        type: 'project',
+        title: `${feature} - ${project.name || project.title}`,
+        description: `${feature} feature in ${project.name || project.title}`,
+        url: '#project',
+        metadata: {
+          feature: feature,
+          projectName: project.name || project.title,
+          projectId: project.id,
+        },
+      })
+    })
   })
+  
+  // Helper function for tech usage
+  function getTechUsageInProject(tech: string): string {
+    const usage: Record<string, string> = {
+      'Angular': 'component-based frontend architecture and state management',
+      'TypeScript': 'type-safe development and modern features',
+      'D3.js': 'interactive data visualizations and charts',
+      'WebSockets': 'real-time bidirectional communication',
+      'Next.js': 'server-side rendering and API routes',
+      'Tailwind CSS': 'utility-first styling and responsive design',
+      'RxJS': 'reactive programming and observables'
+    }
+    return usage[tech] || 'core functionality'
+  }
 
   // Experience
   portfolioData.experience.forEach((exp) => {
@@ -285,10 +366,31 @@ function buildSearchIndex(): SearchResult[] {
   return results
 }
 
+// Popular search suggestions
+const popularSuggestions = [
+  { text: 'Aurex Project', type: 'project', icon: Briefcase },
+  { text: 'Angular', type: 'skill', icon: Code },
+  { text: 'Work Experience', type: 'experience', icon: Building2 },
+  { text: 'Contact Information', type: 'contact', icon: Mail },
+  { text: 'Download Resume', type: 'page', icon: FileText },
+  { text: 'Skills', type: 'skill', icon: Code },
+  { text: 'Projects', type: 'project', icon: Briefcase },
+  { text: 'Achievements', type: 'achievement', icon: Trophy },
+]
+
+// Quick action suggestions
+const quickActions = [
+  { text: 'Open AI Assistant', type: 'chat', icon: Sparkles, action: () => window.dispatchEvent(new CustomEvent('openChat')) },
+  { text: 'Voice Assistant', type: 'voice', icon: Mic, action: () => (window as any).triggerVoiceAssistant?.() },
+  { text: 'View LinkedIn', type: 'contact', icon: Linkedin, action: () => window.open(portfolioData.profile.linkedin, '_blank') },
+  { text: 'View GitHub', type: 'contact', icon: Github, action: () => window.open(portfolioData.profile.github, '_blank') },
+]
+
 export function EnhancedSearch() {
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [results, setResults] = useState<SearchResult[]>([])
+  const [suggestions, setSuggestions] = useState<typeof popularSuggestions>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const searchRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -298,53 +400,126 @@ export function EnhancedSearch() {
   // Build search index once
   const searchIndex = useMemo(() => buildSearchIndex(), [])
 
-  // Search function
+  // Generate intelligent suggestions based on query - only when there's a query
+  const generateSuggestions = useCallback((searchTerm: string) => {
+    if (!searchTerm.trim() || searchTerm.length < 2) {
+      setSuggestions([])
+      return
+    }
+
+    const lower = searchTerm.toLowerCase()
+    const matched: typeof popularSuggestions = []
+
+    // Match popular suggestions that are related to the query
+    popularSuggestions.forEach(suggestion => {
+      if (suggestion.text.toLowerCase().includes(lower) || lower.includes(suggestion.text.toLowerCase().split(' ')[0])) {
+        matched.push(suggestion)
+      }
+    })
+
+    // Match quick actions that are related
+    quickActions.forEach(action => {
+      if (action.text.toLowerCase().includes(lower) || lower.includes('ai') || lower.includes('voice') || lower.includes('linkedin') || lower.includes('github')) {
+        if (action.text.toLowerCase().includes(lower) || 
+            (lower.includes('ai') && action.text.includes('AI')) ||
+            (lower.includes('voice') && action.text.includes('Voice')) ||
+            (lower.includes('linkedin') && action.text.includes('LinkedIn')) ||
+            (lower.includes('github') && action.text.includes('GitHub'))) {
+          matched.push({ text: action.text, type: action.type as any, icon: action.icon })
+        }
+      }
+    })
+
+    // Generate smart suggestions from search index - only related items
+    const indexMatches = searchIndex
+      .filter(item => {
+        const titleMatch = item.title.toLowerCase().includes(lower)
+        const descMatch = item.description?.toLowerCase().includes(lower)
+        const metadataMatch = item.metadata && Object.values(item.metadata).some((value) => {
+          if (Array.isArray(value)) {
+            return value.some((v) => String(v).toLowerCase().includes(lower))
+          }
+          return String(value).toLowerCase().includes(lower)
+        })
+        return titleMatch || descMatch || metadataMatch
+      })
+      .slice(0, 6)
+      .map(item => ({
+        text: item.title,
+        type: item.type,
+        icon: typeIcons[item.type] || FileText
+      }))
+
+    matched.push(...indexMatches)
+
+    // Remove duplicates and limit
+    const unique = Array.from(new Map(matched.map(s => [s.text, s])).values())
+    setSuggestions(unique.slice(0, 8))
+  }, [searchIndex])
+
+  // Search function with improved relevance scoring
   useEffect(() => {
     if (query.trim()) {
       const searchTerm = query.toLowerCase()
-      const filtered = searchIndex.filter((item) => {
-        // Search in title
-        const titleMatch = item.title.toLowerCase().includes(searchTerm)
+      
+      // Generate suggestions
+      generateSuggestions(searchTerm)
+      
+      // Calculate relevance scores for better ranking
+      const scored = searchIndex.map((item) => {
+        let score = 0
+        const titleLower = item.title.toLowerCase()
+        const descLower = item.description?.toLowerCase() || ''
         
-        // Search in description
-        const descMatch = item.description?.toLowerCase().includes(searchTerm)
+        // Exact title match (highest priority)
+        if (titleLower === searchTerm) score += 100
+        // Title starts with query
+        else if (titleLower.startsWith(searchTerm)) score += 50
+        // Title contains query
+        else if (titleLower.includes(searchTerm)) score += 30
         
-        // Search in metadata
-        const metadataMatch = item.metadata && Object.values(item.metadata).some((value) => {
-          if (Array.isArray(value)) {
-            return value.some((v) => String(v).toLowerCase().includes(searchTerm))
-          }
-          return String(value).toLowerCase().includes(searchTerm)
-        })
-
-        // Search in tags (for skills and blogs)
-        const tagsMatch = item.metadata?.tags?.some((tag: string) => 
-          tag.toLowerCase().includes(searchTerm)
-        )
-
-        return titleMatch || descMatch || metadataMatch || tagsMatch
-      })
-
-      // Sort by relevance (title matches first, then description)
-      const sorted = filtered.sort((a, b) => {
-        const aTitleMatch = a.title.toLowerCase().startsWith(searchTerm) ? 2 : 
-                          a.title.toLowerCase().includes(searchTerm) ? 1 : 0
-        const bTitleMatch = b.title.toLowerCase().startsWith(searchTerm) ? 2 : 
-                          b.title.toLowerCase().includes(searchTerm) ? 1 : 0
+        // Description contains query
+        if (descLower.includes(searchTerm)) score += 10
         
-        if (aTitleMatch !== bTitleMatch) {
-          return bTitleMatch - aTitleMatch
+        // Metadata matches
+        if (item.metadata) {
+          Object.values(item.metadata).forEach((value) => {
+            if (Array.isArray(value)) {
+              if (value.some((v) => String(v).toLowerCase().includes(searchTerm))) score += 15
+            } else if (String(value).toLowerCase().includes(searchTerm)) {
+              score += 5
+            }
+          })
         }
         
-        return a.title.localeCompare(b.title)
+        // Project features, challenges, outcomes (high relevance)
+        if (item.metadata?.features?.some((f: string) => f.toLowerCase().includes(searchTerm))) score += 20
+        if (item.metadata?.challenges?.some((c: string) => c.toLowerCase().includes(searchTerm))) score += 20
+        if (item.metadata?.outcomes?.some((o: string) => o.toLowerCase().includes(searchTerm))) score += 20
+        
+        // Tags match
+        if (item.metadata?.tags?.some((tag: string) => tag.toLowerCase().includes(searchTerm))) score += 15
+        
+        // Type priority (projects and skills are more important)
+        if (item.type === 'project') score += 5
+        if (item.type === 'skill') score += 5
+        
+        return { item, score }
       })
 
-      setResults(sorted.slice(0, 10)) // Limit to 10 results
+      // Filter and sort by score
+      const filtered = scored
+        .filter(({ score }) => score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map(({ item }) => item)
+
+      setResults(filtered.slice(0, 12)) // Increased to 12 results
     } else {
       setResults([])
+      setSuggestions([])
     }
     setSelectedIndex(-1)
-  }, [query, searchIndex])
+  }, [query, searchIndex, generateSuggestions])
 
   const handleResultClick = useCallback((result: SearchResult) => {
     // Handle different result types
@@ -504,9 +679,52 @@ export function EnhancedSearch() {
         </div>
       </div>
 
-      {/* Search Results Dropdown */}
+      {/* Search Suggestions - Show only when query has related suggestions */}
       <AnimatePresence>
-        {isFocused && results.length > 0 && (
+        {isFocused && query.trim().length >= 2 && suggestions.length > 0 && results.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute top-full left-0 right-0 mt-1 rounded shadow-2xl z-50 overflow-hidden bg-vscode-sidebar border border-vscode-border"
+          >
+            <div className="p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles size={14} className="text-vscode-text-secondary" />
+                <span className="text-xs font-semibold text-vscode-text-secondary uppercase tracking-wide">
+                  Related Suggestions
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {suggestions.slice(0, 6).map((suggestion, idx) => {
+                  const Icon = suggestion.icon
+                  return (
+                    <motion.button
+                      key={`${suggestion.text}-${idx}`}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: idx * 0.05 }}
+                      onClick={() => {
+                        setQuery(suggestion.text)
+                        inputRef.current?.focus()
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-vscode-active hover:bg-vscode-hover border border-vscode-border rounded transition-colors text-vscode-text"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Icon size={12} className="text-vscode-text-secondary" />
+                      <span>{suggestion.text}</span>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Search Results Dropdown */}
+        {isFocused && query.trim().length >= 2 && results.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -595,20 +813,52 @@ export function EnhancedSearch() {
           </motion.div>
         )}
 
-        {/* No Results */}
-        {isFocused && query.trim() && results.length === 0 && (
+        {/* No Results with Suggestions */}
+        {isFocused && query.trim().length >= 2 && results.length === 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 right-0 mt-1 rounded shadow-2xl z-50 p-4 text-center bg-vscode-sidebar border border-vscode-border"
+            className="absolute top-full left-0 right-0 mt-1 rounded shadow-2xl z-50 overflow-hidden bg-vscode-sidebar border border-vscode-border"
           >
-            <div style={{ color: '#858585' }} className="text-sm">
-              No results found for &quot;{query}&quot;
+            <div className="p-4 text-center border-b border-vscode-border">
+              <div style={{ color: '#858585' }} className="text-sm mb-1">
+                No results found for &quot;{query}&quot;
+              </div>
+              <div style={{ color: '#858585' }} className="text-xs">
+                Try searching for projects, skills, experience, or contact info
+              </div>
             </div>
-            <div style={{ color: '#858585' }} className="text-xs mt-2">
-              Try searching for projects, skills, experience, or contact info
-            </div>
+            {suggestions.length > 0 && (
+              <div className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles size={12} className="text-vscode-text-secondary" />
+                  <span className="text-xs font-semibold text-vscode-text-secondary uppercase">
+                    Try These Instead
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {suggestions.slice(0, 4).map((suggestion, idx) => {
+                    const Icon = suggestion.icon
+                    return (
+                      <motion.button
+                        key={`suggestion-${idx}`}
+                        onClick={() => {
+                          setQuery(suggestion.text)
+                          inputRef.current?.focus()
+                        }}
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs bg-vscode-active hover:bg-vscode-hover border border-vscode-border rounded transition-colors text-vscode-text"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Icon size={11} className="text-vscode-text-secondary" />
+                        <span>{suggestion.text}</span>
+                      </motion.button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

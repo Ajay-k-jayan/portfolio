@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { 
   FileText, FolderOpen, GitBranch, 
   Lightbulb, Star, Code, Briefcase,
@@ -31,6 +31,11 @@ const menuItemLabels: Record<string, string> = {
 export function WelcomeTab() {
   const { setActiveMenuItem, recentlySelected, portfolioSettings, addNotification } = useAppStore()
   const { currentTheme } = useEnhancedTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Start actions - VS Code style
   const startActions = [
@@ -272,6 +277,7 @@ export function WelcomeTab() {
             </div>
 
             {/* Recent Section */}
+            {mounted && (
             <div>
               <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
                 Recent
@@ -350,6 +356,7 @@ export function WelcomeTab() {
                 )}
                 </div>
               </div>
+            )}
           </div>
 
           {/* Right Column - Walkthroughs */}

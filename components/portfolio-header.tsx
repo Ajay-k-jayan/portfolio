@@ -152,7 +152,7 @@ export function PortfolioHeader() {
       </header>
 
       {/* Voice Assistant Component (invisible button, handles voice recognition) */}
-      <VoiceAssistant onTriggerClick={() => {}} />
+      <VoiceAssistant />
 
       {/* AI Assistance Panel */}
       <AnimatePresence>

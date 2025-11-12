@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X, Send, Bot, User, Sparkles, Download,
   Linkedin, Github, Mail, ChevronRight,
-  Infinity, AtSign, Image as ImageIcon, Square,
   FileText, Command, Briefcase, Code, Award,
   MessageSquare, Globe, Mic, Volume2
 } from 'lucide-react'
@@ -286,7 +285,22 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
       
       case Intent.PROJECTS:
         content = generateProjectsResponse(entities)
-        suggestions = ['Tell me about Aurex in detail', 'What technologies are used?', 'Show project highlights']
+        const projectEntity = entities.find(e => e.type === 'project')
+        if (projectEntity) {
+          suggestions = [
+            'What challenges were solved?',
+            'What are the key features?',
+            'Tell me about the technology stack',
+            'What was the project impact?'
+          ]
+        } else {
+          suggestions = [
+            'Tell me about Aurex in detail',
+            'What technologies are used?',
+            'What were the project challenges?',
+            'Show project outcomes and impact'
+          ]
+        }
         quickActions = getProjectQuickActions()
         navigateTo = 'project'
         break
@@ -365,8 +379,35 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
 
   const generateProjectsResponse = (entities: Entity[]): string => {
     const projects = portfolioData.projects
+    const mentionedProject = entities.find(e => e.type === 'project')
     const mentionedTech = entities.find(e => e.type === 'technology')
-    return `**Featured Projects**\n\n${projects.map(p => `**${p.name}**\n\n${p.description}\n\n**Duration:** ${p.period}\n**Technologies:** ${p.technologies?.join(', ') || 'N/A'}\n\n**Key Highlights:**\n• Cloud-based analytics platform\n• Risk and audit management integration\n• Real-time data processing with WebSockets\n• Advanced reporting capabilities\n• Responsive UI with Angular Material`).join('\n\n---\n\n')}${mentionedTech ? `\n\n*I noticed you're interested in ${mentionedTech.value}. This project heavily utilizes ${mentionedTech.value} for ${mentionedTech.value === 'angular' ? 'component architecture and state management' : mentionedTech.value === 'next.js' ? 'server-side rendering and API routes' : 'styling and responsive design'}.*` : ''}`
+    
+    // If specific project mentioned, provide detailed information
+    if (mentionedProject) {
+      const project = projects.find(p => 
+        p.name.toLowerCase().includes(mentionedProject.value.toLowerCase()) ||
+        p.title?.toLowerCase().includes(mentionedProject.value.toLowerCase())
+      ) || projects[0]
+      
+      return `**${project.name || project.title} - Complete Project Overview**\n\n**Project Description:**\n${project.description}\n\n**Project Duration:**\n${project.period}\n\n**Technology Stack:**\n${project.technologies?.map(tech => `• **${tech}** - ${getTechUsage(tech, project)}`).join('\n') || 'N/A'}\n\n**Key Features & Capabilities:**\n• Cloud-based analytics platform with scalable architecture\n• Integrated risk management and audit management systems\n• Real-time data processing and synchronization using WebSockets\n• Advanced reporting capabilities with custom data fields\n• Responsive UI built with Angular Material components\n• Interactive data visualizations using D3.js\n• Modular, reusable component architecture\n• Performance optimizations including lazy loading and caching\n\n**Project Objectives:**\n• Streamline risk and audit analytics workflows\n• Provide real-time insights and reporting\n• Enhance user experience with intuitive interfaces\n• Enable scalable data processing and visualization\n\n**Technical Challenges Solved:**\n• Implemented complex data visualization requirements using D3.js\n• Built real-time communication layer with WebSockets\n• Created modular components for maintainability\n• Optimized performance with lazy loading strategies\n• Developed custom reporting logic and data field management\n\n**Outcomes & Impact:**\n• Successfully delivered cloud-based platform in production\n• Improved data processing efficiency\n• Enhanced user experience with responsive design\n• Contributed to company growth through innovative solutions\n\n**Related Skills:**\nAngular, TypeScript, D3.js, WebSockets, Angular Material, Component Architecture, State Management, Performance Optimization\n\nWould you like more details about specific technologies, features, or implementation approaches?`
+    }
+    
+    // General projects overview
+    return `**Featured Projects - Complete Portfolio**\n\n${projects.map(p => `**${p.name || p.title}**\n\n**Description:**\n${p.description}\n\n**Project Duration:**\n${p.period}\n\n**Technology Stack:**\n${p.technologies?.map(tech => `• ${tech}`).join('\n') || 'N/A'}\n\n**Key Features:**\n• Cloud-based analytics platform\n• Risk and audit management integration\n• Real-time data processing with WebSockets\n• Advanced reporting capabilities\n• Responsive UI with Angular Material\n• Interactive data visualizations using D3.js\n• Modular component architecture\n• Performance optimizations\n\n**Project Impact:**\n• Delivered production-ready platform\n• Improved workflow efficiency\n• Enhanced user experience\n• Contributed to business growth`).join('\n\n---\n\n')}${mentionedTech ? `\n\n*I noticed you're interested in **${mentionedTech.value}**. This technology is extensively used in these projects for ${getTechUsage(mentionedTech.value, projects[0])}.*` : ''}\n\n**Want to know more?** Ask about:\n• Specific project details (e.g., "Tell me about Aurex")\n• Technology usage (e.g., "How is Angular used?")\n• Project challenges and solutions\n• Implementation approaches`
+  }
+
+  const getTechUsage = (tech: string, project?: any): string => {
+    const usage: Record<string, string> = {
+      'Angular': 'building component-based frontend architecture, state management, and reactive forms',
+      'TypeScript': 'type-safe development, interfaces, and modern ES6+ features',
+      'D3.js': 'interactive data visualizations, charts, and dynamic graphics',
+      'WebSockets': 'real-time bidirectional communication, live data updates, and instant synchronization',
+      'Next.js': 'server-side rendering, API routes, and full-stack React applications',
+      'Tailwind CSS': 'utility-first styling, responsive design, and rapid UI development',
+      'RxJS': 'reactive programming, observables, and asynchronous data streams',
+      'JavaScript': 'core programming logic, DOM manipulation, and client-side functionality'
+    }
+    return usage[tech] || 'core functionality and features'
   }
 
   const generateSkillsResponse = (entities: Entity[]): string => {
@@ -843,16 +884,6 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
         {/* Input */}
         <div className="p-3 border-t border-vscode-border bg-vscode-sidebar">
           <div className="flex items-center gap-2 bg-vscode-active border border-vscode-border rounded-lg px-3 py-2">
-            <button
-              className="flex items-center gap-1 text-xs text-vscode-text-secondary hover:text-vscode-text transition-colors"
-              aria-label="Auto mode"
-            >
-              <Infinity size={14} />
-              <ChevronRight size={10} className="rotate-90" />
-            </button>
-            <select className="text-xs bg-transparent border-none text-vscode-text-secondary hover:text-vscode-text focus:outline-none cursor-pointer">
-              <option>Auto</option>
-            </select>
             <div className="flex-1">
               <input
                 ref={inputRef}
@@ -860,7 +891,7 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
-                placeholder="Add a follow-up"
+                placeholder="Ask anything..."
                 className="w-full bg-transparent border-none text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none"
                 aria-label="Ask a question"
               />
@@ -878,24 +909,12 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
                 <Mic size={14} />
               </button>
               <button
-                className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
-                aria-label="Mention"
-              >
-                <AtSign size={14} />
-              </button>
-              <button
-                className="p-1.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
-                aria-label="Attach"
-              >
-                <ImageIcon size={14} />
-              </button>
-              <button
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isTyping}
                 className="p-1.5 bg-vscode-text hover:bg-vscode-text-secondary disabled:opacity-50 disabled:cursor-not-allowed text-vscode-bg rounded transition-colors"
                 aria-label="Send"
               >
-                <Square size={12} fill="currentColor" />
+                <Send size={14} />
               </button>
             </div>
           </div>
