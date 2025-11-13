@@ -13,15 +13,20 @@ export function NotificationToast() {
   const [currentNotification, setCurrentNotification] = useState<any>(null)
   const previousNotificationsLength = useRef(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  // Track dismissed notification IDs to prevent re-showing until marked as read
+  const dismissedNotificationIds = useRef<Set<string>>(new Set())
 
+  // Handle showing new notifications
   useEffect(() => {
-    // Clear any existing timer
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-    }
-
-    // Only show unread notifications
-    const unreadNotifications = notifications.filter(n => !n.read)
+    // Only show unread notifications that haven't been dismissed
+    const unreadNotifications = notifications.filter(n => !n.read && !dismissedNotificationIds.current.has(n.id))
+    
+    // Clean up dismissed IDs for notifications that are now read
+    notifications.forEach(n => {
+      if (n.read && dismissedNotificationIds.current.has(n.id)) {
+        dismissedNotificationIds.current.delete(n.id)
+      }
+    })
     
     // Check if a new unread notification was added
     if (unreadNotifications.length > 0) {
@@ -32,7 +37,6 @@ export function NotificationToast() {
       if (latestNotification && latestNotification.id !== currentNotification?.id) {
         setCurrentNotification(latestNotification)
         setShowToast(true)
-        // No auto-hide - user must manually close
       }
     } else {
       // If no unread notifications, hide toast
@@ -40,21 +44,41 @@ export function NotificationToast() {
       if (currentNotification) {
         setCurrentNotification(null)
       }
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null
-      }
     }
     
     previousNotificationsLength.current = notifications.length
+  }, [notifications, currentNotification])
+
+  // Handle auto-dismiss timer when toast is shown
+  useEffect(() => {
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+
+    // Set up auto-dismiss timer when toast is shown
+    if (showToast && currentNotification) {
+      timerRef.current = setTimeout(() => {
+        setShowToast(false)
+        // Track dismissed notification to prevent re-showing
+        if (currentNotification?.id) {
+          dismissedNotificationIds.current.add(currentNotification.id)
+        }
+        setTimeout(() => {
+          setCurrentNotification(null)
+        }, 300)
+      }, 5000)
+    }
 
     // Cleanup function
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current)
+        timerRef.current = null
       }
     }
-  }, [notifications, markNotificationAsRead, currentNotification])
+  }, [showToast, currentNotification, markNotificationAsRead])
 
   // Get theme-aware colors
   const getThemeColors = () => {
@@ -243,7 +267,10 @@ export function NotificationToast() {
                           timerRef.current = null
                         }
                         setShowToast(false)
-                        markNotificationAsRead(currentNotification.id)
+                        // Track dismissed notification to prevent re-showing
+                        if (currentNotification?.id) {
+                          dismissedNotificationIds.current.add(currentNotification.id)
+                        }
                         setTimeout(() => {
                           setCurrentNotification(null)
                         }, 300)

@@ -22,6 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <Toaster
           position="bottom-right"
           toastOptions={{
+            duration: 5000,
             style: {
               background: 'var(--theme-sidebar, #252526)',
               color: 'var(--theme-text, #cccccc)',
