@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { ChevronDown, ChevronRight, Settings, Clock, Star, CheckCircle2, Star as StarIcon, Search, X, Filter, SortAsc, SortDesc, Download, ChevronDown as ChevronDownIcon, Award, TrendingUp, Sparkles, Zap, Target, Layers, Grid3x3, List, Clock as ClockIcon, Info, LayoutGrid, LayoutList } from 'lucide-react'
+import { ChevronDown, ChevronRight, Settings, Clock, Star, CheckCircle2, Star as StarIcon, Search, X, Filter, SortAsc, SortDesc, Download, ChevronDown as ChevronDownIcon, Award, TrendingUp, Sparkles, Zap, Target, Layers, Grid3x3, List, Clock as ClockIcon, Info, LayoutGrid, LayoutList, Code, Heart } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { skillWebsites } from '@/lib/skill-websites'
 import { Tooltip } from '@/components/ui/tooltip'
@@ -452,7 +452,7 @@ export function SkillsTab() {
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
                   <Code className="text-vscode-blue" size={20} />
-                  {t('skills')}
+                  Skills
                 </h1>
                 <div className="relative">
                   <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">

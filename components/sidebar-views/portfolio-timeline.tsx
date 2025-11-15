@@ -15,7 +15,9 @@ import {
   ExternalLink,
   Filter,
   Search,
-  X
+  X,
+  Layout,
+  LayoutGrid
 } from 'lucide-react'
 import { portfolioData } from '@/lib/portfolio-data'
 import { useAppStore } from '@/lib/store'
@@ -39,11 +41,14 @@ interface TimelineEvent {
   achievements?: string[]
 }
 
+type TimelineView = 'vertical' | 'horizontal'
+
 export function PortfolioTimeline() {
   const { setActiveMenuItem } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<string>('all')
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set())
+  const [view, setView] = useState<TimelineView>('horizontal')
 
   // Build timeline from portfolio data
   const timelineEvents = useMemo(() => {
@@ -107,7 +112,7 @@ export function PortfolioTimeline() {
         iconColor: 'text-purple-400',
         bgColor: 'bg-purple-500/10',
         borderColor: 'border-purple-500/30',
-        url: project.url
+        url: (project as any).url
       })
     })
 
@@ -189,6 +194,15 @@ export function PortfolioTimeline() {
     return Object.entries(groups).sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
   }, [filteredEvents])
 
+  // Sort events chronologically for horizontal view
+  const sortedEvents = useMemo(() => {
+    return [...filteredEvents].sort((a, b) => {
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+      return dateA - dateB
+    })
+  }, [filteredEvents])
+
   const toggleExpand = (id: string) => {
     setExpandedEvents(prev => {
       const newSet = new Set(prev)
@@ -230,50 +244,121 @@ export function PortfolioTimeline() {
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
-              <Calendar className="text-vscode-blue" size={20} />
-              Timeline
-            </h1>
+          <div className="flex items-start justify-between mb-2">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
+                  <Calendar className="text-vscode-blue" size={20} />
+                  Timeline
+                </h1>
+                <div className="relative">
+                  <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">
+                    <span className="text-xs font-bold text-white">
+                      {timelineEvents.length}
+                    </span>
+                  </div>
+                  {/* Pulse effect */}
+                  <motion.div
+                    className="absolute inset-0 bg-vscode-blue rounded-full"
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 0, 0.3],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                </div>
+              </div>
+              <p className="text-sm text-vscode-text-secondary">
+                Visual timeline of career journey, projects, and achievements
+              </p>
+            </div>
+            <div className="flex items-center gap-1 ml-4">
+              {/* Horizontal/Vertical View Toggle - Refined Small Button */}
+              <Tooltip content={view === 'horizontal' ? 'Switch to Vertical View' : 'Switch to Horizontal View'} position="bottom">
+                <motion.button
+                  onClick={() => setView(view === 'horizontal' ? 'vertical' : 'horizontal')}
+                  className="relative w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover hover:border-vscode-border/80 transition-all duration-200 group"
+                  whileHover={{ scale: 1.08, borderColor: 'rgba(0, 122, 204, 0.3)' }}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  <motion.div
+                    key={view}
+                    initial={{ opacity: 0, scale: 0.7, rotate: -180 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.7, rotate: 180 }}
+                    transition={{ 
+                      duration: 0.25, 
+                      ease: [0.34, 1.56, 0.64, 1],
+                      opacity: { duration: 0.15 }
+                    }}
+                    className="flex items-center justify-center"
+                  >
+                    {view === 'horizontal' ? (
+                      <LayoutGrid size={15} className="text-vscode-text-secondary group-hover:text-vscode-text transition-colors" />
+                    ) : (
+                      <Layout size={15} className="text-vscode-text-secondary group-hover:text-vscode-text transition-colors" />
+                    )}
+                  </motion.div>
+                  {/* Subtle glow on hover */}
+                  <motion.div
+                    className="absolute inset-0 rounded bg-vscode-blue/0 group-hover:bg-vscode-blue/5"
+                    transition={{ duration: 0.2 }}
+                  />
+                </motion.button>
+              </Tooltip>
+            </div>
           </div>
-          <p className="text-sm text-vscode-text-secondary mt-1">
-            Visual timeline of career journey, projects, and achievements
-          </p>
         </div>
 
-        {/* Search and Filter */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex-1 min-w-[200px] relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary" size={16} />
-            <input
-              type="text"
-              placeholder="Search timeline..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-10 pr-8 bg-vscode-sidebar border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:ring-1 focus:ring-vscode-blue"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary hover:text-vscode-text p-1"
-              >
-                <X size={14} />
-              </button>
-            )}
+        {/* Search Bar */}
+        <div className="mb-6 mt-4">
+          <div className="relative">
+            <div className="relative rounded-sm h-8 flex items-center border border-vscode-border bg-vscode-sidebar transition-colors">
+              <Search
+                size={16}
+                className="absolute left-3 text-vscode-text-secondary pointer-events-none z-10"
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search timeline..."
+                className="w-full pl-10 pr-8 h-full bg-transparent border-0 outline-none text-sm font-normal text-vscode-text placeholder:text-vscode-text-secondary focus:outline-none focus:ring-0"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 p-1 hover:bg-vscode-hover rounded transition-colors flex items-center justify-center"
+                >
+                  <X size={14} className="text-vscode-text-secondary" />
+                </button>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-vscode-text-secondary" />
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="h-9 px-3 bg-vscode-sidebar border border-vscode-border rounded text-sm text-vscode-text focus:outline-none focus:ring-1 focus:ring-vscode-blue"
-            >
-              {['all', 'education', 'experience', 'project', 'achievement', 'certification'].map(type => (
-                <option key={type} value={type}>
-                  {getTypeLabel(type)} ({typeCounts[type] || 0})
-                </option>
-              ))}
-            </select>
+        </div>
+
+        {/* Controls Bar */}
+        <div className="mb-4 space-y-3">
+          {/* Filters */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Filter size={16} className="text-vscode-text-secondary" />
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-3 h-8 bg-vscode-sidebar border border-vscode-border rounded text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue"
+              >
+                {['all', 'education', 'experience', 'project', 'achievement', 'certification'].map(type => (
+                  <option key={type} value={type}>
+                    {getTypeLabel(type)} ({typeCounts[type] || 0})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -284,6 +369,90 @@ export function PortfolioTimeline() {
             <p className="text-vscode-text-secondary">
               {searchQuery ? 'No events found matching your search.' : 'No events to display.'}
             </p>
+          </div>
+        ) : view === 'horizontal' ? (
+          <div className="relative h-[600px] overflow-x-auto overflow-y-visible">
+            <div className="relative h-full" style={{ minWidth: `${sortedEvents.length * 300}px`, paddingLeft: '140px', paddingRight: '140px' }}>
+              {/* Horizontal Timeline Line */}
+              <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-vscode-blue via-vscode-blue/50 to-vscode-blue transform -translate-y-1/2" style={{
+                boxShadow: '0 0 10px rgba(0, 122, 204, 0.5)',
+              }} />
+
+              {/* Events */}
+              <div className="relative h-full flex items-center">
+                {sortedEvents.map((event, idx) => {
+                  const Icon = event.icon
+                  const isExpanded = expandedEvents.has(event.id)
+                  const totalWidth = sortedEvents.length * 300
+                  const availableWidth = totalWidth - 280 // Subtract card width (140px on each side)
+                  const left = sortedEvents.length === 1 
+                    ? '50%' 
+                    : `${140 + (idx / (sortedEvents.length - 1)) * availableWidth}px`
+
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="absolute transform -translate-x-1/2"
+                      style={{ left }}
+                    >
+                      {/* Timeline Dot */}
+                      <motion.div
+                        whileHover={{ scale: 1.2 }}
+                        className={`w-12 h-12 rounded-full ${event.bgColor} border-2 ${event.borderColor} flex items-center justify-center shadow-lg cursor-pointer mx-auto mb-4`}
+                        onClick={() => {
+                          if (event.description || event.achievements || event.technologies) {
+                            toggleExpand(event.id)
+                          }
+                        }}
+                      >
+                        <Icon size={20} className={event.iconColor} />
+                      </motion.div>
+
+                      {/* Event Card - Positioned above or below */}
+                      <div className={`absolute ${idx % 2 === 0 ? 'bottom-full mb-4' : 'top-full mt-4'}`} style={{ width: '280px', left: '50%', transform: 'translateX(-50%)' }}>
+                        <div 
+                          className={`bg-vscode-sidebar border ${event.borderColor} rounded-lg p-4 hover:shadow-lg transition-all cursor-pointer relative ${
+                            isExpanded ? 'border-vscode-blue/50 shadow-xl' : ''
+                          }`}
+                          onClick={() => {
+                            if (event.description || event.achievements || event.technologies) {
+                              toggleExpand(event.id)
+                            }
+                          }}
+                        >
+                          <div>
+                            <h3 className="text-base font-semibold mb-1 text-vscode-text">
+                              {event.title}
+                            </h3>
+                            <p className="text-xs text-vscode-text-secondary mb-2">
+                              {event.subtitle}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-vscode-text-secondary flex-wrap">
+                              <div className="flex items-center gap-1">
+                                <Calendar size={10} />
+                                <span>
+                                  {event.date}
+                                  {event.endDate && ` - ${event.endDate}`}
+                                </span>
+                              </div>
+                              {event.endDate === 'Present' && (
+                                <div className="flex items-center gap-1 text-green-400">
+                                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                                  <span>Ongoing</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="relative">
@@ -333,7 +502,9 @@ export function PortfolioTimeline() {
 
                           {/* Event Card */}
                           <div 
-                            className={`flex-1 bg-vscode-sidebar border ${event.borderColor} rounded-lg p-5 hover:shadow-lg transition-all cursor-pointer ${isExpanded ? 'border-vscode-blue/50 shadow-xl' : ''}`}
+                            className={`flex-1 bg-vscode-sidebar border ${event.borderColor} rounded-lg p-5 hover:shadow-lg transition-all cursor-pointer relative ${
+                              isExpanded ? 'border-vscode-blue/50 shadow-xl' : ''
+                            }`}
                             onClick={() => {
                               if (event.description || event.achievements || event.technologies) {
                                 toggleExpand(event.id)
