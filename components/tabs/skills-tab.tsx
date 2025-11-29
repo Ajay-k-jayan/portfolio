@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { ChevronDown, ChevronRight, Settings, Clock, Star, CheckCircle2, Star as StarIcon, Search, X, Filter, SortAsc, SortDesc, Download, ChevronDown as ChevronDownIcon, Award, TrendingUp, Sparkles, Zap, Target, Layers, Grid3x3, List, Clock as ClockIcon, Info, LayoutGrid, LayoutList, Code, Heart } from 'lucide-react'
+import { ChevronDown, ChevronRight, Settings, Clock, Star, CheckCircle2, Star as StarIcon, Search, X, Filter, SortAsc, SortDesc, Download, ChevronDown as ChevronDownIcon, Award, TrendingUp, Sparkles, Zap, Target, Layers, Grid3x3, List, Clock as ClockIcon, Info, LayoutGrid, LayoutList, Code, Heart, Network } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { skillWebsites } from '@/lib/skill-websites'
 import { Tooltip } from '@/components/ui/tooltip'
+import { SkillsNetworkChart } from '@/components/skills-network-chart'
 
 interface Skill {
   id: string
@@ -32,7 +33,7 @@ interface SkillCategory {
 
 type SortOption = 'name' | 'level' | 'years' | 'category'
 type LevelFilter = 'all' | 'expert' | 'advanced' | 'intermediate' | 'beginner'
-type ViewMode = 'grid' | 'list'
+type ViewMode = 'grid' | 'list' | 'network'
 
 export function SkillsTab() {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -480,37 +481,47 @@ export function SkillsTab() {
               </p>
             </div>
             <div className="flex items-center gap-1 ml-4">
-              {/* Grid/List View Toggle - Refined Small Button */}
-              <Tooltip content={viewMode === 'grid' ? 'Switch to List View' : 'Switch to Grid View'} position="bottom">
+              {/* View Mode Toggle - Grid/List/Network */}
+              <Tooltip content="Grid View" position="bottom">
                 <motion.button
-                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                  className="relative w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover hover:border-vscode-border/80 transition-all duration-200 group"
-                  whileHover={{ scale: 1.08, borderColor: 'rgba(0, 122, 204, 0.3)' }}
+                  onClick={() => setViewMode('grid')}
+                  className={`relative w-8 h-8 flex items-center justify-center border rounded transition-all duration-200 ${
+                    viewMode === 'grid'
+                      ? 'bg-vscode-blue border-vscode-blue text-white'
+                      : 'bg-vscode-sidebar border-vscode-border hover:bg-vscode-hover text-vscode-text-secondary hover:text-vscode-text'
+                  }`}
+                  whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.92 }}
                 >
-                  <motion.div
-                    key={viewMode}
-                    initial={{ opacity: 0, scale: 0.7, rotate: -180 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                    exit={{ opacity: 0, scale: 0.7, rotate: 180 }}
-                    transition={{ 
-                      duration: 0.25, 
-                      ease: [0.34, 1.56, 0.64, 1],
-                      opacity: { duration: 0.15 }
-                    }}
-                    className="flex items-center justify-center"
-                  >
-                    {viewMode === 'grid' ? (
-                      <LayoutGrid size={15} className="text-vscode-text-secondary group-hover:text-vscode-text transition-colors" />
-                    ) : (
-                      <LayoutList size={15} className="text-vscode-text-secondary group-hover:text-vscode-text transition-colors" />
-                    )}
-                  </motion.div>
-                  {/* Subtle glow on hover */}
-                  <motion.div
-                    className="absolute inset-0 rounded bg-vscode-blue/0 group-hover:bg-vscode-blue/5"
-                    transition={{ duration: 0.2 }}
-                  />
+                  <LayoutGrid size={15} />
+                </motion.button>
+              </Tooltip>
+              <Tooltip content="List View" position="bottom">
+                <motion.button
+                  onClick={() => setViewMode('list')}
+                  className={`relative w-8 h-8 flex items-center justify-center border rounded transition-all duration-200 ${
+                    viewMode === 'list'
+                      ? 'bg-vscode-blue border-vscode-blue text-white'
+                      : 'bg-vscode-sidebar border-vscode-border hover:bg-vscode-hover text-vscode-text-secondary hover:text-vscode-text'
+                  }`}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  <LayoutList size={15} />
+                </motion.button>
+              </Tooltip>
+              <Tooltip content="Network View" position="bottom">
+                <motion.button
+                  onClick={() => setViewMode('network')}
+                  className={`relative w-8 h-8 flex items-center justify-center border rounded transition-all duration-200 ${
+                    viewMode === 'network'
+                      ? 'bg-vscode-blue border-vscode-blue text-white'
+                      : 'bg-vscode-sidebar border-vscode-border hover:bg-vscode-hover text-vscode-text-secondary hover:text-vscode-text'
+                  }`}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.92 }}
+                >
+                  <Network size={15} />
                 </motion.button>
               </Tooltip>
             </div>
@@ -563,23 +574,27 @@ export function SkillsTab() {
               )}
             </button>
 
-            {/* Sort */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-3 h-8 bg-vscode-sidebar border border-vscode-border rounded text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue"
-            >
-              <option value="level">Sort by Level</option>
-              <option value="name">Sort by Name</option>
-              <option value="years">Sort by Experience</option>
-              <option value="category">Sort by Category</option>
-            </select>
-            <button
-              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover transition-colors"
-            >
-              {sortOrder === 'asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
-            </button>
+            {/* Sort - Hidden in network view */}
+            {viewMode !== 'network' && (
+              <>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="px-3 h-8 bg-vscode-sidebar border border-vscode-border rounded text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue"
+                >
+                  <option value="level">Sort by Level</option>
+                  <option value="name">Sort by Name</option>
+                  <option value="years">Sort by Experience</option>
+                  <option value="category">Sort by Category</option>
+                </select>
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  className="w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover transition-colors"
+                >
+                  {sortOrder === 'asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
+                </button>
+              </>
+            )}
 
             {activeFilterCount > 0 && (
               <button
@@ -653,8 +668,15 @@ export function SkillsTab() {
           </AnimatePresence>
         </div>
 
+        {/* Network View */}
+        {viewMode === 'network' && (
+          <div className="h-[calc(100vh-400px)] min-h-[600px] relative rounded-lg overflow-hidden border border-vscode-border">
+            <SkillsNetworkChart />
+          </div>
+        )}
+
         {/* Results */}
-        {activeFilterCount > 0 && (
+        {activeFilterCount > 0 && viewMode !== 'network' && (
           <div className="mb-4 text-xs text-vscode-text-secondary">
             Showing {filteredAndSortedCategories.reduce((sum, cat) => sum + cat.skills.length, 0)} skill
             {filteredAndSortedCategories.reduce((sum, cat) => sum + cat.skills.length, 0) !== 1 ? 's' : ''}
@@ -662,6 +684,7 @@ export function SkillsTab() {
         )}
 
         {/* Skills Grid/List */}
+        {viewMode !== 'network' && (
         <div className="space-y-6">
           {filteredAndSortedCategories.length === 0 ? (
             <div className="text-center py-12">
@@ -733,6 +756,7 @@ export function SkillsTab() {
             })
           )}
         </div>
+        )}
       </div>
     </div>
   )

@@ -9,8 +9,6 @@ import {
   FolderOpen,
   Calendar,
   MapPin,
-  Building2,
-  Code,
   Trophy,
   ExternalLink,
   Filter,
@@ -20,7 +18,6 @@ import {
   LayoutGrid
 } from 'lucide-react'
 import { portfolioData } from '@/lib/portfolio-data'
-import { useAppStore } from '@/lib/store'
 import { Tooltip } from '../ui/tooltip'
 
 interface TimelineEvent {
@@ -44,7 +41,6 @@ interface TimelineEvent {
 type TimelineView = 'vertical' | 'horizontal'
 
 export function PortfolioTimeline() {
-  const { setActiveMenuItem } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<string>('all')
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set())

@@ -106,6 +106,8 @@ interface AppState {
   notifications: Notification[]
   isInitialized: boolean
   mobileMenuOpen: boolean
+  voiceAssistantActive: boolean
+  setVoiceAssistantActive: (active: boolean) => void
   openSidebarView: (view: string) => void
   closeSidebarView: () => void
   addTab: (tab: Tab) => void
@@ -198,7 +200,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   notifications: loadNotifications(),
   isInitialized: false,
   mobileMenuOpen: false,
+  voiceAssistantActive: false,
   setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
+  setVoiceAssistantActive: (active) => set({ voiceAssistantActive: active }),
   initializeApp: () => {
     // Mark this as initialized and mark all old notifications as read
     const notifications = get().notifications
