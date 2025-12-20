@@ -262,6 +262,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleFileExplore: () => set((state) => ({ fileExploreExpanded: !state.fileExploreExpanded })),
   updateSettings: (newSettings, silent = false) => {
     const currentSettings = get().portfolioSettings
+    
+    // Check if any values actually changed
+    const hasChanges = Object.keys(newSettings).some(key => {
+      const typedKey = key as keyof PortfolioSettings
+      return currentSettings[typedKey] !== newSettings[typedKey]
+    })
+    
+    // If no changes, don't update or notify
+    if (!hasChanges) return
+    
     const updatedSettings = { ...currentSettings, ...newSettings }
     set({ portfolioSettings: updatedSettings })
     
@@ -305,7 +315,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       showLanguageSwitcher: 'Language Switcher',
     }
 
-    const changedKeys = Object.keys(newSettings)
+    const changedKeys = Object.keys(newSettings).filter(key => {
+      const typedKey = key as keyof PortfolioSettings
+      return currentSettings[typedKey] !== newSettings[typedKey]
+    })
+    
     if (changedKeys.length > 0) {
       const firstKey = changedKeys[0] as keyof PortfolioSettings
       const settingLabel = settingLabels[firstKey] || firstKey

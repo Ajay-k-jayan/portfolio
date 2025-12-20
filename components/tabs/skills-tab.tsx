@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { skillWebsites } from '@/lib/skill-websites'
 import { Tooltip } from '@/components/ui/tooltip'
 import { SkillsNetworkChart } from '@/components/skills-network-chart'
+import { ViewSwitcher } from '@/components/ui/view-switcher'
 
 interface Skill {
   id: string
@@ -481,49 +482,11 @@ export function SkillsTab() {
               </p>
             </div>
             <div className="flex items-center gap-1 ml-4">
-              {/* View Mode Toggle - Grid/List/Network */}
-              <Tooltip content="Grid View" position="bottom">
-                <motion.button
-                  onClick={() => setViewMode('grid')}
-                  className={`relative w-8 h-8 flex items-center justify-center border rounded transition-all duration-200 ${
-                    viewMode === 'grid'
-                      ? 'bg-vscode-blue border-vscode-blue text-white'
-                      : 'bg-vscode-sidebar border-vscode-border hover:bg-vscode-hover text-vscode-text-secondary hover:text-vscode-text'
-                  }`}
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.92 }}
-                >
-                  <LayoutGrid size={15} />
-                </motion.button>
-              </Tooltip>
-              <Tooltip content="List View" position="bottom">
-                <motion.button
-                  onClick={() => setViewMode('list')}
-                  className={`relative w-8 h-8 flex items-center justify-center border rounded transition-all duration-200 ${
-                    viewMode === 'list'
-                      ? 'bg-vscode-blue border-vscode-blue text-white'
-                      : 'bg-vscode-sidebar border-vscode-border hover:bg-vscode-hover text-vscode-text-secondary hover:text-vscode-text'
-                  }`}
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.92 }}
-                >
-                  <LayoutList size={15} />
-                </motion.button>
-              </Tooltip>
-              <Tooltip content="Network View" position="bottom">
-                <motion.button
-                  onClick={() => setViewMode('network')}
-                  className={`relative w-8 h-8 flex items-center justify-center border rounded transition-all duration-200 ${
-                    viewMode === 'network'
-                      ? 'bg-vscode-blue border-vscode-blue text-white'
-                      : 'bg-vscode-sidebar border-vscode-border hover:bg-vscode-hover text-vscode-text-secondary hover:text-vscode-text'
-                  }`}
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.92 }}
-                >
-                  <Network size={15} />
-                </motion.button>
-              </Tooltip>
+              <ViewSwitcher
+                viewMode={viewMode}
+                onViewChange={(mode) => setViewMode(mode)}
+                options="grid-list-network"
+              />
             </div>
           </div>
         </div>

@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Calendar, Clock, Sparkles, Globe, BookOpen } from 'lucide-react'
+import { Calendar, Clock, Sparkles, BookOpen } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Tooltip } from './ui/tooltip'
+import { ViewSwitcher } from './ui/view-switcher'
 
 interface BlogPost {
   id: string
@@ -66,8 +67,11 @@ Learn about conditional types, mapped types, and template literal types.`,
   },
 ]
 
+type BlogViewMode = 'grid' | 'list'
+
 export function BlogSystem() {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null)
+  const [viewMode, setViewMode] = useState<BlogViewMode>('grid')
 
   return (
     <div className="h-full p-6 overflow-auto">
@@ -81,61 +85,90 @@ export function BlogSystem() {
               </h1>
               <p className="text-sm text-vscode-text-secondary">Articles and insights on web development and technology</p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-vscode-text-secondary">
-              <Globe size={16} />
-              <span>Available in multiple languages</span>
-            </div>
+            <ViewSwitcher
+              viewMode={viewMode}
+              onViewChange={(mode) => setViewMode(mode as BlogViewMode)}
+              options="grid-list"
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-4'}>
             {blogPosts.map((post) => (
               <article
                 key={post.id}
                 onClick={() => setSelectedPost(post)}
-                className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6 hover:border-vscode-blue transition-colors cursor-pointer"
+                className={`bg-vscode-sidebar border border-vscode-border rounded-lg hover:border-vscode-blue transition-colors cursor-pointer ${
+                  viewMode === 'grid' ? 'p-6' : 'p-4 flex items-start gap-4'
+                }`}
               >
-                <div className="flex items-start justify-between mb-3">
-                  <h2 className="text-xl font-semibold text-vscode-text hover:text-vscode-blue transition-colors">
-                    {post.title}
-                  </h2>
-                  {post.aiSummary && (
-                    <Tooltip content="AI Summary Available">
-                      <div className="flex items-center gap-1 text-vscode-purple">
-                        <Sparkles size={16} />
-                      </div>
-                    </Tooltip>
-                  )}
-                </div>
-                <p className="text-vscode-text-secondary text-sm mb-4">{post.excerpt}</p>
-                <div className="flex items-center gap-4 text-xs text-vscode-text-secondary mb-4">
-                  <div className="flex items-center gap-1">
-                    <Calendar size={12} />
-                    <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock size={12} />
-                    <span>{post.readTime}</span>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 bg-vscode-active text-vscode-green text-xs rounded"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                {post.aiSummary && (
-                  <div className="mt-4 p-3 bg-vscode-active rounded border-l-2 border-vscode-purple">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Sparkles size={14} className="text-vscode-purple" />
-                      <span className="text-xs font-semibold text-vscode-text">AI Summary</span>
+                {viewMode === 'list' && (
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-lg bg-vscode-active border border-vscode-border flex items-center justify-center">
+                      <BookOpen size={20} className="text-vscode-blue" />
                     </div>
-                    <p className="text-xs text-vscode-text-secondary">{post.aiSummary}</p>
                   </div>
                 )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between mb-3">
+                    <h2 className={`font-semibold text-vscode-text hover:text-vscode-blue transition-colors ${
+                      viewMode === 'grid' ? 'text-xl' : 'text-lg'
+                    }`}>
+                      {post.title}
+                    </h2>
+                    {post.aiSummary && (
+                      <Tooltip content="AI Summary Available">
+                        <div className="flex items-center gap-1 text-vscode-purple flex-shrink-0 ml-2">
+                          <Sparkles size={16} />
+                        </div>
+                      </Tooltip>
+                    )}
+                  </div>
+                  <p className={`text-vscode-text-secondary mb-4 ${
+                    viewMode === 'grid' ? 'text-sm' : 'text-xs line-clamp-2'
+                  }`}>
+                    {post.excerpt}
+                  </p>
+                  <div className={`flex items-center gap-4 text-xs text-vscode-text-secondary mb-4 ${
+                    viewMode === 'list' ? 'flex-wrap' : ''
+                  }`}>
+                    <div className="flex items-center gap-1">
+                      <Calendar size={12} />
+                      <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock size={12} />
+                      <span>{post.readTime}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-vscode-active text-vscode-green text-xs rounded"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  {post.aiSummary && viewMode === 'grid' && (
+                    <div className="mt-4 p-3 bg-vscode-active rounded border-l-2 border-vscode-purple">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sparkles size={14} className="text-vscode-purple" />
+                        <span className="text-xs font-semibold text-vscode-text">AI Summary</span>
+                      </div>
+                      <p className="text-xs text-vscode-text-secondary">{post.aiSummary}</p>
+                    </div>
+                  )}
+                  {post.aiSummary && viewMode === 'list' && (
+                    <div className="mt-2 p-2 bg-vscode-active rounded border-l-2 border-vscode-purple">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sparkles size={12} className="text-vscode-purple" />
+                        <span className="text-xs font-semibold text-vscode-text">AI Summary</span>
+                      </div>
+                      <p className="text-xs text-vscode-text-secondary line-clamp-1">{post.aiSummary}</p>
+                    </div>
+                  )}
+                </div>
               </article>
             ))}
           </div>

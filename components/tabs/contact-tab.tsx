@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { portfolioData } from '@/lib/portfolio-data'
 import { Tooltip } from '@/components/ui/tooltip'
+import { ViewSwitcher } from '@/components/ui/view-switcher'
 
 interface GitHubData {
   followers?: number
@@ -371,33 +372,11 @@ export function ContactTab() {
               </p>
             </div>
             <div className="flex items-center gap-1 ml-4">
-              <Tooltip content={viewMode === 'grid' ? 'Switch to List View' : 'Switch to Grid View'} position="bottom">
-                <motion.button
-                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                  className="relative w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover hover:border-vscode-border/80 transition-all duration-200 group"
-                  whileHover={{ scale: 1.08, borderColor: 'rgba(0, 122, 204, 0.3)' }}
-                  whileTap={{ scale: 0.92 }}
-                >
-                  <motion.div
-                    key={viewMode}
-                    initial={{ opacity: 0, scale: 0.7, rotate: -180 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                    exit={{ opacity: 0, scale: 0.7, rotate: 180 }}
-                    transition={{ 
-                      duration: 0.25, 
-                      ease: [0.34, 1.56, 0.64, 1],
-                      opacity: { duration: 0.15 }
-                    }}
-                    className="flex items-center justify-center"
-                  >
-                    {viewMode === 'grid' ? (
-                      <LayoutGrid size={15} className="text-vscode-text-secondary group-hover:text-vscode-text transition-colors" />
-                    ) : (
-                      <LayoutList size={15} className="text-vscode-text-secondary group-hover:text-vscode-text transition-colors" />
-                    )}
-                  </motion.div>
-                </motion.button>
-              </Tooltip>
+              <ViewSwitcher
+                viewMode={viewMode}
+                onViewChange={(mode) => setViewMode(mode)}
+                options="grid-list"
+              />
             </div>
           </div>
         </div>
