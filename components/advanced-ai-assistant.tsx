@@ -31,6 +31,20 @@ enum Intent {
   UNKNOWN = 'unknown'
 }
 
+// NLP: Enhanced Intent Result with Confidence
+interface IntentResult {
+  intent: Intent
+  confidence: number
+  alternativeIntents?: Array<{ intent: Intent; confidence: number }>
+}
+
+// NLP: Enhanced Sentiment Result
+interface SentimentResult {
+  sentiment: Sentiment
+  intensity: number
+  emotions?: string[]
+}
+
 // NLP: Entity Types
 interface Entity {
   type: 'project' | 'technology' | 'date' | 'skill' | 'company' | 'person'
@@ -95,7 +109,7 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const [pendingNavigation, setPendingNavigation] = useState<{ menuId: string; label: string } | null>(null)
+  const [navigationNotification, setNavigationNotification] = useState<{ menuId: string; label: string } | null>(null)
   const [dialogueState, setDialogueState] = useState<DialogueState>({
     context: [],
     lastIntent: null,
@@ -163,74 +177,360 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
     }
   }, [onClose])
 
-  // NLP: Intent Recognition
-  const recognizeIntent = useCallback((text: string): Intent => {
-    const lower = text.toLowerCase()
+  // NLP: Enhanced Intent Recognition with Confidence Scoring
+  const recognizeIntent = useCallback((text: string, context?: DialogueState): IntentResult => {
+    const lower = text.toLowerCase().trim()
+    const intents: Array<{ intent: Intent; confidence: number }> = []
     
-    if (lower.match(/\b(hi|hello|hey|greetings|good morning|good afternoon)\b/)) return Intent.GREETING
-    if (lower.match(/\b(about|who|background|introduce|bio)\b/)) return Intent.ABOUT
-    if (lower.match(/\b(project|work|portfolio|aurex|case study)\b/)) return Intent.PROJECTS
-    if (lower.match(/\b(skill|technology|tech|expertise|angular|next\.js|tailwind|rxjs)\b/)) return Intent.SKILLS
-    if (lower.match(/\b(experience|work history|career|job|position|role)\b/)) return Intent.EXPERIENCE
-    if (lower.match(/\b(contact|email|phone|reach|hire|connect|linkedin|github)\b/)) return Intent.CONTACT
-    if (lower.match(/\b(achievement|award|certification|recognition)\b/)) return Intent.ACHIEVEMENTS
-    if (lower.match(/\b(testimonial|recommendation|review|feedback|colleague)\b/)) return Intent.TESTIMONIALS
-    if (lower.match(/\b(resume|cv|download|pdf)\b/)) return Intent.RESUME
-    if (lower.match(/\b(walkthrough|tour|guide|show around)\b/)) return Intent.WALKTHROUGH
-    if (lower.match(/\b(recruiter|hiring|available|interview|position|role|job)\b/)) return Intent.RECRUITER
+    // Greeting patterns with confidence
+    const greetingPatterns = [
+      /\b(hi|hello|hey|greetings|good morning|good afternoon|good evening|hi there|hey there)\b/i,
+      /^(hi|hello|hey)[\s!.,]*$/i
+    ]
+    if (greetingPatterns.some(p => p.test(text))) {
+      intents.push({ intent: Intent.GREETING, confidence: 0.95 })
+    }
     
-    return Intent.UNKNOWN
+    // About patterns
+    const aboutPatterns = [
+      /\b(about|who|background|introduce|bio|tell me about|who is|who are)\b/i,
+      /^(who|what) (is|are) (you|he|this|your)/i,
+      /\b(biography|introduction|overview|summary)\b/i
+    ]
+    const aboutMatches = aboutPatterns.filter(p => p.test(text)).length
+    if (aboutMatches > 0) {
+      intents.push({ intent: Intent.ABOUT, confidence: 0.7 + (aboutMatches * 0.1) })
+    }
+    
+    // Projects patterns
+    const projectPatterns = [
+      /\b(project|projects|portfolio|aurex|case study|work sample|showcase)\b/i,
+      /\b(what projects|tell me about projects|show projects|project details)\b/i,
+      /\b(built|developed|created|designed).*(project|application|app|website)\b/i
+    ]
+    const projectMatches = projectPatterns.filter(p => p.test(text)).length
+    if (projectMatches > 0) {
+      intents.push({ intent: Intent.PROJECTS, confidence: 0.75 + (projectMatches * 0.08) })
+    }
+    
+    // Skills patterns
+    const skillPatterns = [
+      /\b(skill|skills|technology|tech|expertise|proficient|know|familiar|experience with)\b/i,
+      /\b(angular|next\.js|tailwind|rxjs|typescript|javascript|d3\.js|websockets|react|vue)\b/i,
+      /\b(what.*skills|technical skills|technologies|tech stack|programming languages)\b/i
+    ]
+    const skillMatches = skillPatterns.filter(p => p.test(text)).length
+    if (skillMatches > 0) {
+      intents.push({ intent: Intent.SKILLS, confidence: 0.8 + (skillMatches * 0.07) })
+    }
+    
+    // Experience patterns
+    const experiencePatterns = [
+      /\b(experience|work history|career|job|position|role|employment|worked|work at)\b/i,
+      /\b(where.*work|current job|previous job|work experience|career history)\b/i,
+      /\b(company|employer|organization)\b/i
+    ]
+    const expMatches = experiencePatterns.filter(p => p.test(text)).length
+    if (expMatches > 0) {
+      intents.push({ intent: Intent.EXPERIENCE, confidence: 0.75 + (expMatches * 0.08) })
+    }
+    
+    // Contact patterns
+    const contactPatterns = [
+      /\b(contact|email|phone|reach|hire|connect|linkedin|github|get in touch|reach out)\b/i,
+      /\b(how.*contact|contact information|contact details|email address|phone number)\b/i,
+      /\b(social media|social links|professional profile)\b/i
+    ]
+    const contactMatches = contactPatterns.filter(p => p.test(text)).length
+    if (contactMatches > 0) {
+      intents.push({ intent: Intent.CONTACT, confidence: 0.8 + (contactMatches * 0.07) })
+    }
+    
+    // Achievements patterns
+    const achievementPatterns = [
+      /\b(achievement|achievements|award|certification|certifications|recognition|accomplishment)\b/i,
+      /\b(certified|certificate|badge|credential|qualification)\b/i,
+      /\b(what.*achievements|show.*certifications|awards.*received)\b/i
+    ]
+    const achievementMatches = achievementPatterns.filter(p => p.test(text)).length
+    if (achievementMatches > 0) {
+      intents.push({ intent: Intent.ACHIEVEMENTS, confidence: 0.75 + (achievementMatches * 0.08) })
+    }
+    
+    // Testimonials patterns
+    const testimonialPatterns = [
+      /\b(testimonial|testimonials|recommendation|recommendations|review|reviews|feedback|reference)\b/i,
+      /\b(what.*people.*say|colleague.*say|recommendations|endorsements)\b/i
+    ]
+    const testimonialMatches = testimonialPatterns.filter(p => p.test(text)).length
+    if (testimonialMatches > 0) {
+      intents.push({ intent: Intent.TESTIMONIALS, confidence: 0.7 + (testimonialMatches * 0.1) })
+    }
+    
+    // Resume patterns
+    const resumePatterns = [
+      /\b(resume|cv|curriculum vitae|download.*resume|get.*resume|resume.*pdf)\b/i,
+      /\b(download.*cv|get.*cv|view.*resume|see.*resume)\b/i
+    ]
+    const resumeMatches = resumePatterns.filter(p => p.test(text)).length
+    if (resumeMatches > 0) {
+      intents.push({ intent: Intent.RESUME, confidence: 0.85 + (resumeMatches * 0.1) })
+    }
+    
+    // Walkthrough patterns
+    const walkthroughPatterns = [
+      /\b(walkthrough|tour|guide|show around|introduction|onboarding|help me navigate)\b/i,
+      /\b(how.*use|how.*navigate|show me around|guide me|tutorial)\b/i
+    ]
+    const walkthroughMatches = walkthroughPatterns.filter(p => p.test(text)).length
+    if (walkthroughMatches > 0) {
+      intents.push({ intent: Intent.WALKTHROUGH, confidence: 0.75 + (walkthroughMatches * 0.1) })
+    }
+    
+    // Recruiter patterns
+    const recruiterPatterns = [
+      /\b(recruiter|hiring|available|interview|position|role|job|opportunity|open.*position)\b/i,
+      /\b(looking.*hire|hiring.*developer|job opening|career opportunity|available.*work)\b/i,
+      /\b(interested.*hiring|want.*hire|need.*developer|recruiting)\b/i
+    ]
+    const recruiterMatches = recruiterPatterns.filter(p => p.test(text)).length
+    if (recruiterMatches > 0) {
+      intents.push({ intent: Intent.RECRUITER, confidence: 0.8 + (recruiterMatches * 0.08) })
+    }
+    
+    // Context-based boosting
+    if (context?.lastIntent) {
+      intents.forEach(intent => {
+        if (intent.intent === context.lastIntent) {
+          intent.confidence += 0.15
+        }
+      })
+    }
+    
+    // Sort by confidence
+    intents.sort((a, b) => b.confidence - a.confidence)
+    
+    if (intents.length === 0) {
+      return { intent: Intent.UNKNOWN, confidence: 0.1 }
+    }
+    
+    const topIntent = intents[0]
+    const alternativeIntents = intents.slice(1, 3).map(i => ({
+      intent: i.intent,
+      confidence: i.confidence
+    }))
+    
+    return {
+      intent: topIntent.intent,
+      confidence: Math.min(topIntent.confidence, 0.99),
+      alternativeIntents: alternativeIntents.length > 0 ? alternativeIntents : undefined
+    }
   }, [])
 
-  // NLP: Entity Extraction
-  const extractEntities = useCallback((text: string): Entity[] => {
+  // NLP: Enhanced Entity Extraction with NER
+  const extractEntities = useCallback((text: string, context?: DialogueState): Entity[] => {
     const entities: Entity[] = []
     const lower = text.toLowerCase()
     
-    // Extract technologies
-    const technologies = ['angular', 'next.js', 'tailwind', 'rxjs', 'typescript', 'javascript', 'd3.js', 'websockets']
-    technologies.forEach(tech => {
-      if (lower.includes(tech)) {
-        entities.push({ type: 'technology', value: tech, confidence: 0.9 })
+    // Enhanced technology extraction with aliases
+    const technologyMap: Record<string, { value: string; confidence: number; aliases: string[] }> = {
+      'angular': { value: 'Angular', confidence: 0.95, aliases: ['angular', 'angularjs', 'angular.js'] },
+      'next.js': { value: 'Next.js', confidence: 0.95, aliases: ['next.js', 'nextjs', 'next'] },
+      'react': { value: 'React', confidence: 0.9, aliases: ['react', 'reactjs', 'react.js'] },
+      'typescript': { value: 'TypeScript', confidence: 0.95, aliases: ['typescript', 'ts'] },
+      'javascript': { value: 'JavaScript', confidence: 0.9, aliases: ['javascript', 'js', 'ecmascript'] },
+      'tailwind': { value: 'Tailwind CSS', confidence: 0.9, aliases: ['tailwind', 'tailwindcss', 'tailwind css'] },
+      'rxjs': { value: 'RxJS', confidence: 0.9, aliases: ['rxjs', 'reactive extensions'] },
+      'd3.js': { value: 'D3.js', confidence: 0.9, aliases: ['d3.js', 'd3js', 'd3'] },
+      'websockets': { value: 'WebSockets', confidence: 0.9, aliases: ['websockets', 'websocket', 'ws'] },
+      'node.js': { value: 'Node.js', confidence: 0.9, aliases: ['node.js', 'nodejs', 'node'] },
+      'vue': { value: 'Vue.js', confidence: 0.85, aliases: ['vue', 'vuejs', 'vue.js'] }
+    }
+    
+    Object.entries(technologyMap).forEach(([key, tech]) => {
+      const found = tech.aliases.some(alias => {
+        const regex = new RegExp(`\\b${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+        return regex.test(text)
+      })
+      if (found) {
+        entities.push({ type: 'technology', value: tech.value, confidence: tech.confidence })
       }
     })
     
-    // Extract projects
-    if (lower.includes('aurex')) {
-      entities.push({ type: 'project', value: 'Aurex', confidence: 0.95 })
+    // Enhanced project extraction
+    const projectMap: Record<string, { value: string; confidence: number }> = {
+      'aurex': { value: 'Aurex', confidence: 0.95 },
+      'portfolio': { value: 'Portfolio', confidence: 0.7 }
     }
     
-    // Extract skills
-    const skills = ['frontend', 'backend', 'fullstack', 'ui/ux', 'design']
-    skills.forEach(skill => {
-      if (lower.includes(skill)) {
-        entities.push({ type: 'skill', value: skill, confidence: 0.85 })
+    Object.entries(projectMap).forEach(([key, project]) => {
+      if (lower.includes(key)) {
+        entities.push({ type: 'project', value: project.value, confidence: project.confidence })
       }
     })
     
-    // Extract company
-    if (lower.includes('beinex')) {
-      entities.push({ type: 'company', value: 'Beinex', confidence: 0.9 })
+    // Enhanced skill extraction
+    const skillMap: Record<string, { value: string; confidence: number }> = {
+      'frontend': { value: 'Frontend Development', confidence: 0.9 },
+      'front-end': { value: 'Frontend Development', confidence: 0.9 },
+      'backend': { value: 'Backend Development', confidence: 0.9 },
+      'back-end': { value: 'Backend Development', confidence: 0.9 },
+      'fullstack': { value: 'Full-stack Development', confidence: 0.9 },
+      'full-stack': { value: 'Full-stack Development', confidence: 0.9 },
+      'ui/ux': { value: 'UI/UX Design', confidence: 0.85 },
+      'ui': { value: 'UI Design', confidence: 0.8 },
+      'ux': { value: 'UX Design', confidence: 0.8 },
+      'design': { value: 'Design', confidence: 0.75 }
     }
     
-    return entities
+    Object.entries(skillMap).forEach(([key, skill]) => {
+      if (lower.includes(key)) {
+        entities.push({ type: 'skill', value: skill.value, confidence: skill.confidence })
+      }
+    })
+    
+    // Company extraction
+    const companyMap: Record<string, { value: string; confidence: number }> = {
+      'beinex': { value: 'Beinex', confidence: 0.95 }
+    }
+    
+    Object.entries(companyMap).forEach(([key, company]) => {
+      if (lower.includes(key)) {
+        entities.push({ type: 'company', value: company.value, confidence: company.confidence })
+      }
+    })
+    
+    // Date extraction
+    const datePatterns = [
+      /\b(\d{4})\b/g,
+      /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/gi
+    ]
+    
+    datePatterns.forEach(pattern => {
+      const matches = text.match(pattern)
+      if (matches) {
+        matches.forEach(match => {
+          entities.push({ type: 'date', value: match, confidence: 0.7 })
+        })
+      }
+    })
+    
+    // Person name extraction
+    if (lower.includes(portfolioData.profile.name.toLowerCase())) {
+      entities.push({ type: 'person', value: portfolioData.profile.name, confidence: 0.9 })
+    }
+    
+    // Remove duplicates and boost from context
+    const uniqueEntities = new Map<string, Entity>()
+    entities.forEach(entity => {
+      const key = `${entity.type}:${entity.value.toLowerCase()}`
+      if (!uniqueEntities.has(key) || uniqueEntities.get(key)!.confidence < entity.confidence) {
+        uniqueEntities.set(key, entity)
+      }
+    })
+    
+    // Boost confidence from context
+    if (context?.entities) {
+      uniqueEntities.forEach((entity) => {
+        const contextEntity = context.entities.find(e => 
+          e.type === entity.type && e.value.toLowerCase() === entity.value.toLowerCase()
+        )
+        if (contextEntity) {
+          entity.confidence = Math.min(entity.confidence + 0.1, 0.99)
+        }
+      })
+    }
+    
+    return Array.from(uniqueEntities.values())
   }, [])
 
-  // NLP: Sentiment Analysis
-  const analyzeSentiment = useCallback((text: string, intent: Intent): Sentiment => {
+  // NLP: Enhanced Sentiment Analysis with Intensity
+  const analyzeSentiment = useCallback((text: string, intent: Intent): SentimentResult => {
     const lower = text.toLowerCase()
     
-    if (intent === Intent.RECRUITER) return Sentiment.PROFESSIONAL
+    if (intent === Intent.RECRUITER) {
+      return { sentiment: Sentiment.PROFESSIONAL, intensity: 0.8, emotions: ['professional', 'formal'] }
+    }
     
-    const positiveWords = ['great', 'excellent', 'amazing', 'impressive', 'wonderful', 'love', 'fantastic']
-    const negativeWords = ['bad', 'terrible', 'awful', 'hate', 'disappointed']
+    // Enhanced positive words with intensity
+    const positiveWords: Record<string, number> = {
+      'excellent': 0.9, 'amazing': 0.9, 'fantastic': 0.85, 'wonderful': 0.8,
+      'great': 0.75, 'impressive': 0.8, 'love': 0.85, 'awesome': 0.8,
+      'brilliant': 0.9, 'outstanding': 0.85, 'perfect': 0.9, 'superb': 0.85,
+      'incredible': 0.85, 'remarkable': 0.8, 'exceptional': 0.85
+    }
     
-    const hasPositive = positiveWords.some(word => lower.includes(word))
-    const hasNegative = negativeWords.some(word => lower.includes(word))
+    // Enhanced negative words with intensity
+    const negativeWords: Record<string, number> = {
+      'terrible': 0.9, 'awful': 0.85, 'hate': 0.9, 'disappointed': 0.75,
+      'bad': 0.7, 'poor': 0.7, 'worst': 0.85, 'horrible': 0.85,
+      'frustrated': 0.75, 'annoyed': 0.7
+    }
     
-    if (hasPositive) return Sentiment.POSITIVE
-    if (hasNegative) return Sentiment.NEGATIVE
-    return Sentiment.NEUTRAL
+    // Emotion detection
+    const emotions: string[] = []
+    const emotionMap: Record<string, string[]> = {
+      'excited': ['excited', 'enthusiastic', 'eager'],
+      'curious': ['curious', 'interested', 'wondering'],
+      'professional': ['professional', 'formal', 'business'],
+      'friendly': ['friendly', 'casual', 'informal'],
+      'concerned': ['concerned', 'worried', 'anxious']
+    }
+    
+    Object.entries(emotionMap).forEach(([emotion, keywords]) => {
+      if (keywords.some(kw => lower.includes(kw))) {
+        emotions.push(emotion)
+      }
+    })
+    
+    // Calculate sentiment and intensity
+    let positiveScore = 0
+    let negativeScore = 0
+    let maxPositiveIntensity = 0
+    let maxNegativeIntensity = 0
+    
+    Object.entries(positiveWords).forEach(([word, intensity]) => {
+      if (lower.includes(word)) {
+        positiveScore += intensity
+        maxPositiveIntensity = Math.max(maxPositiveIntensity, intensity)
+        if (!emotions.includes('excited')) emotions.push('excited')
+      }
+    })
+    
+    Object.entries(negativeWords).forEach(([word, intensity]) => {
+      if (lower.includes(word)) {
+        negativeScore += intensity
+        maxNegativeIntensity = Math.max(maxNegativeIntensity, intensity)
+        if (!emotions.includes('concerned')) emotions.push('concerned')
+      }
+    })
+    
+    // Determine sentiment
+    let sentiment: Sentiment
+    let intensity: number
+    
+    if (positiveScore > negativeScore && positiveScore > 0) {
+      sentiment = Sentiment.POSITIVE
+      intensity = Math.min(maxPositiveIntensity + (positiveScore / 10), 1.0)
+    } else if (negativeScore > positiveScore && negativeScore > 0) {
+      sentiment = Sentiment.NEGATIVE
+      intensity = Math.min(maxNegativeIntensity + (negativeScore / 10), 1.0)
+    } else {
+      sentiment = Sentiment.NEUTRAL
+      intensity = 0.5
+    }
+    
+    // Punctuation affects intensity
+    const exclamationCount = (text.match(/!/g) || []).length
+    if (exclamationCount > 0 && sentiment === Sentiment.POSITIVE) {
+      intensity = Math.min(intensity + (exclamationCount * 0.1), 1.0)
+    }
+    
+    if (emotions.length === 0) {
+      emotions.push('neutral')
+    }
+    
+    return { sentiment, intensity, emotions }
   }, [])
 
   // NLG: Visitor Profile Detection
@@ -260,7 +560,7 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
     return baseContent
   }, [])
 
-  // NLG: Generate Response
+  // NLG: Enhanced Response Generation with Context Awareness
   const generateResponse = useCallback((userInput: string, state: DialogueState): {
     content: string
     suggestions?: string[]
@@ -270,9 +570,11 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
     intent: Intent
     sentiment: Sentiment
   } => {
-    const intent = recognizeIntent(userInput)
-    const entities = extractEntities(userInput)
-    const sentiment = analyzeSentiment(userInput, intent)
+    const intentResult = recognizeIntent(userInput, state)
+    const intent = intentResult.intent
+    const entities = extractEntities(userInput, state)
+    const sentimentResult = analyzeSentiment(userInput, intent)
+    const sentiment = sentimentResult.sentiment
     const profile = detectVisitorProfile(userInput, intent)
     
     // Update dialogue state
@@ -379,8 +681,22 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
         quickActions = getContactQuickActions()
     }
 
-    // Apply tone customization
+    // Apply tone customization with enhanced NLG
     content = customizeTone(content, profile, sentiment)
+    
+    // Enhance response based on sentiment intensity and emotions
+    if (sentimentResult.intensity > 0.7 && sentimentResult.emotions) {
+      if (sentiment === Sentiment.POSITIVE && sentimentResult.emotions.includes('excited')) {
+        content = content.replace(/^/, 'Great question! ')
+      }
+    }
+    
+    // Add confidence indicator for low-confidence intents (subtle, doesn't change UI structure)
+    if (intentResult.confidence < 0.6 && intent !== Intent.UNKNOWN) {
+      // Only add subtle hint, don't change UI
+      const confidenceHint = `\n\n*Note: I'm interpreting this as a question about ${intent}.*`
+      content = content + confidenceHint
+    }
 
     return { content, suggestions, quickActions, navigateTo, intent, sentiment }
   }, [recognizeIntent, extractEntities, analyzeSentiment, detectVisitorProfile, customizeTone])
@@ -499,6 +815,14 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
     return descriptions[skill] || 'Proficient'
   }
 
+  // Direct navigation handler (defined early for use in quick actions)
+  const handleDirectNavigation = (menuId: string, label: string) => {
+    setActiveMenuItem(menuId)
+    setNavigationNotification(null)
+    // Close assistant after a brief delay for smooth transition
+    setTimeout(() => onClose(), 300)
+  }
+
   const getContactQuickActions = (): QuickAction[] => [
     {
       id: 'resume',
@@ -556,7 +880,7 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
       label: 'Contact',
       icon: <Mail size={16} />,
       type: 'contact',
-      action: () => setPendingNavigation({ menuId: 'contact', label: 'Contact' })
+      action: () => handleDirectNavigation('contact', 'Contact')
     }
   ]
 
@@ -567,7 +891,7 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
       label: 'View Project Details',
       icon: <Briefcase size={16} />,
       type: 'navigate',
-      action: () => setPendingNavigation({ menuId: 'project', label: 'Projects' })
+      action: () => handleDirectNavigation('project', 'Projects')
     }
   ]
 
@@ -656,18 +980,12 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
 
       if (response.navigateTo) {
         const menuLabel = menuItemLabels[response.navigateTo] || response.navigateTo
-        setPendingNavigation({ menuId: response.navigateTo, label: menuLabel })
+        // Show subtle notification instead of blocking dialog
+        setNavigationNotification({ menuId: response.navigateTo, label: menuLabel })
+        // Auto-hide notification after 3 seconds
+        setTimeout(() => setNavigationNotification(null), 3000)
       }
     }, 800)
-  }
-
-  const handleNavigationConfirm = (confirmed: boolean) => {
-    if (confirmed && pendingNavigation) {
-      setActiveMenuItem(pendingNavigation.menuId)
-      addMessage('assistant', `Redirecting to ${pendingNavigation.label}...`)
-      setTimeout(() => onClose(), 500)
-    }
-    setPendingNavigation(null)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -676,7 +994,7 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
       handleSend()
     }
     if (e.key === 'Escape') {
-      if (pendingNavigation) setPendingNavigation(null)
+      if (navigationNotification) setNavigationNotification(null)
       else onClose()
     }
   }
@@ -900,42 +1218,38 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Navigation Confirmation */}
+        {/* Subtle Navigation Notification */}
         <AnimatePresence>
-          {pendingNavigation && (
+          {navigationNotification && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[101]"
-              onClick={() => setPendingNavigation(null)}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              className="absolute bottom-16 left-3 right-3 z-[101]"
             >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl"
-              >
-                <h3 className="text-sm font-semibold text-vscode-text mb-4">Navigate to {pendingNavigation.label}?</h3>
-                <p className="text-sm text-vscode-text-secondary mb-6">
-                  This will close the AI Assistant panel.
-                </p>
-                <div className="flex gap-3">
+              <div className="bg-vscode-active border border-vscode-border rounded-md px-2.5 py-1.5 shadow-lg flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <ChevronRight size={11} className="text-vscode-text-secondary flex-shrink-0" />
+                  <span className="text-[11px] text-vscode-text-secondary truncate">
+                    Navigate to <span className="text-vscode-text font-medium">{navigationNotification.label}</span>?
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <button
-                    onClick={() => handleNavigationConfirm(true)}
-                    className="flex-1 px-4 py-2 bg-vscode-blue hover:bg-blue-600 text-white rounded text-sm"
+                    onClick={() => handleDirectNavigation(navigationNotification.menuId, navigationNotification.label)}
+                    className="px-2 py-0.5 bg-vscode-blue hover:bg-blue-600 text-white rounded text-[10px] font-medium transition-colors"
                   >
-                    Yes, Navigate
+                    Go
                   </button>
                   <button
-                    onClick={() => handleNavigationConfirm(false)}
-                    className="flex-1 px-4 py-2 bg-vscode-active hover:bg-vscode-hover text-vscode-text rounded text-sm"
+                    onClick={() => setNavigationNotification(null)}
+                    className="p-0.5 hover:bg-vscode-hover rounded text-vscode-text-secondary hover:text-vscode-text transition-colors"
+                    aria-label="Dismiss"
                   >
-                    Cancel
+                    <X size={11} />
                   </button>
                 </div>
-              </motion.div>
+                </div>
             </motion.div>
           )}
         </AnimatePresence>
