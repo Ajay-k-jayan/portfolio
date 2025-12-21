@@ -15,12 +15,10 @@ import {
   Search,
   X,
   Layout,
-  LayoutGrid,
-  LayoutList
+  LayoutGrid
 } from 'lucide-react'
 import { portfolioData } from '@/lib/portfolio-data'
 import { Tooltip } from '../ui/tooltip'
-import { ViewSwitcher } from '../ui/view-switcher'
 
 interface TimelineEvent {
   id: string
@@ -40,13 +38,13 @@ interface TimelineEvent {
   achievements?: string[]
 }
 
-type TimelineViewMode = 'grid' | 'list'
+type TimelineView = 'vertical' | 'horizontal'
 
 export function PortfolioTimeline() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<string>('all')
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set())
-  const [viewMode, setViewMode] = useState<TimelineViewMode>('list')
+  const [view, setView] = useState<TimelineView>('horizontal')
 
   // Build timeline from portfolio data
   const timelineEvents = useMemo(() => {
@@ -275,11 +273,56 @@ export function PortfolioTimeline() {
               </p>
             </div>
             <div className="flex items-center gap-1 ml-4">
-              <ViewSwitcher
-                viewMode={viewMode}
-                onViewChange={(mode) => setViewMode(mode as TimelineViewMode)}
-                options="grid-list"
-              />
+              {/* Horizontal/Vertical View Toggle - Sliding Indicator Design */}
+              <div className="relative flex items-center bg-vscode-sidebar rounded-md p-0.5 border border-vscode-border">
+                {/* Sliding background indicator */}
+                <motion.div
+                  className="absolute bg-vscode-blue rounded"
+                  style={{
+                    height: 'calc(100% - 4px)',
+                    width: 'calc(50% - 2px)',
+                  }}
+                  animate={{
+                    x: view === 'horizontal' ? '0%' : '100%',
+                  }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 30,
+                  }}
+                />
+                
+                <Tooltip content="Horizontal View" position="bottom">
+                  <motion.button
+                    onClick={() => setView('horizontal')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative flex items-center justify-center flex-1 p-1.5 rounded transition-colors duration-200 z-10 min-w-0"
+                  >
+                    <LayoutGrid 
+                      size={16} 
+                      className={`transition-colors duration-200 flex-shrink-0 ${
+                        view === 'horizontal' ? 'text-white' : 'text-vscode-text-secondary'
+                      }`}
+                    />
+                  </motion.button>
+                </Tooltip>
+                <Tooltip content="Vertical View" position="bottom">
+                  <motion.button
+                    onClick={() => setView('vertical')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative flex items-center justify-center flex-1 p-1.5 rounded transition-colors duration-200 z-10 min-w-0"
+                  >
+                    <Layout 
+                      size={16} 
+                      className={`transition-colors duration-200 flex-shrink-0 ${
+                        view === 'vertical' ? 'text-white' : 'text-vscode-text-secondary'
+                      }`}
+                    />
+                  </motion.button>
+                </Tooltip>
+              </div>
             </div>
           </div>
         </div>
@@ -340,115 +383,89 @@ export function PortfolioTimeline() {
               {searchQuery ? 'No events found matching your search.' : 'No events to display.'}
             </p>
           </div>
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedEvents.map((event, idx) => {
-              const Icon = event.icon
-              const isExpanded = expandedEvents.has(event.id)
+        ) : view === 'horizontal' ? (
+          <div className="relative h-[600px] overflow-x-auto overflow-y-visible">
+            <div className="relative h-full" style={{ minWidth: `${sortedEvents.length * 300}px`, paddingLeft: '140px', paddingRight: '140px' }}>
+              {/* Horizontal Timeline Line */}
+              <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-vscode-blue via-vscode-blue/50 to-vscode-blue transform -translate-y-1/2" style={{
+                boxShadow: '0 0 10px rgba(0, 122, 204, 0.5)',
+              }} />
 
-              return (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className={`bg-vscode-sidebar border ${event.borderColor} rounded-lg p-5 hover:shadow-lg transition-all cursor-pointer relative ${
-                    isExpanded ? 'border-vscode-blue/50 shadow-xl' : ''
-                  }`}
-                  onClick={() => {
-                    if (event.description || event.achievements || event.technologies) {
-                      toggleExpand(event.id)
-                    }
-                  }}
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className={`w-12 h-12 rounded-full ${event.bgColor} border-2 ${event.borderColor} flex items-center justify-center shadow-lg flex-shrink-0`}>
-                      <Icon size={20} className={event.iconColor} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-vscode-text mb-1 truncate">
-                        {event.title}
-                      </h3>
-                      <p className="text-xs text-vscode-text-secondary line-clamp-2">
-                        {event.subtitle}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-vscode-text-secondary flex-wrap mb-3">
-                    <div className="flex items-center gap-1">
-                      <Calendar size={12} />
-                      <span>
-                        {event.date}
-                        {event.endDate && ` - ${event.endDate}`}
-                      </span>
-                    </div>
-                    {event.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin size={12} />
-                        <span className="truncate">{event.location}</span>
-                      </div>
-                    )}
-                    {event.endDate === 'Present' && (
-                      <div className="flex items-center gap-1 text-green-400">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                        <span>Ongoing</span>
-                      </div>
-                    )}
-                  </div>
+              {/* Events */}
+              <div className="relative h-full flex items-center">
+                {sortedEvents.map((event, idx) => {
+                  const Icon = event.icon
+                  const isExpanded = expandedEvents.has(event.id)
+                  const totalWidth = sortedEvents.length * 300
+                  const availableWidth = totalWidth - 280 // Subtract card width (140px on each side)
+                  const left = sortedEvents.length === 1 
+                    ? '50%' 
+                    : `${140 + (idx / (sortedEvents.length - 1)) * availableWidth}px`
 
-                  {/* Expanded Content */}
-                  <AnimatePresence>
-                    {isExpanded && (
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="absolute transform -translate-x-1/2"
+                      style={{ left }}
+                    >
+                      {/* Timeline Dot */}
                       <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="mt-3 pt-3 border-t border-vscode-border space-y-3"
+                        whileHover={{ scale: 1.2 }}
+                        className={`w-12 h-12 rounded-full ${event.bgColor} border-2 ${event.borderColor} flex items-center justify-center shadow-lg cursor-pointer mx-auto mb-4`}
+                        onClick={() => {
+                          if (event.description || event.achievements || event.technologies) {
+                            toggleExpand(event.id)
+                          }
+                        }}
                       >
-                        {event.description && (
-                          <p className="text-sm text-vscode-text-secondary leading-relaxed">
-                            {event.description}
-                          </p>
-                        )}
-                        {event.achievements && event.achievements.length > 0 && (
+                        <Icon size={20} className={event.iconColor} />
+                      </motion.div>
+
+                      {/* Event Card - Positioned above or below */}
+                      <div className={`absolute ${idx % 2 === 0 ? 'bottom-full mb-4' : 'top-full mt-4'}`} style={{ width: '280px', left: '50%', transform: 'translateX(-50%)' }}>
+                        <div 
+                          className={`bg-vscode-sidebar border ${event.borderColor} rounded-lg p-4 hover:shadow-lg transition-all cursor-pointer relative ${
+                            isExpanded ? 'border-vscode-blue/50 shadow-xl' : ''
+                          }`}
+                          onClick={() => {
+                            if (event.description || event.achievements || event.technologies) {
+                              toggleExpand(event.id)
+                            }
+                          }}
+                        >
                           <div>
-                            <h4 className="text-xs font-semibold text-vscode-text-secondary mb-2 uppercase tracking-wide">
-                              Key Achievements
-                            </h4>
-                            <ul className="space-y-1.5">
-                              {event.achievements.map((achievement, aIdx) => (
-                                <li key={aIdx} className="text-sm text-vscode-text-secondary flex items-start gap-2">
-                                  <span className="text-vscode-blue mt-1">•</span>
-                                  <span>{achievement}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {event.technologies && event.technologies.length > 0 && (
-                          <div>
-                            <h4 className="text-xs font-semibold text-vscode-text-secondary mb-2 uppercase tracking-wide">
-                              Technologies
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                              {event.technologies.map((tech, tIdx) => (
-                                <span
-                                  key={tIdx}
-                                  className="px-2.5 py-1 bg-vscode-active border border-vscode-border rounded text-xs text-vscode-text-secondary"
-                                >
-                                  {tech}
+                            <h3 className="text-base font-semibold mb-1 text-vscode-text">
+                              {event.title}
+                            </h3>
+                            <p className="text-xs text-vscode-text-secondary mb-2">
+                              {event.subtitle}
+                            </p>
+                            <div className="flex items-center gap-2 text-xs text-vscode-text-secondary flex-wrap">
+                              <div className="flex items-center gap-1">
+                                <Calendar size={10} />
+                                <span>
+                                  {event.date}
+                                  {event.endDate && ` - ${event.endDate}`}
                                 </span>
-                              ))}
+                              </div>
+                              {event.endDate === 'Present' && (
+                                <div className="flex items-center gap-1 text-green-400">
+                                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+                                  <span>Ongoing</span>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              )
-            })}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="relative">

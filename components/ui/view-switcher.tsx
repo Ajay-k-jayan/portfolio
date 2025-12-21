@@ -2,6 +2,7 @@
 
 import { LayoutGrid, LayoutList, Network } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { Tooltip } from './tooltip'
 
 type ViewMode = 'grid' | 'list' | 'network'
 type ViewOptions = 'grid-list' | 'grid-list-network'
@@ -23,24 +24,47 @@ export function ViewSwitcher({ viewMode, onViewChange, options = 'grid-list', cl
     views.push({ mode: 'network', icon: Network, label: 'Network View' })
   }
 
+  const activeIndex = views.findIndex(v => v.mode === viewMode)
+
   return (
-    <div className={`flex items-center gap-1 bg-vscode-sidebar border border-vscode-border rounded-lg p-1 ${className}`}>
-      {views.map(({ mode, icon: Icon, label }) => (
-        <motion.button
-          key={mode}
-          onClick={() => onViewChange(mode)}
-          className={`relative flex items-center justify-center w-8 h-8 rounded transition-all duration-200 ${
-            viewMode === mode
-              ? 'bg-vscode-blue text-white'
-              : 'bg-vscode-sidebar text-vscode-text-secondary hover:text-vscode-text hover:bg-vscode-hover'
-          }`}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          title={label}
-        >
-          <Icon size={16} />
-        </motion.button>
-      ))}
+    <div className={`relative flex items-center bg-vscode-sidebar rounded-md p-0.5 border border-vscode-border ${className}`}>
+      {/* Sliding background indicator */}
+      <motion.div
+        className="absolute bg-vscode-blue rounded"
+        style={{
+          height: 'calc(100% - 4px)',
+          width: `calc(${100 / views.length}% - 2px)`,
+        }}
+        animate={{
+          x: `${activeIndex * 100}%`,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 30,
+        }}
+      />
+      
+      {views.map(({ mode, icon: Icon, label }, index) => {
+        const isActive = viewMode === mode
+        return (
+          <Tooltip key={mode} content={label} position="bottom">
+            <motion.button
+              onClick={() => onViewChange(mode)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative flex items-center justify-center flex-1 p-1.5 rounded transition-colors duration-200 z-10 min-w-0"
+            >
+              <Icon 
+                size={16} 
+                className={`transition-colors duration-200 flex-shrink-0 ${
+                  isActive ? 'text-white' : 'text-vscode-text-secondary'
+                }`}
+              />
+            </motion.button>
+          </Tooltip>
+        )
+      })}
     </div>
   )
 }
