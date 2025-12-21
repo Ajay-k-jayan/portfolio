@@ -161,7 +161,7 @@ export function ProjectsTab() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary" size={16} />
             <input
               type="text"
-              placeholder="Search"
+              placeholder={t('search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-8 pl-10 pr-8 bg-vscode-sidebar border border-vscode-border rounded-sm text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:ring-1 focus:ring-vscode-blue"
@@ -182,10 +182,10 @@ export function ProjectsTab() {
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="h-8 px-3 bg-vscode-sidebar border border-vscode-border rounded-sm text-sm text-vscode-text focus:outline-none focus:ring-1 focus:ring-vscode-blue"
             >
-              <option value="period-desc">Period (Newest)</option>
-              <option value="period-asc">Period (Oldest)</option>
-              <option value="title-asc">Title (A-Z)</option>
-              <option value="title-desc">Title (Z-A)</option>
+              <option value="period-desc">{t('sortByPeriod')} ({t('newest')})</option>
+              <option value="period-asc">{t('sortByPeriod')} ({t('oldest')})</option>
+              <option value="title-asc">{t('sortByTitle')} (A-Z)</option>
+              <option value="title-desc">{t('sortByTitle')} (Z-A)</option>
             </select>
           </div>
         </div>
@@ -209,7 +209,7 @@ export function ProjectsTab() {
                   <FolderOpen className="text-vscode-text-secondary" size={40} />
                 </div>
                 <p className="text-vscode-text-secondary text-base">
-                  {searchQuery ? 'No projects found matching your search.' : 'No projects available.'}
+                  {searchQuery ? t('noProjectsFound') : t('noProjectsAvailable')}
                 </p>
               </motion.div>
             ) : viewMode === 'grid' ? (

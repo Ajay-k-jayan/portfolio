@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { portfolioData } from '@/lib/portfolio-data'
 import { Tooltip } from '../ui/tooltip'
+import { useLanguage } from '@/contexts/language-context'
 
 interface TimelineEvent {
   id: string
@@ -41,6 +42,7 @@ interface TimelineEvent {
 type TimelineView = 'vertical' | 'horizontal'
 
 export function PortfolioTimeline() {
+  const { t } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<string>('all')
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set())
@@ -213,12 +215,12 @@ export function PortfolioTimeline() {
 
   const getTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      'all': 'All Events',
-      'education': 'Education',
-      'experience': 'Experience',
-      'project': 'Projects',
-      'achievement': 'Achievements',
-      'certification': 'Certifications'
+      'all': t('allEvents'),
+      'education': t('education'),
+      'experience': t('experience'),
+      'project': t('projects'),
+      'achievement': t('achievements'),
+      'certification': t('certifications')
     }
     return labels[type] || type
   }
@@ -245,7 +247,7 @@ export function PortfolioTimeline() {
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
                   <Calendar className="text-vscode-blue" size={20} />
-                  Timeline
+                  {t('timeline')}
                 </h1>
                 <div className="relative">
                   <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">
@@ -269,7 +271,7 @@ export function PortfolioTimeline() {
                 </div>
               </div>
               <p className="text-sm text-vscode-text-secondary">
-                Visual timeline of career journey, projects, and achievements
+                {t('timelineDescription')}
               </p>
             </div>
             <div className="flex items-center gap-1 ml-4">
@@ -292,7 +294,7 @@ export function PortfolioTimeline() {
                   }}
                 />
                 
-                <Tooltip content="Horizontal View" position="bottom">
+                <Tooltip content={t('horizontalView')} position="bottom">
                   <motion.button
                     onClick={() => setView('horizontal')}
                     whileHover={{ scale: 1.05 }}
@@ -307,7 +309,7 @@ export function PortfolioTimeline() {
                     />
                   </motion.button>
                 </Tooltip>
-                <Tooltip content="Vertical View" position="bottom">
+                <Tooltip content={t('verticalView')} position="bottom">
                   <motion.button
                     onClick={() => setView('vertical')}
                     whileHover={{ scale: 1.05 }}
@@ -339,7 +341,7 @@ export function PortfolioTimeline() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search timeline..."
+                placeholder={t('searchTimeline')}
                 className="w-full pl-10 pr-8 h-full bg-transparent border-0 outline-none text-sm font-normal text-vscode-text placeholder:text-vscode-text-secondary focus:outline-none focus:ring-0"
               />
               {searchQuery && (
@@ -380,7 +382,7 @@ export function PortfolioTimeline() {
           <div className="text-center py-16">
             <Calendar className="text-vscode-text-secondary mx-auto mb-4" size={48} />
             <p className="text-vscode-text-secondary">
-              {searchQuery ? 'No events found matching your search.' : 'No events to display.'}
+              {searchQuery ? t('noEventsFound') : t('noEventsToDisplay')}
             </p>
           </div>
         ) : view === 'horizontal' ? (
@@ -454,7 +456,7 @@ export function PortfolioTimeline() {
                               {event.endDate === 'Present' && (
                                 <div className="flex items-center gap-1 text-green-400">
                                   <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
-                                  <span>Ongoing</span>
+                                  <span>{t('ongoing')}</span>
                                 </div>
                               )}
                             </div>
@@ -486,7 +488,7 @@ export function PortfolioTimeline() {
                       <div className="flex-1 h-0.5 bg-vscode-border" />
                     </div>
                     <span className="text-xs text-vscode-text-secondary">
-                      {events.length} {events.length === 1 ? 'event' : 'events'}
+                      {events.length} {events.length === 1 ? t('event') : t('events')}
                     </span>
                   </div>
 
@@ -562,7 +564,7 @@ export function PortfolioTimeline() {
                                   {event.endDate === 'Present' && (
                                     <div className="flex items-center gap-1 text-green-400">
                                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                      <span>Ongoing</span>
+                                      <span>{t('ongoing')}</span>
                                     </div>
                                   )}
                                 </div>
@@ -585,7 +587,7 @@ export function PortfolioTimeline() {
                                       {event.achievements && event.achievements.length > 0 && (
                                         <div>
                                           <h4 className="text-xs font-semibold text-vscode-text-secondary mb-2 uppercase tracking-wide">
-                                            Key Achievements
+                                            {t('keyAchievements')}
                                           </h4>
                                           <ul className="space-y-1.5">
                                             {event.achievements.map((achievement, aIdx) => (
@@ -600,7 +602,7 @@ export function PortfolioTimeline() {
                                       {event.technologies && event.technologies.length > 0 && (
                                         <div>
                                           <h4 className="text-xs font-semibold text-vscode-text-secondary mb-2 uppercase tracking-wide">
-                                            Technologies
+                                            {t('technologies')}
                                           </h4>
                                           <div className="flex flex-wrap gap-2">
                                             {event.technologies.map((tech, tIdx) => (
@@ -637,11 +639,11 @@ export function PortfolioTimeline() {
           className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4"
         >
           {[
-            { label: 'Total Events', value: timelineEvents.length, icon: Calendar, color: 'text-vscode-blue' },
-            { label: 'Experience', value: timelineEvents.filter(e => e.type === 'experience').length, icon: Briefcase, color: 'text-green-400' },
-            { label: 'Projects', value: timelineEvents.filter(e => e.type === 'project').length, icon: FolderOpen, color: 'text-purple-400' },
-            { label: 'Achievements', value: timelineEvents.filter(e => e.type === 'achievement').length, icon: Trophy, color: 'text-orange-400' },
-            { label: 'Certifications', value: timelineEvents.filter(e => e.type === 'certification').length, icon: Award, color: 'text-yellow-400' }
+            { label: t('totalEvents'), value: timelineEvents.length, icon: Calendar, color: 'text-vscode-blue' },
+            { label: t('experience'), value: timelineEvents.filter(e => e.type === 'experience').length, icon: Briefcase, color: 'text-green-400' },
+            { label: t('projects'), value: timelineEvents.filter(e => e.type === 'project').length, icon: FolderOpen, color: 'text-purple-400' },
+            { label: t('achievements'), value: timelineEvents.filter(e => e.type === 'achievement').length, icon: Trophy, color: 'text-orange-400' },
+            { label: t('certifications'), value: timelineEvents.filter(e => e.type === 'certification').length, icon: Award, color: 'text-yellow-400' }
           ].map((stat, idx) => {
             const Icon = stat.icon
             return (

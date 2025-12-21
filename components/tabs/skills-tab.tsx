@@ -7,6 +7,7 @@ import { skillWebsites } from '@/lib/skill-websites'
 import { Tooltip } from '@/components/ui/tooltip'
 import { SkillsNetworkChart } from '@/components/skills-network-chart'
 import { ViewSwitcher } from '@/components/ui/view-switcher'
+import { useLanguage } from '@/contexts/language-context'
 
 interface Skill {
   id: string
@@ -37,6 +38,7 @@ type LevelFilter = 'all' | 'expert' | 'advanced' | 'intermediate' | 'beginner'
 type ViewMode = 'grid' | 'list' | 'network'
 
 export function SkillsTab() {
+  const { t } = useLanguage()
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     primary: true,
     additional: true,
@@ -503,7 +505,7 @@ export function SkillsTab() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search"
+                placeholder={t('searchSkills')}
                 className="w-full pl-10 pr-8 h-full bg-transparent border-0 outline-none text-sm font-normal text-vscode-text placeholder:text-vscode-text-secondary focus:outline-none focus:ring-0"
               />
               {searchQuery && (

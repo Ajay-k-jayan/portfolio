@@ -3,6 +3,7 @@
 import { LayoutGrid, LayoutList, Network } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Tooltip } from './tooltip'
+import { useLanguage } from '@/contexts/language-context'
 
 type ViewMode = 'grid' | 'list' | 'network'
 type ViewOptions = 'grid-list' | 'grid-list-network'
@@ -15,13 +16,15 @@ interface ViewSwitcherProps {
 }
 
 export function ViewSwitcher({ viewMode, onViewChange, options = 'grid-list', className = '' }: ViewSwitcherProps) {
+  const { t } = useLanguage()
+  
   const views: { mode: ViewMode; icon: typeof LayoutGrid; label: string }[] = [
-    { mode: 'grid', icon: LayoutGrid, label: 'Grid View' },
-    { mode: 'list', icon: LayoutList, label: 'List View' },
+    { mode: 'grid', icon: LayoutGrid, label: t('gridView') },
+    { mode: 'list', icon: LayoutList, label: t('listView') },
   ]
 
   if (options === 'grid-list-network') {
-    views.push({ mode: 'network', icon: Network, label: 'Network View' })
+    views.push({ mode: 'network', icon: Network, label: t('networkView') })
   }
 
   const activeIndex = views.findIndex(v => v.mode === viewMode)

@@ -270,81 +270,81 @@ interface SettingsCategory {
 const settingsCategories: SettingsCategory[] = [
     {
       id: 'display',
-      label: 'Display',
+      label: t('display'),
       icon: Eye,
       iconColor: 'text-blue-400',
       settings: [
-        { key: 'compactView', label: 'Compact View', description: 'Use compact spacing' },
-        { key: 'showAnimations', label: 'Show Animations', description: 'Enable smooth transitions' },
-        { key: 'animationSpeed', label: 'Animation Speed', description: 'Control animation duration' },
+        { key: 'compactView', label: t('compactView'), description: t('useCompactSpacing') },
+        { key: 'showAnimations', label: t('showAnimations'), description: t('enableSmoothTransitions') },
+        { key: 'animationSpeed', label: t('animationSpeed'), description: t('controlAnimationDuration') },
       ]
     },
     {
       id: 'appearance',
-      label: 'Appearance',
+      label: t('appearance'),
       icon: Palette,
       iconColor: 'text-purple-400',
       settings: [
-        { key: 'theme', label: 'Theme', description: 'Choose color theme' },
-        { key: 'language', label: 'Language', description: 'Select interface language' },
-        { key: 'fontSize', label: 'Font Size', description: 'Adjust text size' },
-        { key: 'fontFamily', label: 'Font Family', description: 'Choose font style' },
+        { key: 'theme', label: t('theme'), description: t('chooseColorTheme') },
+        { key: 'language', label: t('language'), description: t('selectInterfaceLanguage') },
+        { key: 'fontSize', label: t('fontSize'), description: t('adjustTextSize') },
+        { key: 'fontFamily', label: t('fontFamily'), description: t('chooseFontStyle') },
       ]
     },
     {
       id: 'content',
-      label: 'Content',
+      label: t('content'),
       icon: FileText,
       iconColor: 'text-yellow-400',
       settings: [
-        { key: 'showStats', label: 'Show Statistics', description: 'Display stats on welcome page' },
-        { key: 'showSocialLinks', label: 'Show Social Links', description: 'Display social media links' },
-        { key: 'showGitHubStats', label: 'Show GitHub Stats', description: 'Display GitHub profile data' },
-        { key: 'showRecentItems', label: 'Show Recent Items', description: 'Display recently viewed items' },
+        { key: 'showStats', label: t('showStatistics'), description: t('displayStatsOnWelcomePage') },
+        { key: 'showSocialLinks', label: t('showSocialLinks'), description: t('showSocialMediaLinks') },
+        { key: 'showGitHubStats', label: t('showGitHubStats') || 'Show GitHub Stats', description: t('displayGitHubProfileData') },
+        { key: 'showRecentItems', label: t('showRecentItems'), description: t('displayRecentlyViewedItems') },
       ]
     },
     {
       id: 'notifications',
-      label: 'Notifications',
+      label: t('notifications'),
       icon: Bell,
       iconColor: 'text-orange-400',
       settings: [
-        { key: 'updateNotifications', label: 'Update Notifications', description: 'Notify about updates' },
+        { key: 'updateNotifications', label: t('updateNotifications') || 'Update Notifications', description: t('notifyAboutUpdates') },
       ]
     },
     {
       id: 'navigation',
-      label: 'Navigation',
+      label: t('navigation'),
       icon: Navigation,
       iconColor: 'text-pink-400',
       settings: [
-        { key: 'enableQuickNav', label: 'Enable Quick Navigation', description: 'Fast access to pages' },
-        { key: 'showRecentlyViewed', label: 'Show Recently Viewed', description: 'Display recent items in sidebar' },
+        { key: 'enableQuickNav', label: t('enableQuickNavigation') || 'Enable Quick Navigation', description: t('fastAccessToPages') },
+        { key: 'showRecentlyViewed', label: t('showRecentlyViewed') || 'Show Recently Viewed', description: t('displayRecentItemsInSidebar') },
       ]
     },
     {
       id: 'header',
-      label: 'Header',
+      label: t('header'),
       icon: Layout,
       iconColor: 'text-indigo-400',
       settings: [
-        { key: 'showThemeSwitcher', label: 'Theme Switcher', description: 'Show theme selector in header' },
-        { key: 'showLanguageSwitcher', label: 'Language Switcher', description: 'Show language selector in header' },
+        { key: 'showThemeSwitcher', label: t('themeSwitcher'), description: t('showThemeSelectorInHeader') },
+        { key: 'showLanguageSwitcher', label: t('languageSwitcher'), description: t('showLanguageSelectorInHeader') },
       ]
     },
     {
       id: 'statusbar',
-      label: 'Status Bar',
+      label: t('statusBar'),
       icon: Activity,
       iconColor: 'text-cyan-400',
       settings: [
-        { key: 'showDateTimeWidget', label: 'Date & Time', description: 'Show date and time in status bar' },
-        { key: 'showWeatherWidget', label: 'Weather', description: 'Show weather information' },
-        { key: 'showLocationWidget', label: 'Location', description: 'Show current location' },
-        { key: 'showNetworkStatusWidget', label: 'Network Status', description: 'Show network latency' },
-        { key: 'showSystemInfoWidget', label: 'System Info', description: 'Show CPU and memory usage' },
-        { key: 'showSocialLinksWidget', label: 'Social Links', description: 'Show social media links' },
-        { key: 'showResumeDownload', label: 'Resume Download', description: 'Show resume download button' },
+        { key: 'showDateTimeWidget', label: t('dateTime'), description: t('showDateAndTimeInStatusBar') },
+        { key: 'showWeatherWidget', label: t('weather'), description: t('showWeatherInformation') },
+        { key: 'showLocationWidget', label: t('location'), description: t('showCurrentLocation') },
+        { key: 'showNetworkStatusWidget', label: t('networkStatus'), description: t('showNetworkLatency') },
+        { key: 'showSystemInfoWidget', label: t('systemInfo'), description: t('showCpuAndMemoryUsage') },
+        { key: 'showSocialLinksWidget', label: t('showSocialLinks'), description: t('showSocialMediaLinks') },
+        { key: 'showResumeDownload', label: t('showResumeDownload'), description: t('showResumeDownloadButton') },
       ]
     },
 ]
@@ -609,7 +609,7 @@ export function SettingsView() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-vscode-text-secondary" size={18} />
             <input
               type="text"
-              placeholder="Search settings..."
+              placeholder={t('searchSettings')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-11 pl-10 pr-10 bg-vscode-sidebar border border-vscode-border rounded-lg text-sm text-vscode-text placeholder-vscode-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:border-vscode-blue transition-all"

@@ -14,24 +14,26 @@ import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
 import { portfolioData } from '@/lib/portfolio-data'
 import { ProfileAvatar } from '@/components/profile-avatar'
 import { Building2, TrendingUp, MapPin, Command } from 'lucide-react'
-
-const menuItemLabels: Record<string, string> = {
-  'project': 'Projects',
-  'skills': 'Skills',
-  'experience': 'Experience',
-  'achievement': 'Achievements',
-  'certifications': 'Certifications',
-  'contact': 'Contact',
-  'blogs': 'Blogs',
-  'recommendation': 'Recommendations',
-  'settings': 'Settings',
-  'welcome': 'Welcome',
-}
+import { useLanguage } from '@/contexts/language-context'
 
 export function WelcomeTab() {
+  const { t } = useLanguage()
   const { setActiveMenuItem, recentlySelected, portfolioSettings, addNotification } = useAppStore()
   const { currentTheme } = useEnhancedTheme()
   const [mounted, setMounted] = useState(false)
+  
+  const menuItemLabels: Record<string, string> = {
+    'project': t('projects'),
+    'skills': t('skills'),
+    'experience': t('experience'),
+    'achievement': t('achievements'),
+    'certifications': t('certifications'),
+    'contact': t('contact'),
+    'blogs': t('blogs'),
+    'recommendation': t('recommendations'),
+    'settings': t('settings'),
+    'welcome': t('welcome'),
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -41,12 +43,12 @@ export function WelcomeTab() {
   const startActions = [
     { 
       id: 'new-project',
-      label: 'New Project...',
+      label: t('newProject'),
       icon: FilePlus,
       action: () => {
         addNotification({
-          title: 'New Project',
-          message: 'Open Projects tab to view portfolio projects',
+          title: t('newProject'),
+          message: t('openProjectsTab'),
           type: 'info'
         })
         setActiveMenuItem('project')
@@ -54,32 +56,32 @@ export function WelcomeTab() {
     },
     { 
       id: 'open-project',
-      label: 'Open Project...',
+      label: t('openProject'),
       icon: FolderOpenIcon,
       action: () => setActiveMenuItem('project'),
     },
     { 
       id: 'clone-git',
-      label: 'Clone from Git...',
+      label: t('cloneFromGit'),
       icon: GitBranch,
       action: () => {
         window.open(portfolioData.profile.portfolioRepo, '_blank')
         addNotification({
-          title: 'Repository Opened',
-          message: 'Portfolio repository opened in new tab',
+          title: t('repositoryOpened'),
+          message: t('portfolioRepositoryOpened'),
           type: 'info'
         })
       },
     },
     { 
       id: 'contact-me',
-      label: 'Contact Me...',
+      label: t('contactMe'),
       icon: MessageSquare,
       action: () => setActiveMenuItem('contact'),
     },
     { 
       id: 'ai-assistant',
-      label: 'Generate Agent Instructions...',
+      label: t('generateAgentInstructions'),
       icon: Sparkles,
       action: () => {
         // Open chatbot via global function
@@ -92,8 +94,8 @@ export function WelcomeTab() {
           window.dispatchEvent(event)
         }
         addNotification({
-          title: 'AI Assistant',
-          message: 'Opening AI Chatbot',
+          title: t('aiAssistant') || 'AI Assistant',
+          message: t('openingAIChatbot'),
           type: 'info'
         })
       },
@@ -163,24 +165,24 @@ export function WelcomeTab() {
   const walkthroughs = [
     {
       id: 'get-started',
-      title: 'Get started with Portfolio',
-      description: 'Explore my skills, projects, and experience. Learn about my journey as a software engineer.',
+      title: t('getStartedWithPortfolio'),
+      description: t('exploreSkillsProjects'),
       icon: Star,
       highlighted: true,
       action: () => setActiveMenuItem('skills')
     },
     {
       id: 'fundamentals',
-      title: 'Learn the Fundamentals',
-      description: 'Discover my core technologies: Angular, React, TypeScript, and modern web development.',
+      title: t('learnTheFundamentals'),
+      description: t('discoverCoreTechnologies'),
       icon: Lightbulb,
       highlighted: false,
       action: () => setActiveMenuItem('skills')
     },
     {
       id: 'resume',
-      title: 'View Resume',
-      description: 'Download my resume and learn about my professional background and achievements.',
+      title: t('viewResume'),
+      description: t('downloadResumeLearn'),
       icon: FileText,
       highlighted: false,
       updated: true,
@@ -190,16 +192,16 @@ export function WelcomeTab() {
       link.download = 'Ajay_K_J_Resume.pdf'
       link.click()
     addNotification({
-          title: 'Resume Download',
-          message: 'Resume download started',
+          title: t('resume'),
+          message: t('resumeDownloadStarted'),
           type: 'info'
         })
       }
     },
     {
       id: 'linkedin',
-      title: 'Connect on LinkedIn',
-      description: 'View my professional profile, recommendations, and connect with me on LinkedIn.',
+      title: t('connectOnLinkedIn'),
+      description: t('viewProfessionalProfile'),
       icon: Linkedin,
       highlighted: false,
       updated: true,
@@ -207,7 +209,7 @@ export function WelcomeTab() {
         window.open(portfolioData.profile.linkedin, '_blank')
         addNotification({
           title: 'LinkedIn',
-          message: 'Opening LinkedIn profile',
+          message: t('openingLinkedInProfile'),
           type: 'info'
         })
       }
@@ -226,7 +228,7 @@ export function WelcomeTab() {
           className="mb-12"
         >
           <h1 className="text-4xl font-normal text-vscode-text mb-2" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
-            Welcome to {portfolioData.profile.name}&apos;s Developer Portfolio
+            {t('welcomeToPortfolio')} {portfolioData.profile.name}&apos;s {t('portfolio') || 'Portfolio'}
           </h1>
           <p className="text-base text-vscode-text-secondary" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
             {portfolioData.profile.subtitle}
@@ -240,7 +242,7 @@ export function WelcomeTab() {
             {/* Start Section */}
             <div>
               <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
-                Start
+                {t('start')}
               </h2>
               <div className="space-y-1">
                 {startActions.map((action, index) => {
@@ -280,7 +282,7 @@ export function WelcomeTab() {
             {mounted && (
             <div>
               <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
-                Recent
+                {t('recent')}
               </h2>
               <div className="space-y-1">
                 {recentItems.length > 0 ? (
@@ -344,13 +346,13 @@ export function WelcomeTab() {
                         e.currentTarget.style.backgroundColor = 'transparent'
                       }}
                     >
-                      <span className="text-sm font-normal">More...</span>
+                      <span className="text-sm font-normal">{t('more')}</span>
                     </motion.button>
                   </>
                 ) : (
                   <div className="px-3 py-8 text-center">
                     <p className="text-sm text-vscode-text-secondary" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
-                      No recent items yet. Start exploring!
+                      {t('noRecentItems')}
                     </p>
                   </div>
                 )}

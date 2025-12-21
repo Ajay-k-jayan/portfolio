@@ -14,6 +14,7 @@ import { useAppStore } from '@/lib/store'
 import { portfolioData } from '@/lib/portfolio-data'
 import { Tooltip } from '@/components/ui/tooltip'
 import { ViewSwitcher } from '@/components/ui/view-switcher'
+import { useLanguage } from '@/contexts/language-context'
 
 interface GitHubData {
   followers?: number
@@ -70,6 +71,7 @@ type ViewMode = 'grid' | 'list'
 type SortOption = 'name-asc' | 'name-desc'
 
 export function ContactTab() {
+  const { t } = useLanguage()
   const { addNotification } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
@@ -134,11 +136,11 @@ export function ContactTab() {
   const contactCategories: ContactCategory[] = useMemo(() => {
     const categories: ContactCategory[] = [
       {
-        name: 'CONTACT METHODS',
+        name: t('contactMethods'),
         items: [
           {
             id: 'email',
-            name: 'Email',
+            name: t('email'),
             description: portfolioData.profile.email,
             category: 'Contact',
             icon: Mail,
@@ -150,7 +152,7 @@ export function ContactTab() {
           },
           {
             id: 'phone',
-            name: 'Phone',
+            name: t('phone'),
             description: portfolioData.profile.phone,
             category: 'Contact',
             icon: Phone,
@@ -162,7 +164,7 @@ export function ContactTab() {
           },
           {
             id: 'location',
-            name: 'Location',
+            name: t('location'),
             description: portfolioData.profile.location,
             category: 'Contact',
             icon: MapPin,
@@ -173,12 +175,12 @@ export function ContactTab() {
         ],
       },
       {
-        name: 'SOCIAL PLATFORMS',
+        name: t('socialPlatforms'),
         items: [
           {
             id: 'github',
             name: 'GitHub',
-            description: githubData?.followers ? `${githubData.followers} followers` : 'Code repositories',
+            description: githubData?.followers ? `${githubData.followers} ${t('followers') || 'followers'}` : t('codeRepositories'),
             category: 'Social',
             icon: GitHubIcon,
             iconColor: 'text-gray-300',
@@ -189,7 +191,7 @@ export function ContactTab() {
           {
             id: 'linkedin',
             name: 'LinkedIn',
-            description: 'Professional network',
+            description: t('professionalNetwork'),
             category: 'Social',
             icon: LinkedInIcon,
             iconColor: 'text-blue-400',
@@ -200,7 +202,7 @@ export function ContactTab() {
           {
             id: 'telegram',
             name: 'Telegram',
-            description: 'Secure messaging',
+            description: t('secureMessaging'),
             category: 'Social',
             icon: MessageCircle,
             iconColor: 'text-blue-300',
@@ -210,12 +212,12 @@ export function ContactTab() {
         ],
       },
       {
-        name: 'PROFESSIONAL INFO',
+        name: t('professionalInfo'),
         items: [
           {
             id: 'availability',
-            name: 'Availability',
-            description: 'Available for Freelance • Mon-Fri: 9AM-6PM IST',
+            name: t('availability'),
+            description: t('availableForFreelance'),
             category: 'Professional',
             icon: Clock,
             iconColor: 'text-green-400',
@@ -223,7 +225,7 @@ export function ContactTab() {
           },
           {
             id: 'company',
-            name: 'Company',
+            name: t('company'),
             description: `${portfolioData.profile.company} • ${portfolioData.profile.experience}`,
             category: 'Professional',
             icon: Building2,
@@ -237,7 +239,7 @@ export function ContactTab() {
     // Add GitHub repositories
     if (repositories.length > 0) {
       categories.push({
-        name: 'GITHUB REPOSITORIES',
+        name: t('githubRepositories'),
         items: repositories.slice(0, 6).map((repo) => ({
           id: `repo-${repo.name}`,
           name: repo.name,
@@ -304,7 +306,7 @@ export function ContactTab() {
     setFormError('')
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
-      setFormError('All fields are required')
+      setFormError(t('allFieldsRequired'))
       setFormStatus('error')
       return
     }
@@ -322,13 +324,13 @@ export function ContactTab() {
         setFormData({ name: '', email: '', subject: '', message: '' })
         addNotification({
           title: 'Contact Form',
-          message: 'Email client opened. Please send your message.',
+          message: t('emailClientOpenedPleaseSend'),
           type: 'success'
         })
         setTimeout(() => setFormStatus('idle'), 3000)
       } catch (error) {
         setFormStatus('error')
-        setFormError('Failed to open email client')
+        setFormError(t('failedToOpenEmailClient'))
       }
     }, 500)
   }
@@ -345,7 +347,7 @@ export function ContactTab() {
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
                   <MessageSquare className="text-vscode-blue" size={20} />
-                  Contact & Social Media
+                  {t('contactAndSocialMedia')}
                 </h1>
                 <div className="relative">
                   <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">
@@ -393,14 +395,14 @@ export function ContactTab() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search"
-                aria-label="Search contact methods and social platforms"
+                placeholder={t('search')}
+                aria-label={t('searchContactMethods')}
                 className="w-full pl-10 pr-8 h-full bg-transparent border-0 outline-none text-sm font-normal text-vscode-text placeholder:text-vscode-text-secondary focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  aria-label="Clear search"
+                  aria-label={t('clearSearch')}
                   className="absolute right-2 p-1 hover:bg-vscode-hover rounded transition-colors flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue"
                 >
                   <X size={14} className="text-vscode-text-secondary" aria-hidden="true" />
@@ -415,15 +417,15 @@ export function ContactTab() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            aria-label="Sort contact items"
+            aria-label={t('sortContactItems')}
             className="px-3 h-8 bg-vscode-sidebar border border-vscode-border rounded text-xs text-vscode-text focus:outline-none focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1"
           >
-            <option value="name-asc">Sort by Name (A-Z)</option>
-            <option value="name-desc">Sort by Name (Z-A)</option>
+            <option value="name-asc">{t('sortByNameAZ')}</option>
+            <option value="name-desc">{t('sortByNameZA')}</option>
           </select>
           <button
             onClick={() => setSortBy(sortBy === 'name-asc' ? 'name-desc' : 'name-asc')}
-            aria-label={`Sort ${sortBy === 'name-asc' ? 'descending' : 'ascending'}`}
+            aria-label={`${t('sort')} ${sortBy === 'name-asc' ? t('descending') : t('ascending')}`}
             className="w-8 h-8 flex items-center justify-center bg-vscode-sidebar border border-vscode-border rounded hover:bg-vscode-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-1"
           >
             {sortBy === 'name-asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
@@ -434,13 +436,13 @@ export function ContactTab() {
         <div className="space-y-6">
           {filteredAndSortedCategories.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-vscode-text-secondary mb-2">No items found matching your search.</p>
+              <p className="text-vscode-text-secondary mb-2">{t('noItemsFound')}</p>
               <button
                 onClick={() => setSearchQuery('')}
-                aria-label="Clear search filters"
+                aria-label={t('clearSearchFilters')}
                 className="text-vscode-blue hover:text-vscode-blue-accent text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-1 rounded px-2 py-1"
               >
-                Clear search
+                {t('clearSearch')}
               </button>
             </div>
           ) : (
@@ -605,7 +607,7 @@ export function ContactTab() {
             <div className="flex items-center gap-3">
               <Send className="text-vscode-blue" size={18} />
               <span id="contact-form-header" className="text-sm font-semibold text-vscode-text">
-                Contact Form
+                {t('contactForm')}
               </span>
             </div>
             <motion.div
@@ -639,13 +641,13 @@ export function ContactTab() {
                   {formStatus === 'success' && (
                     <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm">
                       <CheckCircle2 size={16} />
-                      <span>Message sent successfully! Email client opened.</span>
+                      <span>{t('messageSentSuccessfully')}</span>
                     </div>
                   )}
 
                   <div>
                     <label htmlFor="contact-name" className="block text-xs font-medium mb-2 text-vscode-text-secondary">
-                      Name <span className="text-red-400" aria-label="required">*</span>
+                      {t('name')} <span className="text-red-400" aria-label={t('required')}>*</span>
                     </label>
                     <input
                       type="text"
@@ -653,7 +655,7 @@ export function ContactTab() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1 transition-all"
-                      placeholder="Your name"
+                      placeholder={t('yourName')}
                       required
                       aria-required="true"
                       aria-invalid={formStatus === 'error' && !formData.name.trim()}
@@ -662,7 +664,7 @@ export function ContactTab() {
 
                   <div>
                     <label htmlFor="contact-email" className="block text-xs font-medium mb-2 text-vscode-text-secondary">
-                      Email <span className="text-red-400" aria-label="required">*</span>
+                      {t('email')} <span className="text-red-400" aria-label={t('required')}>*</span>
                     </label>
                     <input
                       type="email"
@@ -670,7 +672,7 @@ export function ContactTab() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1 transition-all"
-                      placeholder="your.email@example.com"
+                      placeholder={t('yourEmail')}
                       required
                       aria-required="true"
                       aria-invalid={formStatus === 'error' && !formData.email.trim()}
@@ -679,7 +681,7 @@ export function ContactTab() {
 
                   <div>
                     <label htmlFor="contact-subject" className="block text-xs font-medium mb-2 text-vscode-text-secondary">
-                      Subject <span className="text-red-400" aria-label="required">*</span>
+                      {t('subject')} <span className="text-red-400" aria-label={t('required')}>*</span>
                     </label>
                     <input
                       type="text"
@@ -687,7 +689,7 @@ export function ContactTab() {
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                       className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1 transition-all"
-                      placeholder="What's this about?"
+                      placeholder={t('whatsThisAbout')}
                       required
                       aria-required="true"
                       aria-invalid={formStatus === 'error' && !formData.subject.trim()}
@@ -696,7 +698,7 @@ export function ContactTab() {
 
                   <div>
                     <label htmlFor="contact-message" className="block text-xs font-medium mb-2 text-vscode-text-secondary">
-                      Message <span className="text-red-400" aria-label="required">*</span>
+                      {t('message')} <span className="text-red-400" aria-label={t('required')}>*</span>
                     </label>
                     <textarea
                       id="contact-message"
@@ -704,7 +706,7 @@ export function ContactTab() {
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       rows={5}
                       className="w-full px-3 py-2 bg-vscode-bg border border-vscode-border rounded text-sm text-vscode-text placeholder-vscode-text-secondary focus:outline-none focus:border-vscode-blue focus:ring-2 focus:ring-vscode-blue focus:ring-offset-1 transition-all resize-none"
-                      placeholder="Tell me about your project or just say hello..."
+                      placeholder={t('tellMeAboutProject')}
                       required
                       aria-required="true"
                       aria-invalid={formStatus === 'error' && !formData.message.trim()}
@@ -731,7 +733,7 @@ export function ContactTab() {
                     ) : (
                       <>
                         <Send size={16} />
-                        <span>Send Message</span>
+                        <span>{t('sendMessage')}</span>
                       </>
                     )}
                   </motion.button>
