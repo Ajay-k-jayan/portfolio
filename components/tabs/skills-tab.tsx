@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { ChevronDown, ChevronRight, Settings, Clock, Star, CheckCircle2, Star as StarIcon, Search, X, Filter, SortAsc, SortDesc, Download, ChevronDown as ChevronDownIcon, Award, TrendingUp, Sparkles, Zap, Target, Layers, Grid3x3, List, Clock as ClockIcon, Info, LayoutGrid, LayoutList, Code, Heart, Network } from 'lucide-react'
+import { ChevronDown, ChevronRight, Settings, Clock, Star, CheckCircle2, Search, X, Filter, SortAsc, SortDesc, Download, Award, TrendingUp, Sparkles, Zap, Target, Layers, Grid3x3, List, Info, LayoutGrid, LayoutList, Code, Heart, Network } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { skillWebsites } from '@/lib/skill-websites'
 import { Tooltip } from '@/components/ui/tooltip'
@@ -383,7 +383,7 @@ export function SkillsTab() {
             {/* Stars */}
             <div className="flex items-center gap-0.5 flex-shrink-0">
               {[...Array(5)].map((_, i) => (
-                <StarIcon
+                <Star
                   key={i}
                   size={10}
                   className={
@@ -423,7 +423,7 @@ export function SkillsTab() {
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <StarIcon
+                    <Star
                       key={i}
                       size={10}
                       className={

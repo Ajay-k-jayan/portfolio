@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { NewSidebar } from './new-sidebar'
 import { PortfolioHeader } from './portfolio-header'
 import { TabBar } from './tab-bar'
@@ -55,29 +55,29 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
     }
   }, [portfolioSettings.fontSize, portfolioSettings.fontFamily, portfolioSettings.animationSpeed])
 
-  // Get content based on active menu item (from sidebar)
-  const getContentFromMenuItem = () => {
-    const contentMap: Record<string, React.ReactNode> = {
-      'welcome': <WelcomeTab />,
-      'timeline': <PortfolioTimeline />,
-      'skills': <SkillsTab />,
-      'project': <ProjectsTab />,
-      'achievement': <AchievementsView />,
-      'experience': <ExperienceTab />,
-      'certifications': <CertificationsView />,
-      'blogs': <BlogSystem />,
-      'contact': <ContactTab />,
-      'recommendation': <RecommendationsTab />,
-      'settings': <SettingsView />,
-    }
-    return contentMap[activeMenuItem] || <WelcomeTab />
-  }
+  // Get content based on active menu item (from sidebar) - memoized
+  const contentMap = useMemo(() => ({
+    'welcome': <WelcomeTab />,
+    'timeline': <PortfolioTimeline />,
+    'skills': <SkillsTab />,
+    'project': <ProjectsTab />,
+    'achievement': <AchievementsView />,
+    'experience': <ExperienceTab />,
+    'certifications': <CertificationsView />,
+    'blogs': <BlogSystem />,
+    'contact': <ContactTab />,
+    'recommendation': <RecommendationsTab />,
+    'settings': <SettingsView />,
+  }), [])
 
   // Use tabs only if activeMenuItem is 'file-explore', otherwise use sidebar menu item content
-  const activeTab = tabs.find(t => t.id === activeTabId)
-  const activeContent = activeMenuItem === 'file-explore' && activeTab?.content
-    ? activeTab.content
-    : getContentFromMenuItem()
+  const activeTab = useMemo(() => tabs.find(t => t.id === activeTabId), [tabs, activeTabId])
+  const activeContent = useMemo(() => {
+    if (activeMenuItem === 'file-explore' && activeTab?.content) {
+      return activeTab.content
+    }
+    return contentMap[activeMenuItem] || <WelcomeTab />
+  }, [activeMenuItem, activeTab, contentMap])
 
   return (
     <div className="h-screen w-screen flex flex-col bg-vscode-bg text-vscode-text overflow-hidden relative">

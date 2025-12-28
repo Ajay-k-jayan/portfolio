@@ -1,8 +1,10 @@
 'use client'
 
+import { memo } from 'react'
 import { ProfileAvatar } from '@/components/profile-avatar'
+import { portfolioData } from '@/lib/portfolio-data'
 
-export function AboutTab() {
+export const AboutTab = memo(function AboutTab() {
   return (
     <div className="h-full overflow-auto">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -12,28 +14,25 @@ export function AboutTab() {
             <div className="flex items-center gap-4 mb-6">
               <ProfileAvatar size="lg" />
               <div>
-                <h2 className="text-2xl font-bold text-vscode-text mb-1">Ajay K J</h2>
-                <p className="text-vscode-text-secondary">Software Engineer</p>
-                <p className="text-sm text-vscode-green mt-1">Front-End Developer | Angular | UI Design | Web Performance</p>
+                <h2 className="text-2xl font-bold text-vscode-text mb-1">{portfolioData.profile.name}</h2>
+                <p className="text-vscode-text-secondary">{portfolioData.profile.title}</p>
+                <p className="text-sm text-vscode-green mt-1">{portfolioData.profile.subtitle}</p>
               </div>
             </div>
             <p className="text-lg leading-relaxed">
-              Experienced Front-End Developer with 2 years of proven expertise in Angular development,
-              web performance optimization, and responsive interfaces. Skilled at transforming business
-              requirements into effective, scalable web applications. Committed to clean code, design
-              aesthetics, and modern frameworks while collaborating in agile development environments.
+              {portfolioData.profile.bio}
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <div className="bg-vscode-active p-4 rounded-lg">
                 <h3 className="text-vscode-blue font-semibold mb-2">Experience</h3>
                 <p className="text-vscode-text-secondary text-sm">
-                  2+ years of professional Angular development at Beinex
+                  {portfolioData.profile.experience} of professional development at {portfolioData.profile.company}
                 </p>
               </div>
               <div className="bg-vscode-active p-4 rounded-lg">
-                <h3 className="text-vscode-blue font-semibold mb-2">Education</h3>
+                <h3 className="text-vscode-blue font-semibold mb-2">Location</h3>
                 <p className="text-vscode-text-secondary text-sm">
-                  Diploma in Computer Engineering - Government Polytechnic College, Perumbavoor
+                  {portfolioData.profile.location}
                 </p>
               </div>
             </div>
@@ -42,5 +41,5 @@ export function AboutTab() {
       </div>
     </div>
   )
-}
+})
 

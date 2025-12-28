@@ -4,7 +4,7 @@ import { Github, Linkedin, Mail, Download, ExternalLink, Share2 } from 'lucide-r
 import { useAppStore } from '@/lib/store'
 
 export function SocialIntegrations() {
-  const { portfolioSettings, addNotification } = useAppStore()
+  const { addNotification } = useAppStore()
   const socialLinks = [
     {
       name: 'GitHub',
@@ -84,21 +84,19 @@ export function SocialIntegrations() {
         </div>
       </div>
 
-      {portfolioSettings.showResumeDownload && (
-        <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-vscode-text mb-4">Resume</h2>
-          <button
-            onClick={handleDownloadResume}
-            className="flex items-center gap-2 px-4 py-2 bg-vscode-blue hover:bg-blue-600 text-white rounded-lg transition-colors"
-          >
-            <Download size={18} />
-            <span>Download Resume (PDF)</span>
-          </button>
-          <p className="text-sm text-vscode-text-secondary mt-2">
-            Get the latest version of my resume
-          </p>
-        </div>
-      )}
+      <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-vscode-text mb-4">Resume</h2>
+        <button
+          onClick={handleDownloadResume}
+          className="flex items-center gap-2 px-4 py-2 bg-vscode-blue hover:bg-blue-600 text-white rounded-lg transition-colors"
+        >
+          <Download size={18} />
+          <span>Download Resume (PDF)</span>
+        </button>
+        <p className="text-sm text-vscode-text-secondary mt-2">
+          Get the latest version of my resume
+        </p>
+      </div>
 
       <div className="bg-vscode-sidebar border border-vscode-border rounded-lg p-6">
         <h2 className="text-xl font-semibold text-vscode-text mb-4">Contact Information</h2>
@@ -120,36 +118,6 @@ export function SocialIntegrations() {
             </a>
           </div>
         </div>
-        <h2 className="text-xl font-semibold text-vscode-text mb-4 mt-6">Contact Form</h2>
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm text-vscode-text-secondary mb-1">Name</label>
-            <input
-              type="text"
-              className="w-full bg-vscode-active border border-vscode-border rounded px-3 py-2 text-vscode-text focus:outline-none focus:border-vscode-blue"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-vscode-text-secondary mb-1">Email</label>
-            <input
-              type="email"
-              className="w-full bg-vscode-active border border-vscode-border rounded px-3 py-2 text-vscode-text focus:outline-none focus:border-vscode-blue"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-vscode-text-secondary mb-1">Message</label>
-            <textarea
-              rows={4}
-              className="w-full bg-vscode-active border border-vscode-border rounded px-3 py-2 text-vscode-text focus:outline-none focus:border-vscode-blue resize-none"
-            />
-          </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-vscode-blue hover:bg-blue-600 text-white rounded-lg transition-colors"
-          >
-            Send Message
-          </button>
-        </form>
       </div>
       </div>
     </div>

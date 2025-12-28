@@ -3,17 +3,15 @@
 import { useState, useMemo, useEffect } from 'react'
 import { 
   FileText, FolderOpen, GitBranch, 
-  Lightbulb, Star, Code, Briefcase,
-  Share2, Sparkles, Award,
-  Download, MessageSquare, FilePlus, FolderOpen as FolderOpenIcon,
-  Github, Linkedin, BookOpen, User
+  Lightbulb, Star, Code,
+  Sparkles, Award,
+  MessageSquare, FilePlus,
+  Linkedin
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
 import { portfolioData } from '@/lib/portfolio-data'
-import { ProfileAvatar } from '@/components/profile-avatar'
-import { Building2, TrendingUp, MapPin, Command } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
 
 export function WelcomeTab() {
@@ -57,7 +55,7 @@ export function WelcomeTab() {
     { 
       id: 'open-project',
       label: t('openProject'),
-      icon: FolderOpenIcon,
+      icon: FolderOpen,
       action: () => setActiveMenuItem('project'),
     },
     { 
@@ -94,7 +92,7 @@ export function WelcomeTab() {
           window.dispatchEvent(event)
         }
         addNotification({
-          title: t('aiAssistant') || 'AI Assistant',
+          title: 'AI Assistant',
           message: t('openingAIChatbot'),
           type: 'info'
         })
@@ -228,7 +226,7 @@ export function WelcomeTab() {
           className="mb-12"
         >
           <h1 className="text-4xl font-normal text-vscode-text mb-2" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
-            {t('welcomeToPortfolio')} {portfolioData.profile.name}&apos;s {t('portfolio') || 'Portfolio'}
+            {t('welcomeToPortfolio')} {portfolioData.profile.name}&apos;s Portfolio
           </h1>
           <p className="text-base text-vscode-text-secondary" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
             {portfolioData.profile.subtitle}

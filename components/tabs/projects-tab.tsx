@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { ExternalLink, Github, FolderOpen, Code2, Search, Filter, X, LayoutGrid, LayoutList, Calendar } from 'lucide-react'
+import { ExternalLink, Github, FolderOpen, Code2, Search, Filter, X, Calendar } from 'lucide-react'
 import { CodePreview } from '@/components/code-preview'
 import { LiveDemo } from '@/components/live-demo'
 import { motion, AnimatePresence } from 'framer-motion'

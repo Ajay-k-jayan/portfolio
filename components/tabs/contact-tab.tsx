@@ -1,18 +1,17 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, memo } from 'react'
 import { 
-  Mail, Github, Linkedin, Send, Loader2, CheckCircle2, 
-  Clock, Download, MapPin, Phone, MessageSquare,
+  Mail, Send, Loader2, CheckCircle2, 
+  Clock, MapPin, Phone, MessageSquare,
   AlertCircle, MessageCircle, Search, X,
-  Code, Star,
-  ExternalLink, Users, ChevronRight,
-  LayoutGrid, LayoutList, Filter, SortAsc, SortDesc, Building2
+  Code,
+  ExternalLink, ChevronRight,
+  SortAsc, SortDesc, Building2
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
 import { portfolioData } from '@/lib/portfolio-data'
-import { Tooltip } from '@/components/ui/tooltip'
 import { ViewSwitcher } from '@/components/ui/view-switcher'
 import { useLanguage } from '@/contexts/language-context'
 
@@ -70,7 +69,7 @@ const LinkedInIcon = ({ size = 24, className = '' }: { size?: number; className?
 type ViewMode = 'grid' | 'list'
 type SortOption = 'name-asc' | 'name-desc'
 
-export function ContactTab() {
+export const ContactTab = memo(function ContactTab() {
   const { t } = useLanguage()
   const { addNotification } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
@@ -84,7 +83,6 @@ export function ContactTab() {
   })
   const [githubData, setGithubData] = useState<GitHubData | null>(null)
   const [repositories, setRepositories] = useState<Repository[]>([])
-  const [githubLoading, setGithubLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -99,7 +97,6 @@ export function ContactTab() {
   useEffect(() => {
     const fetchGitHubData = async () => {
       try {
-        setGithubLoading(true)
         const [profileResponse, reposResponse] = await Promise.all([
           fetch('https://api.github.com/users/Ajay-k-jayan'),
           fetch('https://api.github.com/users/Ajay-k-jayan/repos?sort=updated&per_page=6')
@@ -124,8 +121,6 @@ export function ContactTab() {
         }
       } catch (error) {
         console.error('GitHub API Error:', error)
-      } finally {
-        setGithubLoading(false)
       }
     }
 
@@ -286,22 +281,22 @@ export function ContactTab() {
     return filtered
   }, [contactCategories, searchQuery, sortBy])
 
-  const toggleSection = (sectionKey: string) => {
+  const toggleSection = useCallback((sectionKey: string) => {
     setExpandedSections(prev => ({
       ...prev,
       [sectionKey]: !prev[sectionKey]
     }))
-  }
+  }, [])
 
-  const handleItemClick = (item: ContactItem) => {
+  const handleItemClick = useCallback((item: ContactItem) => {
     if (item.url?.startsWith('mailto:') || item.url?.startsWith('tel:')) {
       window.location.href = item.url
     } else if (item.url?.startsWith('http')) {
       window.open(item.url, '_blank', 'noopener noreferrer')
     }
-  }
+  }, [])
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     setFormError('')
 
@@ -333,9 +328,12 @@ export function ContactTab() {
         setFormError(t('failedToOpenEmailClient'))
       }
     }, 500)
-  }
+  }, [formData, t, portfolioData.profile.email, addNotification])
 
-  const totalItems = contactCategories.reduce((sum, cat) => sum + cat.items.length, 0)
+  const totalItems = useMemo(() => 
+    contactCategories.reduce((sum, cat) => sum + cat.items.length, 0),
+    [contactCategories]
+  )
 
   return (
     <div className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto">
@@ -745,4 +743,4 @@ export function ContactTab() {
       </div>
     </div>
   )
-}
+})
