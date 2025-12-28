@@ -277,7 +277,7 @@ export function WelcomeTab() {
             </div>
 
             {/* Recent Section */}
-            {mounted && (
+            {mounted && portfolioSettings.showRecentItems && (
             <div>
               <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
                 {t('recent')}

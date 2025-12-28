@@ -71,7 +71,7 @@ type SortOption = 'name-asc' | 'name-desc'
 
 export const ContactTab = memo(function ContactTab() {
   const { t } = useLanguage()
-  const { addNotification } = useAppStore()
+  const { addNotification, portfolioSettings } = useAppStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [sortBy, setSortBy] = useState<SortOption>('name-asc')
@@ -231,8 +231,8 @@ export const ContactTab = memo(function ContactTab() {
       },
     ]
 
-    // Add GitHub repositories
-    if (repositories.length > 0) {
+    // Add GitHub repositories (only if showGitHubStats is enabled)
+    if (portfolioSettings.showGitHubStats && repositories.length > 0) {
       categories.push({
         name: t('githubRepositories'),
         items: repositories.slice(0, 6).map((repo) => ({
@@ -249,7 +249,7 @@ export const ContactTab = memo(function ContactTab() {
     }
 
     return categories
-  }, [githubData, repositories])
+  }, [githubData, repositories, portfolioSettings.showGitHubStats])
 
   // Filter and sort
   const filteredAndSortedCategories = useMemo(() => {
@@ -317,18 +317,20 @@ export const ContactTab = memo(function ContactTab() {
         window.location.href = mailtoLink
         setFormStatus('success')
         setFormData({ name: '', email: '', subject: '', message: '' })
-        addNotification({
-          title: 'Contact Form',
-          message: t('emailClientOpenedPleaseSend'),
-          type: 'success'
-        })
+        if (portfolioSettings.formSuccessAlerts) {
+          addNotification({
+            title: 'Contact Form',
+            message: t('emailClientOpenedPleaseSend'),
+            type: 'success'
+          })
+        }
         setTimeout(() => setFormStatus('idle'), 3000)
       } catch (error) {
         setFormStatus('error')
         setFormError(t('failedToOpenEmailClient'))
       }
     }, 500)
-  }, [formData, t, portfolioData.profile.email, addNotification])
+  }, [formData, t, portfolioData.profile.email, addNotification, portfolioSettings.formSuccessAlerts])
 
   const totalItems = useMemo(() => 
     contactCategories.reduce((sum, cat) => sum + cat.items.length, 0),
@@ -374,7 +376,7 @@ export const ContactTab = memo(function ContactTab() {
             <div className="flex items-center gap-1 ml-4">
               <ViewSwitcher
                 viewMode={viewMode}
-                onViewChange={(mode) => setViewMode(mode)}
+                onViewChange={(mode) => setViewMode(mode as ViewMode)}
                 options="grid-list"
               />
             </div>

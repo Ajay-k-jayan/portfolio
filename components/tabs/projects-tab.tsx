@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Tooltip } from '../ui/tooltip'
 import { useLanguage } from '@/contexts/language-context'
 import { ViewSwitcher } from '../ui/view-switcher'
+import { useAppStore } from '@/lib/store'
 
 interface Project {
   id: string
@@ -57,12 +58,13 @@ type ViewMode = 'grid' | 'list'
 
 export function ProjectsTab() {
   const { t } = useLanguage()
+  const { portfolioSettings } = useAppStore()
   const [expandedProject, setExpandedProject] = useState<string | null>(null)
   const [showCodePreview, setShowCodePreview] = useState<string | null>(null)
   const [showLiveDemo, setShowLiveDemo] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('period-desc')
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [viewMode, setViewMode] = useState<ViewMode>(portfolioSettings.gridLayout as ViewMode || 'list')
 
   // Filter and sort projects
   const filteredAndSortedProjects = useMemo(() => {

@@ -8,6 +8,7 @@ import { Tooltip } from '@/components/ui/tooltip'
 import { SkillsNetworkChart } from '@/components/skills-network-chart'
 import { ViewSwitcher } from '@/components/ui/view-switcher'
 import { useLanguage } from '@/contexts/language-context'
+import { useAppStore } from '@/lib/store'
 
 interface Skill {
   id: string
@@ -39,6 +40,7 @@ type ViewMode = 'grid' | 'list' | 'network'
 
 export function SkillsTab() {
   const { t } = useLanguage()
+  const { portfolioSettings } = useAppStore()
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     primary: true,
     additional: true,
@@ -50,7 +52,7 @@ export function SkillsTab() {
   const [levelFilter, setLevelFilter] = useState<LevelFilter>('all')
   const [sortBy, setSortBy] = useState<SortOption>('level')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>((portfolioSettings.gridLayout === 'grid' ? 'grid' : portfolioSettings.gridLayout === 'list' ? 'list' : 'grid') as ViewMode)
 
   const skillCategories: SkillCategory[] = [
     {

@@ -76,7 +76,7 @@ export function NewSidebar() {
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Get settings values
-  const { compactView, showAnimations, animationSpeed, fontSize, fontFamily } = portfolioSettings
+  const { compactView, showAnimations, animationSpeed, fontSize, fontFamily, sidebarWidth, panelWidth } = portfolioSettings
   
   // Calculate animation duration based on speed setting
   const getAnimationDuration = () => {
@@ -266,7 +266,8 @@ export function NewSidebar() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -300, opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed top-12 left-0 bottom-0 w-72 bg-vscode-sidebar border-r border-vscode-border z-50 md:hidden overflow-y-auto custom-scrollbar shadow-2xl"
+                className="fixed top-12 left-0 bottom-0 bg-vscode-sidebar border-r border-vscode-border z-50 md:hidden overflow-y-auto custom-scrollbar shadow-2xl"
+                style={{ width: `${sidebarWidth}px` }}
               >
                 {/* Header */}
                 <div className="px-4 py-3 border-b border-vscode-border flex items-center justify-between bg-vscode-active/50">
@@ -733,7 +734,7 @@ export function NewSidebar() {
         {activeMenuItem === 'file-explore' && (
           <motion.div
             initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 256, opacity: 1 }}
+            animate={{ width: panelWidth, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
             className="bg-vscode-sidebar border-r border-vscode-border flex flex-col overflow-hidden"
