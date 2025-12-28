@@ -38,7 +38,7 @@ import { Tooltip } from './ui/tooltip'
 // Menu items configuration - will be translated in component
 const getMenuItems = (t: (key: keyof Translations) => string) => [
   { id: 'welcome', label: t('welcome'), icon: Home },
-  { id: 'file-explore', label: 'File Explore', icon: Folder },
+  { id: 'file-explore', label: t('fileExplore'), icon: Folder },
   { id: 'skills', label: t('skills'), icon: Code },
   { id: 'achievement', label: t('achievements'), icon: Trophy },
   { id: 'experience', label: t('experience'), icon: Briefcase },
@@ -271,7 +271,7 @@ export function NewSidebar() {
                 {/* Header */}
                 <div className="px-4 py-3 border-b border-vscode-border flex items-center justify-between bg-vscode-active/50">
                   <h2 className="text-sm font-semibold text-vscode-text uppercase tracking-wide">
-                    Menu
+                    {t('navigation')}
                   </h2>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
@@ -336,7 +336,7 @@ export function NewSidebar() {
                   <div className="flex items-center gap-2 mb-2">
                     <Menu size={14} className="text-vscode-text-secondary" />
                     <span className="text-xs font-medium text-vscode-text-secondary uppercase tracking-wide">
-                      Navigation
+                      {t('navigation')}
                     </span>
                   </div>
                   <div className="space-y-1">

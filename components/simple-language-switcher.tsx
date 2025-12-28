@@ -42,10 +42,10 @@ export function SimpleLanguageSwitcher() {
           aria-label="Change Language"
         >
           <Globe size={13} className="text-vscode-text-secondary" />
-          <span className="text-xs text-vscode-text hidden md:inline">{currentLang.nativeName}</span>
+          <span className="text-xs text-vscode-text inline">{currentLang.nativeName}</span>
           <ChevronDown 
             size={11} 
-            className={`text-vscode-text-secondary transition-transform hidden md:block ${isOpen ? 'rotate-180' : ''}`} 
+            className={`text-vscode-text-secondary transition-transform block ${isOpen ? 'rotate-180' : ''}`} 
           />
         </button>
       </Tooltip>

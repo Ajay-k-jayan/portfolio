@@ -961,6 +961,14 @@ export const translations: Record<LanguageCode, Translations> = {
     noProjectsAvailable: 'ലഭ്യമായ പ്രോജക്റ്റുകൾ ഇല്ല.',
     noExperienceFound: 'നിങ്ങളുടെ തിരയലുമായി പൊരുത്തപ്പെടുന്ന അനുഭവം കണ്ടെത്തിയില്ല.',
     noExperienceAvailable: 'ലഭ്യമായ അനുഭവം ഇല്ല.',
+    
+    // File Explorer
+    fileExplore: 'ഫയൽ പര്യവേക്ഷണം',
+    explorer: 'പര്യവേക്ഷകൻ',
+    files: 'ഫയലുകൾ',
+    folders: 'ഫോൾഡറുകൾ',
+    openFile: 'ഫയൽ തുറക്കുക',
+    closeFile: 'ഫയൽ അടയ്ക്കുക',
   },
 }
 

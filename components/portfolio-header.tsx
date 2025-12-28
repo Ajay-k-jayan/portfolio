@@ -132,6 +132,33 @@ export function PortfolioHeader() {
             </motion.button>
           </Tooltip>
 
+          {/* Mobile Voice Assistant Button */}
+          <Tooltip content={isVoiceListening ? "Stop Listening" : "Voice Assistant"} position="bottom">
+            <motion.button
+              onClick={() => {
+                const trigger = (window as any).triggerVoiceAssistant
+                if (trigger) {
+                  trigger()
+                }
+              }}
+              className={`md:hidden p-2 rounded hover:bg-vscode-active transition-colors relative ${
+                isVoiceListening 
+                  ? 'bg-red-500/20 text-red-400' 
+                  : 'text-vscode-text-secondary hover:text-vscode-text'
+              }`}
+              aria-label={isVoiceListening ? "Stop Listening" : "Voice Assistant"}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              animate={isVoiceListening ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ repeat: isVoiceListening ? Infinity : 0, duration: 1 }}
+            >
+              <Mic size={18} />
+              {isVoiceListening && (
+                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              )}
+            </motion.button>
+          </Tooltip>
+
           {/* Mobile Search Toggle */}
           <motion.button
             onClick={() => setShowSearchMobile(!showSearchMobile)}
