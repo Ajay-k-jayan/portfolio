@@ -1,7 +1,7 @@
 // Comprehensive translation system for all languages
 
 export type LanguageCode = 
-  | 'en-US' | 'es' | 'ml' | 'hi'
+  | 'en-US' | 'ml' | 'hi'
 
 export interface Language {
   code: LanguageCode
@@ -13,7 +13,6 @@ export interface Language {
 export const languages: Language[] = [
   // Working languages with full translations
   { code: 'en-US', name: 'English', nativeName: 'English (US)', flag: '🇺🇸' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
   { code: 'ml', name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳' },
   { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
 ]
@@ -745,10 +744,10 @@ export const translations: Record<LanguageCode, Translations> = {
   // English
   'en-US': enUSTranslations,
   
-  // Spanish - merge with English for missing keys
-  'es': {
+  // Malayalam - merge with English for missing keys
+  'ml': {
     ...enUSTranslations,
-    searchPlaceholder: 'Buscar',
+    searchPlaceholder: 'തിരയുക',
     changeLanguage: 'Cambiar idioma',
     theme: 'Tema',
     settings: 'Configuración',

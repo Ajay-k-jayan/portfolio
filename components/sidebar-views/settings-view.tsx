@@ -385,7 +385,7 @@ export function SettingsView() {
         setting.description?.toLowerCase().includes(query)
       )
     }))
-  }, [searchQuery])
+  }, [searchQuery, settingsCategories])
 
   // Check if settings differ from defaults
   const hasChanges = useMemo(() => {
