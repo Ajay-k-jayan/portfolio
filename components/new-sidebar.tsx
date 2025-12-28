@@ -170,16 +170,23 @@ export function NewSidebar() {
                           <motion.button
                             key={menuId}
                             onClick={() => handleMenuItemClick(menuId)}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors text-left ${
+                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 text-left relative group ${
                               isActive
-                                ? 'bg-vscode-blue text-white'
-                                : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                                ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/30'
+                                : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
                             }`}
                             whileHover={{ x: 4 }}
                             whileTap={{ scale: 0.98 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
                           >
-                            <Icon size={18} />
-                            <span className="text-sm">{item.label}</span>
+                            <Icon size={18} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
+                            <span className="text-sm relative z-10">{item.label}</span>
+                            {!isActive && (
+                              <motion.div
+                                className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                                initial={false}
+                              />
+                            )}
                           </motion.button>
                         )
                       })}
@@ -204,20 +211,30 @@ export function NewSidebar() {
                         <motion.button
                           key={item.id}
                           onClick={() => handleMenuItemClick(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded transition-colors text-left ${
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 text-left relative group ${
                             isActive
-                              ? 'bg-vscode-blue text-white'
-                              : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                              ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/30'
+                              : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
                           }`}
                           whileHover={{ x: 4 }}
                           whileTap={{ scale: 0.98 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
                         >
-                          <Icon size={18} />
-                          <span className="text-sm">{item.label}</span>
+                          <Icon size={18} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
+                          <span className="text-sm relative z-10">{item.label}</span>
                           {isActive && (
                             <motion.div
                               layoutId="mobileActiveIndicator"
-                              className="ml-auto w-1.5 h-1.5 rounded-full bg-white"
+                              className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-sm shadow-white/50"
+                              initial={{ scale: 0, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={{ duration: 0.2 }}
+                            />
+                          )}
+                          {!isActive && (
+                            <motion.div
+                              className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                              initial={false}
                             />
                           )}
                         </motion.button>
@@ -262,19 +279,29 @@ export function NewSidebar() {
                   <Tooltip key={menuId} content={item.label} position="right">
                     <motion.button
                       onClick={() => handleMenuItemClick(menuId)}
-                      className={`w-8 h-8 flex items-center justify-center rounded transition-colors relative ${
+                      className={`w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200 relative group ${
                         isActive
-                          ? 'bg-vscode-blue text-white'
-                          : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                          ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/30'
+                          : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
                       }`}
-                      whileHover={{ scale: 1.1 }}
+                      whileHover={{ scale: 1.1, x: 2 }}
                       whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      <Icon size={14} />
+                      <Icon size={14} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
                       {isActive && (
                         <motion.div
                           layoutId="activeIndicatorCollapsed"
-                          className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
+                          className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r shadow-sm shadow-vscode-blue/50"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                      )}
+                      {!isActive && (
+                        <motion.div
+                          className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                          initial={false}
                         />
                       )}
                     </motion.button>
@@ -295,19 +322,29 @@ export function NewSidebar() {
               <Tooltip key={item.id} content={item.label} position="right">
                 <motion.button
                   onClick={() => handleMenuItemClick(item.id)}
-                  className={`w-8 h-8 flex items-center justify-center rounded transition-colors relative ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200 relative group ${
                     isActive
-                      ? 'bg-vscode-blue text-white'
-                      : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                      ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/30'
+                      : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
                   }`}
                   whileHover={{ scale: 1.1, x: 2 }}
                   whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <Icon size={14} />
+                  <Icon size={14} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicatorCollapsed"
-                      className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
+                      className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r shadow-sm shadow-vscode-blue/50"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
+                  {!isActive && (
+                    <motion.div
+                      className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                      initial={false}
                     />
                   )}
                 </motion.button>
@@ -343,19 +380,29 @@ export function NewSidebar() {
                   <Tooltip key={menuId} content={item.label} position="right">
                     <motion.button
                       onClick={() => handleMenuItemClick(menuId)}
-                      className={`w-8 h-8 flex items-center justify-center rounded transition-colors relative ${
+                      className={`w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200 relative group ${
                         isActive
-                          ? 'bg-vscode-blue text-white'
-                          : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                          ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/30'
+                          : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
                       }`}
                       whileHover={{ scale: 1.1, x: 2 }}
                       whileTap={{ scale: 0.95 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      <Icon size={14} />
+                      <Icon size={14} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
                       {isActive && (
                         <motion.div
                           layoutId="activeIndicatorExpanded"
-                          className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
+                          className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r shadow-sm shadow-vscode-blue/50"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                      )}
+                      {!isActive && (
+                        <motion.div
+                          className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                          initial={false}
                         />
                       )}
                     </motion.button>
@@ -376,19 +423,29 @@ export function NewSidebar() {
               <Tooltip key={item.id} content={item.label} position="right">
                 <motion.button
                   onClick={() => handleMenuItemClick(item.id)}
-                  className={`w-8 h-8 flex items-center justify-center rounded transition-colors relative ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200 relative group ${
                     isActive
-                      ? 'bg-vscode-blue text-white'
-                      : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                      ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/30'
+                      : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
                   }`}
                   whileHover={{ scale: 1.1, x: 2 }}
                   whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <Icon size={14} />
+                  <Icon size={14} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
                   {isActive && (
                     <motion.div
                       layoutId="activeIndicatorExpanded"
-                      className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r"
+                      className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r shadow-sm shadow-vscode-blue/50"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
+                  {!isActive && (
+                    <motion.div
+                      className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                      initial={false}
                     />
                   )}
                 </motion.button>
