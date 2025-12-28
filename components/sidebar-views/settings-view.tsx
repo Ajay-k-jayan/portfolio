@@ -266,8 +266,8 @@ interface SettingsCategory {
   }>
 }
 
-// Define settings categories (constant, moved outside component)
-const settingsCategories: SettingsCategory[] = [
+// Define settings categories function (takes translation function as parameter)
+const getSettingsCategories = (t: (key: string) => string): SettingsCategory[] => [
     {
       id: 'display',
       label: t('display'),
@@ -353,6 +353,10 @@ export function SettingsView() {
   const { portfolioSettings, updateSettings, resetSettings, addNotification } = useAppStore()
   const { themes, setTheme, currentTheme } = useEnhancedTheme()
   const { language, setLanguage, t } = useLanguage()
+  
+  // Get settings categories with translations
+  const settingsCategories = useMemo(() => getSettingsCategories(t), [t])
+  
   // All categories expanded by default
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(settingsCategories.map(cat => cat.id))
