@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Home,
@@ -18,10 +18,12 @@ import {
   Mail,
   Menu,
   X,
-  Calendar
+  Calendar,
+  MoreVertical
 } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
 import { useLanguage } from '@/contexts/language-context'
+import type { Translations } from '@/lib/translations'
 import { WelcomeTab } from './tabs/welcome-tab'
 import { SkillsTab } from './tabs/skills-tab'
 import { ProjectsTab } from './tabs/projects-tab'
@@ -34,17 +36,17 @@ import { FileExplorer } from './file-explorer'
 import { Tooltip } from './ui/tooltip'
 
 // Menu items configuration - will be translated in component
-const getMenuItems = (t: (key: string) => string) => [
+const getMenuItems = (t: (key: keyof Translations) => string) => [
   { id: 'welcome', label: t('welcome'), icon: Home },
   { id: 'file-explore', label: 'File Explore', icon: Folder },
   { id: 'skills', label: t('skills'), icon: Code },
   { id: 'achievement', label: t('achievements'), icon: Trophy },
   { id: 'experience', label: t('experience'), icon: Briefcase },
   { id: 'certifications', label: t('certifications'), icon: Award },
-  { id: 'contact', label: 'Contact', icon: Mail },
+  { id: 'contact', label: t('contact'), icon: Mail },
   { id: 'recommendation', label: t('recommendations'), icon: MessageSquare },
   { id: 'project', label: t('projects'), icon: FolderOpen },
-  { id: 'timeline', label: 'Timeline', icon: Calendar },
+  { id: 'timeline', label: t('timeline'), icon: Calendar },
   { id: 'blogs', label: t('blogs'), icon: BookOpen },
   { id: 'settings', label: t('settings'), icon: Settings },
 ]
@@ -66,6 +68,63 @@ export function NewSidebar() {
   const menuItems = getMenuItems(t)
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState<boolean | null>(null) // null = not determined yet
+  const [visibleItemsCount, setVisibleItemsCount] = useState(menuItems.length)
+  const [showMoreMenu, setShowMoreMenu] = useState(false)
+  const [menuContainerRefState, setMenuContainerRef] = useState<HTMLDivElement | null>(null)
+  const [moreMenuRefState, setMoreMenuRef] = useState<HTMLDivElement | null>(null)
+  const [moreButtonRef, setMoreButtonRef] = useState<HTMLButtonElement | null>(null)
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Get settings values
+  const { compactView, showAnimations, animationSpeed, fontSize, fontFamily } = portfolioSettings
+  
+  // Calculate animation duration based on speed setting
+  const getAnimationDuration = () => {
+    switch (animationSpeed) {
+      case 'fast': return 0.15
+      case 'slow': return 0.5
+      default: return 0.3
+    }
+  }
+  
+  // Get spacing based on compact view
+  const getSpacing = () => {
+    return compactView ? 'space-y-0.5 gap-0.5' : 'space-y-1 gap-1'
+  }
+  
+  // Get font size classes
+  const getFontSizeClass = () => {
+    switch (fontSize) {
+      case 'small': return 'text-xs'
+      case 'large': return 'text-base'
+      default: return 'text-sm'
+    }
+  }
+  
+  // Get font family classes
+  const getFontFamilyClass = () => {
+    switch (fontFamily) {
+      case 'mono': return 'font-mono'
+      case 'sans': return 'font-sans'
+      default: return 'font-sans'
+    }
+  }
+  
+  // Animation props based on settings
+  const getAnimationProps = () => {
+    if (!showAnimations) {
+      return {
+        whileHover: {},
+        whileTap: {},
+        transition: { duration: 0 }
+      }
+    }
+    return {
+      whileHover: { scale: 1.1, x: 2 },
+      whileTap: { scale: 0.95 },
+      transition: { type: "spring", stiffness: 400, damping: 20, duration: getAnimationDuration() }
+    }
+  }
 
   // Handle SSR - only show recently selected after mount
   useEffect(() => {
@@ -86,6 +145,80 @@ export function NewSidebar() {
     
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Calculate visible items based on available space
+  useEffect(() => {
+    if (!mounted || isMobile || sidebarCollapsed || !menuContainerRefState) return
+
+    const calculateVisibleItems = () => {
+      if (!menuContainerRefState) return
+
+      const container = menuContainerRefState
+      const containerHeight = container.clientHeight
+      const containerTop = container.getBoundingClientRect().top
+      const viewportHeight = window.innerHeight
+      const availableHeight = viewportHeight - containerTop - 20 // 20px padding
+
+      // Each icon button is approximately 32px (w-8 h-8) + 2px gap = 34px
+      // Reserve space for "More" button (34px)
+      const iconHeight = 34
+      const moreButtonHeight = 34
+      const maxVisible = Math.floor((availableHeight - moreButtonHeight) / iconHeight)
+
+      // Ensure at least 3 items are visible, and show "More" if needed
+      const visibleCount = Math.max(3, Math.min(menuItems.length, maxVisible))
+      
+      setVisibleItemsCount(visibleCount < menuItems.length ? visibleCount : menuItems.length)
+    }
+
+    // Initial calculation
+    calculateVisibleItems()
+
+    // Use ResizeObserver for dynamic updates
+    const resizeObserver = new ResizeObserver(() => {
+      setTimeout(calculateVisibleItems, 100)
+    })
+
+    resizeObserver.observe(menuContainerRefState)
+    window.addEventListener('resize', calculateVisibleItems)
+    window.addEventListener('scroll', calculateVisibleItems)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', calculateVisibleItems)
+      window.removeEventListener('scroll', calculateVisibleItems)
+    }
+  }, [mounted, isMobile, sidebarCollapsed, menuContainerRefState, menuItems.length])
+
+  // Close "More" menu on outside click
+  useEffect(() => {
+    if (!showMoreMenu) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        moreMenuRefState &&
+        !moreMenuRefState.contains(event.target as Node) &&
+        menuContainerRefState &&
+        !menuContainerRefState.contains(event.target as Node)
+      ) {
+        setShowMoreMenu(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowMoreMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showMoreMenu, moreMenuRefState, menuContainerRefState])
 
   const handleMenuItemClick = (menuId: string) => {
     // Close all tabs when clicking non-file-explore menu items
@@ -153,9 +286,13 @@ export function NewSidebar() {
                 {mounted && portfolioSettings.showRecentlyViewed && recentlySelected.length > 0 && (
                   <div className="px-4 py-3 border-b border-vscode-border">
                     <div className="flex items-center gap-2 mb-2">
-                      <History size={14} className="text-vscode-text-secondary" />
+                      <Tooltip content={t('displayRecentlyViewedItems')} position="right">
+                        <div className="p-1">
+                          <History size={14} className="text-vscode-text-secondary hover:text-vscode-text transition-colors duration-200" />
+                        </div>
+                      </Tooltip>
                       <span className="text-xs font-medium text-vscode-text-secondary uppercase tracking-wide">
-                        Recent
+                        {t('recent')}
                       </span>
                     </div>
                     <div className="space-y-1">
@@ -265,7 +402,11 @@ export function NewSidebar() {
         {mounted && portfolioSettings.showRecentlyViewed && recentlySelected.length > 0 && (
           <div className="py-1.5 border-b border-vscode-border flex-shrink-0">
             <div className="mb-1 flex justify-center items-center">
-              <History size={10} className="text-vscode-text-secondary" />
+              <Tooltip content={t('recent')} position="right">
+                <div className="p-1">
+                  <History size={12} className="text-vscode-text-secondary hover:text-vscode-text transition-colors duration-200" />
+                </div>
+              </Tooltip>
             </div>
             <div className="flex flex-col items-center space-y-0.5">
               {recentlySelected.slice(0, 3).map((menuId) => {
@@ -288,19 +429,18 @@ export function NewSidebar() {
                       whileTap={{ scale: 0.95 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      <Icon size={14} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeIndicatorCollapsed"
-                          className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r shadow-sm shadow-vscode-blue/50"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      )}
+                      <motion.div
+                        initial={false}
+                        animate={{
+                          scale: isActive ? 1.1 : 1,
+                        }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                      >
+                        <Icon size={14} className="relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                      </motion.div>
                       {!isActive && (
                         <motion.div
-                          className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                          className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-300"
                           initial={false}
                         />
                       )}
@@ -313,7 +453,7 @@ export function NewSidebar() {
         )}
 
         {/* Main Menu Icons - Compact Grid */}
-        <div className="flex-1 pt-0 flex flex-col items-center gap-0.5">
+            <div className={`flex-1 pt-0 flex flex-col items-center ${compactView ? 'gap-0.5' : 'gap-1'}`}>
           {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = activeMenuItem === item.id
@@ -322,28 +462,35 @@ export function NewSidebar() {
               <Tooltip key={item.id} content={item.label} position="right">
                 <motion.button
                   onClick={() => handleMenuItemClick(item.id)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200 relative group ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-md transition-all relative group ${getFontFamilyClass()} ${
                     isActive
                       ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/30'
                       : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
                   }`}
-                  whileHover={{ scale: 1.1, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  style={{ 
+                    transitionDuration: showAnimations ? `${getAnimationDuration()}s` : '0s'
+                  }}
+                  {...getAnimationProps()}
                 >
-                  <Icon size={14} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicatorCollapsed"
-                      className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r shadow-sm shadow-vscode-blue/50"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.2 }}
+                  <motion.div
+                    initial={false}
+                    animate={showAnimations ? {
+                      scale: isActive ? 1.1 : 1,
+                    } : {}}
+                    transition={{ duration: getAnimationDuration(), ease: "easeOut" }}
+                  >
+                    <Icon size={14} className={`relative z-10 ${showAnimations ? 'transition-transform' : ''}`}
+                      style={{ 
+                        transitionDuration: showAnimations ? `${getAnimationDuration()}s` : '0s'
+                      }}
                     />
-                  )}
+                  </motion.div>
                   {!isActive && (
                     <motion.div
-                      className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                      className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10"
+                      style={{ 
+                        transitionDuration: showAnimations ? `${getAnimationDuration()}s` : '0s'
+                      }}
                       initial={false}
                     />
                   )}
@@ -366,7 +513,11 @@ export function NewSidebar() {
         {mounted && portfolioSettings.showRecentlyViewed && recentlySelected.length > 0 && (
           <div className="pt-1 pb-0.5 border-b border-vscode-border flex-shrink-0">
             <div className="mb-0.5 flex justify-center items-center">
-              <History size={10} className="text-vscode-text-secondary" />
+              <Tooltip content={t('recent')} position="right">
+                <div className="p-1">
+                  <History size={12} className="text-vscode-text-secondary hover:text-vscode-text transition-colors duration-200" />
+                </div>
+              </Tooltip>
             </div>
             <div className="flex flex-col items-center space-y-0.5">
               {recentlySelected.slice(0, 3).map((menuId) => {
@@ -389,19 +540,18 @@ export function NewSidebar() {
                       whileTap={{ scale: 0.95 }}
                       transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                      <Icon size={14} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeIndicatorExpanded"
-                          className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r shadow-sm shadow-vscode-blue/50"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      )}
+                      <motion.div
+                        initial={false}
+                        animate={{
+                          scale: isActive ? 1.1 : 1,
+                        }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                      >
+                        <Icon size={14} className="relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                      </motion.div>
                       {!isActive && (
                         <motion.div
-                          className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                          className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-300"
                           initial={false}
                         />
                       )}
@@ -414,8 +564,11 @@ export function NewSidebar() {
         )}
 
         {/* Main Menu Icons - Compact, No Scroll */}
-        <div className="flex-1 flex flex-col items-center justify-start pt-0 space-y-0.5">
-          {menuItems.map((item) => {
+        <div 
+          ref={setMenuContainerRef}
+          className="flex-1 flex flex-col items-center justify-start pt-0 space-y-0.5 relative overflow-visible"
+        >
+          {menuItems.slice(0, visibleItemsCount).map((item) => {
             const Icon = item.icon
             const isActive = activeMenuItem === item.id
             
@@ -423,28 +576,35 @@ export function NewSidebar() {
               <Tooltip key={item.id} content={item.label} position="right">
                 <motion.button
                   onClick={() => handleMenuItemClick(item.id)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-md transition-all duration-200 relative group ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-md transition-all relative group ${getFontFamilyClass()} ${
                     isActive
-                      ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/30'
+                      ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/40'
                       : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
                   }`}
-                  whileHover={{ scale: 1.1, x: 2 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  style={{ 
+                    transitionDuration: showAnimations ? `${getAnimationDuration()}s` : '0s'
+                  }}
+                  {...getAnimationProps()}
                 >
-                  <Icon size={14} className="relative z-10 transition-transform duration-200 group-hover:scale-110" />
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeIndicatorExpanded"
-                      className="absolute left-0 top-0 bottom-0 w-0.5 bg-vscode-blue rounded-r shadow-sm shadow-vscode-blue/50"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.2 }}
+                  <motion.div
+                    initial={false}
+                    animate={showAnimations ? {
+                      scale: isActive ? 1.1 : 1,
+                    } : {}}
+                    transition={{ duration: getAnimationDuration(), ease: "easeOut" }}
+                  >
+                    <Icon size={14} className={`relative z-10 ${showAnimations ? 'transition-transform' : ''}`} 
+                      style={{ 
+                        transitionDuration: showAnimations ? `${getAnimationDuration()}s` : '0s'
+                      }}
                     />
-                  )}
+                  </motion.div>
                   {!isActive && (
                     <motion.div
-                      className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-200"
+                      className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10"
+                      style={{ 
+                        transitionDuration: showAnimations ? `${getAnimationDuration()}s` : '0s'
+                      }}
                       initial={false}
                     />
                   )}
@@ -452,6 +612,118 @@ export function NewSidebar() {
               </Tooltip>
             )
           })}
+
+          {/* More Button - Show if there are overflow items */}
+          {visibleItemsCount < menuItems.length && (
+            <div 
+              className="relative z-30"
+              onMouseEnter={() => {
+                if (hoverTimeoutRef.current) {
+                  clearTimeout(hoverTimeoutRef.current)
+                  hoverTimeoutRef.current = null
+                }
+                setShowMoreMenu(true)
+              }}
+              onMouseLeave={() => {
+                hoverTimeoutRef.current = setTimeout(() => setShowMoreMenu(false), 150)
+              }}
+            >
+              <motion.button
+                ref={setMoreButtonRef}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowMoreMenu(!showMoreMenu)
+                }}
+                className={`w-8 h-8 flex items-center justify-center rounded-md transition-all duration-300 relative group ${
+                  showMoreMenu
+                    ? 'bg-vscode-blue text-white shadow-lg shadow-vscode-blue/40'
+                    : 'text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text hover:shadow-md'
+                }`}
+                whileHover={{ scale: 1.1, x: 2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              >
+                <motion.div
+                  initial={false}
+                  animate={{
+                    scale: showMoreMenu ? 1.1 : 1,
+                  }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <MoreVertical size={14} className="relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                </motion.div>
+                {!showMoreMenu && (
+                  <motion.div
+                    className="absolute inset-0 rounded-md bg-vscode-blue/0 group-hover:bg-vscode-blue/10 transition-colors duration-300"
+                    initial={false}
+                  />
+                )}
+              </motion.button>
+
+              {/* More Menu Dropdown - Horizontal Row */}
+              <AnimatePresence>
+                {showMoreMenu && (
+                  <>
+                    {/* Dropdown Container - Fixed positioning */}
+                    <motion.div
+                      ref={setMoreMenuRef}
+                      initial={{ opacity: 0, scale: 0.95, x: -5 }}
+                      animate={{ opacity: 1, scale: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, x: -5 }}
+                      transition={{ duration: 0.2, type: "spring", stiffness: 300, damping: 25 }}
+                      className="fixed z-50 bg-vscode-sidebar border border-vscode-border rounded-lg shadow-2xl p-2"
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseEnter={() => {
+                        if (hoverTimeoutRef.current) {
+                          clearTimeout(hoverTimeoutRef.current)
+                          hoverTimeoutRef.current = null
+                        }
+                        setShowMoreMenu(true)
+                      }}
+                      onMouseLeave={() => {
+                        hoverTimeoutRef.current = setTimeout(() => setShowMoreMenu(false), 150)
+                      }}
+                      style={{
+                        left: moreButtonRef ? `${moreButtonRef.getBoundingClientRect().right + 12}px` : '60px',
+                        top: moreButtonRef ? `${moreButtonRef.getBoundingClientRect().top + (moreButtonRef.offsetHeight / 2) - 20}px` : '50%',
+                        transform: 'translateY(-50%)',
+                      }}
+                    >
+                      <div className="flex flex-row gap-1.5 items-center flex-nowrap">
+                        {menuItems.slice(visibleItemsCount).map((item, index) => {
+                          const Icon = item.icon
+                          const isActive = activeMenuItem === item.id
+                          
+                          return (
+                            <Tooltip key={item.id} content={item.label} position="top">
+                              <motion.button
+                                onClick={() => {
+                                  handleMenuItemClick(item.id)
+                                  setShowMoreMenu(false)
+                                }}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: index * 0.02, duration: 0.15 }}
+                                className={`w-10 h-10 flex items-center justify-center rounded-md transition-all duration-200 flex-shrink-0 ${
+                                  isActive
+                                    ? 'bg-vscode-blue text-white shadow-md'
+                                    : 'bg-vscode-hover/50 text-vscode-text-secondary hover:bg-vscode-hover hover:text-vscode-text'
+                                }`}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                <Icon size={16} />
+                              </motion.button>
+                            </Tooltip>
+                          )
+                        })}
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </div>
 
       </div>
