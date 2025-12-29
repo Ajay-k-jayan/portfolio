@@ -181,9 +181,17 @@ export function RecommendationsTab() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-vscode-sidebar border border-vscode-border flex items-center justify-center">
                   <MessageSquare className="text-vscode-text-secondary" size={40} />
                 </div>
-                <p className="text-vscode-text-secondary text-base">
+                <p className="text-vscode-text-secondary text-base mb-2">
                   {searchQuery ? 'No recommendations found matching your search.' : 'No recommendations available.'}
                 </p>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-vscode-blue hover:text-vscode-blue-accent text-sm transition-colors"
+                  >
+                    Clear filters
+                  </button>
+                )}
               </motion.div>
             ) : viewMode === 'grid' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

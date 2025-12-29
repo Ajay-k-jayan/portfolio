@@ -249,7 +249,7 @@ export const ContactTab = memo(function ContactTab() {
     }
 
     return categories
-  }, [githubData, repositories, portfolioSettings.showGitHubStats])
+  }, [githubData, repositories, portfolioSettings.showGitHubStats, t])
 
   // Filter and sort
   const filteredAndSortedCategories = useMemo(() => {
@@ -330,7 +330,7 @@ export const ContactTab = memo(function ContactTab() {
         setFormError(t('failedToOpenEmailClient'))
       }
     }, 500)
-  }, [formData, t, portfolioData.profile.email, addNotification, portfolioSettings.formSuccessAlerts])
+  }, [formData, t, addNotification, portfolioSettings.formSuccessAlerts])
 
   const totalItems = useMemo(() => 
     contactCategories.reduce((sum, cat) => sum + cat.items.length, 0),
@@ -435,15 +435,20 @@ export const ContactTab = memo(function ContactTab() {
         {/* Contact Categories */}
         <div className="space-y-6">
           {filteredAndSortedCategories.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-vscode-text-secondary mb-2">{t('noItemsFound')}</p>
-              <button
-                onClick={() => setSearchQuery('')}
-                aria-label={t('clearSearchFilters')}
-                className="text-vscode-blue hover:text-vscode-blue-accent text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-1 rounded px-2 py-1"
-              >
-                {t('clearSearch')}
-              </button>
+            <div className="text-center py-16">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-vscode-sidebar border border-vscode-border flex items-center justify-center">
+                <MessageSquare className="text-vscode-text-secondary" size={40} />
+              </div>
+              <p className="text-vscode-text-secondary text-base mb-2">{t('noItemsFound')}</p>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  aria-label={t('clearSearchFilters')}
+                  className="text-vscode-blue hover:text-vscode-blue-accent text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-1 rounded px-2 py-1"
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
           ) : (
             filteredAndSortedCategories.map((category) => {

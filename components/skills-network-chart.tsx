@@ -11,6 +11,7 @@ import {
   Minimize2, Maximize2, ChevronDown, ChevronUp, FileText, Share2, Save, Clipboard,
   Languages, Monitor, Smartphone, Tablet, FileDown
 } from 'lucide-react'
+// @ts-ignore - d3-force types are declared in d3-force.d.ts
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide, SimulationNodeDatum, SimulationLinkDatum } from 'd3-force'
 import { skillWebsites } from '@/lib/skill-websites'
 import { languages } from '@/lib/translations'
@@ -860,11 +861,14 @@ export function SkillsNetworkChart() {
 
     // Prepare nodes and links for d3
     const d3Nodes = nodes.map(n => ({ ...n, x: n.x || Math.random() * canvas.width, y: n.y || Math.random() * canvas.height }))
-    const d3Links = links.map(l => ({
-      source: typeof l.source === 'string' ? d3Nodes.find(n => n.id === l.source) : l.source,
-      target: typeof l.target === 'string' ? d3Nodes.find(n => n.id === l.target) : l.target,
-      ...l
-    })).filter(l => l.source && l.target) as any[]
+    const d3Links = links.map(l => {
+      const { source: sourceProp, target: targetProp, ...rest } = l
+      return {
+        ...rest,
+        source: typeof sourceProp === 'string' ? d3Nodes.find(n => n.id === sourceProp) : sourceProp,
+        target: typeof targetProp === 'string' ? d3Nodes.find(n => n.id === targetProp) : targetProp,
+      }
+    }).filter(l => l.source && l.target) as any[]
 
     // Create force simulation with increased spacing
     const simulation = forceSimulation<GraphNode>(d3Nodes as any)

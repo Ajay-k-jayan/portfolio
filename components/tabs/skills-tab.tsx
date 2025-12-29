@@ -54,7 +54,7 @@ export function SkillsTab() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [viewMode, setViewMode] = useState<ViewMode>((portfolioSettings.gridLayout === 'grid' ? 'grid' : portfolioSettings.gridLayout === 'list' ? 'list' : 'grid') as ViewMode)
 
-  const skillCategories: SkillCategory[] = [
+  const skillCategories: SkillCategory[] = useMemo(() => [
     {
       name: 'FRONTEND LANGUAGES',
       skills: [
@@ -137,7 +137,7 @@ export function SkillsTab() {
         { id: 'auth', name: 'Secure Authentication', description: 'JWT, OAuth — Implementing secure authentication and authorization', category: 'Expertise', level: 82, years: '2+', tags: ['auth', 'jwt', 'oauth', 'security'], publisher: 'Expert', projects: 6, experience: 'Advanced' },
       ],
     },
-  ]
+  ], [])
 
   // Get all unique categories
   const allCategories = useMemo(() => {
@@ -148,7 +148,7 @@ export function SkillsTab() {
       })
     })
     return Array.from(categories).sort()
-  }, [])
+  }, [skillCategories])
 
 
 
@@ -222,7 +222,7 @@ export function SkillsTab() {
         skills: filteredSkills,
       }
     })
-  }, [searchQuery, selectedCategories, levelFilter, sortBy, sortOrder])
+  }, [searchQuery, selectedCategories, levelFilter, sortBy, sortOrder, skillCategories])
 
   const toggleSection = (sectionName: string) => {
     setExpandedSections((prev) => ({
@@ -654,8 +654,11 @@ export function SkillsTab() {
         {viewMode !== 'network' && (
         <div className="space-y-6">
           {filteredAndSortedCategories.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-vscode-text-secondary mb-2">No skills found matching your filters.</p>
+            <div className="text-center py-16">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-vscode-sidebar border border-vscode-border flex items-center justify-center">
+                <Code className="text-vscode-text-secondary" size={40} />
+              </div>
+              <p className="text-vscode-text-secondary text-base mb-2">No skills found matching your filters.</p>
               <button
                 onClick={clearFilters}
                 className="text-vscode-blue hover:text-vscode-blue-accent text-sm transition-colors"

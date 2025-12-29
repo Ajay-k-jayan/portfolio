@@ -312,7 +312,6 @@ export interface Translations {
   contactMethods: string
   aurexProject: string
   noRecentItems: string
-  more: string
   
   // Contact Form Additional
   whatsThisAbout: string
@@ -331,11 +330,9 @@ export interface Translations {
   emailClientOpenedPleaseSend: string
   failedToOpenEmailClient: string
   contactAndSocialMedia: string
-  socialPlatforms: string
   professionalInfo: string
   githubRepositories: string
   availability: string
-  company: string
   codeRepositories: string
   professionalNetwork: string
   secureMessaging: string
@@ -348,28 +345,7 @@ export interface Translations {
   weather: string
   networkStatus: string
   systemInfo: string
-  useCompactSpacing: string
-  enableSmoothTransitions: string
-  controlAnimationDuration: string
-  chooseColorTheme: string
   selectInterfaceLanguage: string
-  adjustTextSize: string
-  chooseFontStyle: string
-  displayStatsOnWelcomePage: string
-  displayGitHubProfileData: string
-  displayRecentlyViewedItems: string
-  fastAccessToPages: string
-  displayRecentItemsInSidebar: string
-  showThemeSelectorInHeader: string
-  showLanguageSelectorInHeader: string
-  showDateAndTimeInStatusBar: string
-  showWeatherInformation: string
-  showCurrentLocation: string
-  showNetworkLatency: string
-  showCpuAndMemoryUsage: string
-  showSocialMediaLinks: string
-  showResumeDownloadButton: string
-  notifyAboutUpdates: string
   newest: string
   oldest: string
   noProjectsFound: string
@@ -545,7 +521,6 @@ const enUSTranslations: Translations = {
   recommendationsPageDescription: 'Testimonials and recommendations from colleagues, managers, and collaborators',
   testimonials: 'Testimonials',
   sortByDate: 'Sort by Date',
-  sortByName: 'Sort by Name',
   position: 'Position',
   
   // Settings Page
@@ -667,7 +642,6 @@ const enUSTranslations: Translations = {
   contactMethods: 'CONTACT METHODS',
   aurexProject: 'Aurex Project',
   noRecentItems: 'No recent items yet. Start exploring!',
-  more: 'More...',
   
   // Contact Form Additional
   whatsThisAbout: 'What\'s this about?',
@@ -686,11 +660,9 @@ const enUSTranslations: Translations = {
   emailClientOpenedPleaseSend: 'Email client opened. Please send your message.',
   failedToOpenEmailClient: 'Failed to open email client',
   contactAndSocialMedia: 'Contact & Social Media',
-  socialPlatforms: 'SOCIAL PLATFORMS',
   professionalInfo: 'PROFESSIONAL INFO',
   githubRepositories: 'GITHUB REPOSITORIES',
   availability: 'Availability',
-  company: 'Company',
   codeRepositories: 'Code repositories',
   professionalNetwork: 'Professional network',
   secureMessaging: 'Secure messaging',
@@ -703,28 +675,7 @@ const enUSTranslations: Translations = {
   weather: 'Weather',
   networkStatus: 'Network Status',
   systemInfo: 'System Info',
-  useCompactSpacing: 'Use compact spacing',
-  enableSmoothTransitions: 'Enable smooth transitions',
-  controlAnimationDuration: 'Control animation duration',
-  chooseColorTheme: 'Choose color theme',
   selectInterfaceLanguage: 'Select interface language',
-  adjustTextSize: 'Adjust text size',
-  chooseFontStyle: 'Choose font style',
-  displayStatsOnWelcomePage: 'Display stats on welcome page',
-  displayGitHubProfileData: 'Display GitHub profile data',
-  displayRecentlyViewedItems: 'Display recently viewed items',
-  fastAccessToPages: 'Fast access to pages',
-  displayRecentItemsInSidebar: 'Display recent items in sidebar',
-  showThemeSelectorInHeader: 'Show theme selector in header',
-  showLanguageSelectorInHeader: 'Show language selector in header',
-  showDateAndTimeInStatusBar: 'Show date and time in status bar',
-  showWeatherInformation: 'Show weather information',
-  showCurrentLocation: 'Show current location',
-  showNetworkLatency: 'Show network latency',
-  showCpuAndMemoryUsage: 'Show CPU and memory usage',
-  showSocialMediaLinks: 'Show social media links',
-  showResumeDownloadButton: 'Show resume download button',
-  notifyAboutUpdates: 'Notify about updates',
   newest: 'Newest',
   oldest: 'Oldest',
   noProjectsFound: 'No projects found matching your search.',
