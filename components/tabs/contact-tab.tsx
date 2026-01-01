@@ -81,6 +81,7 @@ type SortOption = 'name-asc' | 'name-desc'
 export const ContactTab = memo(function ContactTab() {
   const { t } = useLanguage()
   const { addNotification, portfolioSettings } = useAppStore()
+  const { variants } = useMotionConfig(portfolioSettings.animationSpeed)
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [sortBy, setSortBy] = useState<SortOption>('name-asc')
@@ -347,7 +348,13 @@ export const ContactTab = memo(function ContactTab() {
   )
 
   return (
-    <div className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto">
+    <motion.div 
+      className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto"
+      variants={variants(pageTransition, portfolioSettings.showAnimations)}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-6">
@@ -390,7 +397,7 @@ export const ContactTab = memo(function ContactTab() {
               />
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Search Bar */}
         <motion.div 
@@ -422,7 +429,7 @@ export const ContactTab = memo(function ContactTab() {
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Controls Bar */}
         <div className="mb-4 flex items-center gap-2 flex-wrap">
@@ -763,7 +770,7 @@ export const ContactTab = memo(function ContactTab() {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   )
