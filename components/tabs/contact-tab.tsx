@@ -14,6 +14,15 @@ import { useAppStore } from '@/lib/store'
 import { portfolioData } from '@/lib/portfolio-data'
 import { ViewSwitcher } from '@/components/ui/view-switcher'
 import { useLanguage } from '@/contexts/language-context'
+import { 
+  pageTransition, 
+  staggerContainer, 
+  staggerItem,
+  staggerItemLeft,
+  slideUp,
+  slideDown,
+  useMotionConfig 
+} from '@/lib/motionConfig'
 
 interface GitHubData {
   followers?: number
@@ -381,10 +390,13 @@ export const ContactTab = memo(function ContactTab() {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Search Bar */}
-        <div className="mb-6 mt-4">
+        <motion.div 
+          className="mb-6 mt-4"
+          variants={variants(slideUp, portfolioSettings.showAnimations)}
+        >
           <div className="relative">
             <div className="relative rounded-sm h-8 flex items-center border border-vscode-border bg-vscode-sidebar transition-colors">
               <Search
@@ -433,7 +445,12 @@ export const ContactTab = memo(function ContactTab() {
         </div>
 
         {/* Contact Categories */}
-        <div className="space-y-6">
+        <motion.div 
+          className="space-y-6"
+          variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+          initial="hidden"
+          animate="visible"
+        >
           {filteredAndSortedCategories.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-vscode-sidebar border border-vscode-border flex items-center justify-center">
@@ -456,7 +473,11 @@ export const ContactTab = memo(function ContactTab() {
               const isExpanded = expandedSections[sectionKey] ?? true
 
               return (
-                <div key={category.name} className="mb-5">
+                <motion.div 
+                  key={category.name}
+                  className="mb-5"
+                  variants={variants(staggerItem, portfolioSettings.showAnimations)}
+                >
                   <button
                     onClick={(e) => {
                       e.preventDefault()
@@ -515,9 +536,7 @@ export const ContactTab = memo(function ContactTab() {
                                     }
                                   }}
                                   aria-label={`${item.name}: ${item.description}`}
-                                  initial={{ opacity: 0, scale: 0.95 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ delay: index * 0.05 }}
+                                  variants={variants(staggerItem, portfolioSettings.showAnimations)}
                                   className="group relative overflow-hidden rounded-lg border border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50 hover:bg-vscode-hover transition-all p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-2"
                                   whileHover={{ scale: 1.02, y: -2 }}
                                   whileTap={{ scale: 0.98 }}
@@ -562,9 +581,7 @@ export const ContactTab = memo(function ContactTab() {
                                     }
                                   }}
                                   aria-label={`${item.name}: ${item.description}`}
-                                  initial={{ opacity: 0, x: -10 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: index * 0.03 }}
+                                  variants={variants(staggerItemLeft, portfolioSettings.showAnimations)}
                                   className="w-full flex items-center gap-3 p-3 rounded border border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50 hover:bg-vscode-hover transition-all text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-2"
                                   whileHover={{ x: 4 }}
                                 >
@@ -595,11 +612,11 @@ export const ContactTab = memo(function ContactTab() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
+                </motion.div>
               )
             })
           )}
-        </div>
+        </motion.div>
 
         {/* Contact Form Section */}
         <div className="mt-8 bg-vscode-sidebar border border-vscode-border rounded-lg overflow-hidden">
@@ -746,8 +763,8 @@ export const ContactTab = memo(function ContactTab() {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   )
 })

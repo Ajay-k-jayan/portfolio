@@ -1,14 +1,21 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { ExternalLink, Github, FolderOpen, Code2, Search, Filter, X, Calendar } from 'lucide-react'
-import { CodePreview } from '@/components/code-preview'
-import { LiveDemo } from '@/components/live-demo'
+import { FolderOpen, Search, Filter, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Tooltip } from '../ui/tooltip'
 import { useLanguage } from '@/contexts/language-context'
 import { ViewSwitcher } from '../ui/view-switcher'
 import { useAppStore } from '@/lib/store'
+import { 
+  pageTransition, 
+  staggerContainer, 
+  slideUp,
+  fadeIn,
+  useMotionConfig 
+} from '@/lib/motionConfig'
+import { EnhancedProjectCard } from '@/components/projects/enhanced-project-card'
+import { ProjectDetailModal } from '@/components/projects/project-detail-modal'
+import { useScrollAnimation } from '@/hooks/useScrollAnimation'
 
 interface Project {
   id: string
@@ -59,12 +66,16 @@ type ViewMode = 'grid' | 'list'
 export function ProjectsTab() {
   const { t } = useLanguage()
   const { portfolioSettings } = useAppStore()
-  const [expandedProject, setExpandedProject] = useState<string | null>(null)
-  const [showCodePreview, setShowCodePreview] = useState<string | null>(null)
-  const [showLiveDemo, setShowLiveDemo] = useState<string | null>(null)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('period-desc')
-  const [viewMode, setViewMode] = useState<ViewMode>(portfolioSettings.gridLayout as ViewMode || 'list')
+  const [viewMode, setViewMode] = useState<ViewMode>(portfolioSettings.gridLayout as ViewMode || 'grid')
+  const { variants } = useMotionConfig(portfolioSettings.animationSpeed)
+  
+  // Scroll-triggered animations
+  const headerRef = useScrollAnimation({ once: true, amount: 0.3 })
+  const descriptionRef = useScrollAnimation({ once: true, amount: 0.3 })
+  const gridRef = useScrollAnimation({ once: false, amount: 0.2 })
 
   // Filter and sort projects
   const filteredAndSortedProjects = useMemo(() => {
@@ -111,10 +122,22 @@ export function ProjectsTab() {
   }, [searchQuery, sortBy])
 
   return (
-    <div className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-6">
+      <motion.div 
+        className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto"
+        variants={variants(pageTransition, portfolioSettings.showAnimations)}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+      >
+        <div className="max-w-7xl mx-auto p-6">
+        {/* Header with scroll-triggered animation */}
+        <motion.div 
+          ref={headerRef.ref}
+          className="mb-6"
+          initial={{ opacity: 0, y: 30 }}
+          animate={headerRef.isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
@@ -143,9 +166,6 @@ export function ProjectsTab() {
                   />
                 </div>
               </div>
-              <p className="text-sm text-vscode-text-secondary mt-1">
-                {t('projectsPageDescription')}
-              </p>
             </div>
             <div className="flex items-center gap-1 ml-4">
               <ViewSwitcher
@@ -155,7 +175,18 @@ export function ProjectsTab() {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
+
+        {/* Description with scroll-triggered animation */}
+        <motion.p
+          ref={descriptionRef.ref}
+          initial={{ opacity: 0, y: 20 }}
+          animate={descriptionRef.isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="text-sm text-vscode-text-secondary mb-6"
+        >
+          {t('projectsPageDescription')}
+        </motion.p>
 
         {/* Search and Sort */}
         <div className="mb-6 flex items-center gap-3 flex-wrap">
@@ -196,10 +227,10 @@ export function ProjectsTab() {
         <AnimatePresence mode="wait">
           <motion.div
             key={viewMode}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            variants={variants(fadeIn, portfolioSettings.showAnimations)}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
           >
             {filteredAndSortedProjects.length === 0 ? (
               <motion.div
@@ -223,236 +254,47 @@ export function ProjectsTab() {
                 )}
               </motion.div>
             ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {filteredAndSortedProjects.map((project, index) => {
-                  const isExpanded = expandedProject === project.id
-                  return (
-                    <motion.div
-                      key={project.id}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                      className="group relative bg-vscode-sidebar border border-vscode-border rounded-lg p-4 hover:border-vscode-blue/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col"
-                    >
-                      {/* Header */}
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-vscode-text text-sm mb-1 line-clamp-2">
-                            {project.title}
-                          </h3>
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-vscode-text-secondary text-xs leading-relaxed mb-2 line-clamp-3">
-                        {project.description}
-                      </p>
-
-                      {/* Technologies Tags */}
-                      <div className="flex flex-wrap gap-1.5 mb-2">
-                        {project.technologies.slice(0, 3).map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-1.5 py-0.5 bg-vscode-blue/10 text-vscode-blue text-[10px] rounded border border-vscode-blue/20"
-                          >
-                            {tech.length > 10 ? tech.substring(0, 10) + '...' : tech}
-                          </span>
-                        ))}
-                        {project.technologies.length > 3 && (
-                          <span className="px-1.5 py-0.5 bg-vscode-sidebar text-vscode-text-secondary text-[10px] rounded border border-vscode-border">
-                            +{project.technologies.length - 3}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-1.5 mb-2 flex-wrap">
-                        {project.githubUrl && (
-                          <a
-                            href={project.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-2 py-1 bg-vscode-active hover:bg-vscode-hover text-vscode-text text-[10px] rounded transition-colors"
-                          >
-                            <Github size={10} />
-                            <span>GitHub</span>
-                          </a>
-                        )}
-                        {project.liveUrl && (
-                          <a
-                            href={project.liveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 px-2 py-1 bg-vscode-blue hover:bg-blue-600 text-white text-[10px] rounded transition-colors"
-                          >
-                            <ExternalLink size={10} />
-                            <span>Live</span>
-                          </a>
-                        )}
-                        {project.codePreview && (
-                          <button
-                            onClick={() => setShowCodePreview(project.id)}
-                            className="flex items-center gap-1 px-2 py-1 bg-vscode-active hover:bg-vscode-hover text-vscode-text text-[10px] rounded transition-colors"
-                          >
-                            <Code2 size={10} />
-                            <span>Code</span>
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Period at the bottom */}
-                      {project.period && (
-                        <div className="flex items-center gap-1 text-[10px] text-vscode-text-secondary mt-auto pt-2 border-t border-vscode-border">
-                          <Calendar size={9} />
-                          <span>{project.period}</span>
-                        </div>
-                      )}
-
-                      {/* Expandable Code Preview */}
-                      {isExpanded && project.codePreview && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="mt-2 pt-2 border-t border-vscode-border"
-                        >
-                          <button
-                            onClick={() => setExpandedProject(null)}
-                            className="text-[10px] text-vscode-blue hover:text-vscode-blue-accent mb-2"
-                          >
-                            Hide Code
-                          </button>
-                          <pre className="text-[9px] text-vscode-orange bg-vscode-active p-2 rounded overflow-x-auto">
-                            <code>{project.codePreview}</code>
-                          </pre>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  )
-                })}
-              </div>
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+                initial="hidden"
+                animate={gridRef.isInView ? "visible" : "hidden"}
+              >
+                {filteredAndSortedProjects.map((project, index) => (
+                  <EnhancedProjectCard
+                    key={project.id}
+                    project={project}
+                    onCardClick={setSelectedProject}
+                    index={index}
+                  />
+                ))}
+              </motion.div>
             ) : (
-              <div className="space-y-3">
-                {filteredAndSortedProjects.map((project, index) => {
-                  const isExpanded = expandedProject === project.id
-                  return (
-                    <motion.div
-                      key={project.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
-                      className="group relative bg-vscode-sidebar border border-vscode-border rounded-lg p-4 hover:border-vscode-blue/50 hover:shadow-lg transition-all duration-300"
-                    >
-                      {/* Header */}
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <FolderOpen className="text-vscode-blue flex-shrink-0" size={18} />
-                            <h3 className="font-semibold text-vscode-text text-base">
-                              {project.title}
-                            </h3>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <p className="text-vscode-text-secondary text-sm leading-relaxed mb-3 ml-6">
-                        {project.description}
-                      </p>
-
-                      {/* Technologies Tags */}
-                      <div className="flex flex-wrap gap-2 mb-3 ml-6">
-                        {project.technologies.map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-2 py-0.5 bg-vscode-blue/10 text-vscode-blue text-xs rounded border border-vscode-blue/20"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-2 mb-3 ml-6">
-                        {project.githubUrl && (
-                          <a
-                            href={project.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-vscode-active hover:bg-vscode-hover text-vscode-text text-sm rounded transition-colors"
-                          >
-                            <Github size={14} />
-                            <span>GitHub</span>
-                          </a>
-                        )}
-                        {project.liveUrl && (
-                          <a
-                            href={project.liveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-vscode-blue hover:bg-blue-600 text-white text-sm rounded transition-colors"
-                          >
-                            <ExternalLink size={14} />
-                            <span>Live Demo</span>
-                          </a>
-                        )}
-                        {project.codePreview && (
-                          <button
-                            onClick={() => setExpandedProject(isExpanded ? null : project.id)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-vscode-active hover:bg-vscode-hover text-vscode-text text-sm rounded transition-colors"
-                          >
-                            <Code2 size={14} />
-                            <span>Code</span>
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Period at the bottom */}
-                      {project.period && (
-                        <div className="flex items-center gap-1 text-xs text-vscode-text-secondary ml-6 pt-3 border-t border-vscode-border">
-                          <Calendar size={11} />
-                          <span>{project.period}</span>
-                        </div>
-                      )}
-
-                      {/* Expandable Code Preview */}
-                      {isExpanded && project.codePreview && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.2 }}
-                          className="mt-4 pt-4 border-t border-vscode-border ml-6"
-                        >
-                          <pre className="text-xs text-vscode-orange bg-vscode-active p-3 rounded overflow-x-auto">
-                            <code>{project.codePreview}</code>
-                          </pre>
-                        </motion.div>
-                      )}
-                    </motion.div>
-                  )
-                })}
-              </div>
+              <motion.div 
+                className="space-y-3"
+                variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+                initial="hidden"
+                animate={gridRef.isInView ? "visible" : "hidden"}
+              >
+                {filteredAndSortedProjects.map((project, index) => (
+                  <EnhancedProjectCard
+                    key={project.id}
+                    project={project}
+                    onCardClick={setSelectedProject}
+                    index={index}
+                  />
+                ))}
+              </motion.div>
             )}
           </motion.div>
         </AnimatePresence>
       </div>
-      {showCodePreview && (
-        <CodePreview
-          projectId={showCodePreview}
-          code={projects.find(p => p.id === showCodePreview)?.codePreview || ''}
-          onClose={() => setShowCodePreview(null)}
-        />
-      )}
-      {showLiveDemo && (
-        <LiveDemo
-          projectId={showLiveDemo}
-          url={projects.find(p => p.id === showLiveDemo)?.liveUrl || ''}
-          onClose={() => setShowLiveDemo(null)}
-        />
-      )}
-    </div>
+      
+      {/* Project Detail Modal */}
+      <ProjectDetailModal
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
+      />
+    </motion.div>
   )
 }

@@ -23,6 +23,7 @@ import { ContactTab } from './tabs/contact-tab'
 
 export function VSCodeLayout({ children }: { children: React.ReactNode }) {
   const { tabs, activeTabId, sidebarCollapsed, activeMenuItem, portfolioSettings } = useAppStore()
+  const { variants } = useMotionConfig(portfolioSettings.animationSpeed)
 
   // Apply font size and family settings dynamically
   useEffect(() => {
@@ -100,13 +101,10 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
               {portfolioSettings.showAnimations ? (
                 <motion.div
                   key={activeTabId || activeMenuItem || 'welcome'}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ 
-                    duration: portfolioSettings.animationSpeed === 'fast' ? 0.15 : 
-                             portfolioSettings.animationSpeed === 'slow' ? 0.5 : 0.2 
-                  }}
+                  variants={variants(pageTransition, portfolioSettings.showAnimations)}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
                   className="w-full"
                 >
                   {activeContent}

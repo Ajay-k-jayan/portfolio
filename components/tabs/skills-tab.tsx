@@ -9,6 +9,14 @@ import { SkillsNetworkChart } from '@/components/skills-network-chart'
 import { ViewSwitcher } from '@/components/ui/view-switcher'
 import { useLanguage } from '@/contexts/language-context'
 import { useAppStore } from '@/lib/store'
+import { 
+  pageTransition, 
+  staggerContainer, 
+  staggerItem,
+  slideUp,
+  slideDown,
+  useMotionConfig 
+} from '@/lib/motionConfig'
 
 interface Skill {
   id: string
@@ -448,11 +456,22 @@ export function SkillsTab() {
     )
   }
 
+  const { variants } = useMotionConfig(portfolioSettings.animationSpeed)
+
   return (
-    <div className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto">
+    <motion.div 
+      className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto"
+      variants={variants(pageTransition, portfolioSettings.showAnimations)}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
-        <div className="mb-6">
+        <motion.div 
+          className="mb-6"
+          variants={variants(slideDown, portfolioSettings.showAnimations)}
+        >
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
@@ -493,10 +512,13 @@ export function SkillsTab() {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Search Bar */}
-        <div className="mb-6 mt-4">
+        <motion.div 
+          className="mb-6 mt-4"
+          variants={variants(slideUp, portfolioSettings.showAnimations)}
+        >
           <div className="relative">
             <div className="relative rounded-sm h-8 flex items-center border border-vscode-border bg-vscode-sidebar transition-colors">
               <Search
@@ -520,10 +542,13 @@ export function SkillsTab() {
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Controls Bar */}
-        <div className="mb-4 space-y-3">
+        <motion.div 
+          className="mb-4 space-y-3"
+          variants={variants(slideUp, portfolioSettings.showAnimations)}
+        >
           {/* Filters */}
           <div className="flex items-center gap-2 flex-wrap">
             <button
@@ -633,7 +658,7 @@ export function SkillsTab() {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
 
         {/* Network View */}
         {viewMode === 'network' && (
@@ -652,7 +677,12 @@ export function SkillsTab() {
 
         {/* Skills Grid/List */}
         {viewMode !== 'network' && (
-        <div className="space-y-6">
+        <motion.div 
+          className="space-y-6"
+          variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+          initial="hidden"
+          animate="visible"
+        >
           {filteredAndSortedCategories.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-vscode-sidebar border border-vscode-border flex items-center justify-center">
@@ -672,7 +702,11 @@ export function SkillsTab() {
               const isExpanded = expandedSections[sectionKey] ?? true
 
               return (
-                <div key={category.name} className="mb-5">
+                <motion.div 
+                  key={category.name}
+                  className="mb-5"
+                  variants={variants(staggerItem, portfolioSettings.showAnimations)}
+                >
                   <button
                     onClick={(e) => {
                       e.preventDefault()
@@ -721,13 +755,13 @@ export function SkillsTab() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
+                </motion.div>
               )
             })
           )}
-        </div>
+        </motion.div>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }

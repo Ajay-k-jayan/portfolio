@@ -13,12 +13,20 @@ import { useAppStore } from '@/lib/store'
 import { useEnhancedTheme } from '@/contexts/enhanced-theme-context'
 import { portfolioData } from '@/lib/portfolio-data'
 import { useLanguage } from '@/contexts/language-context'
+import { 
+  slideDown, 
+  staggerContainer, 
+  staggerItemLeft, 
+  staggerItem,
+  useMotionConfig 
+} from '@/lib/motionConfig'
 
 export function WelcomeTab() {
   const { t } = useLanguage()
   const { setActiveMenuItem, recentlySelected, portfolioSettings, addNotification } = useAppStore()
   const { currentTheme } = useEnhancedTheme()
   const [mounted, setMounted] = useState(false)
+  const { variants } = useMotionConfig(portfolioSettings.animationSpeed)
   
   const menuItemLabels: Record<string, string> = {
     'project': t('projects'),
@@ -219,10 +227,10 @@ export function WelcomeTab() {
       {/* VS Code Welcome Screen Design */}
       <div className="max-w-7xl mx-auto p-6">
         {/* Welcome Header */}
-            <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+        <motion.div
+          variants={variants(slideDown, portfolioSettings.showAnimations)}
+          initial="hidden"
+          animate="visible"
           className="mb-12"
         >
           <h1 className="text-4xl font-normal text-vscode-text mb-2" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
@@ -238,20 +246,22 @@ export function WelcomeTab() {
           {/* Left Column - Start & Recent */}
           <div className="lg:col-span-2 space-y-10">
             {/* Start Section */}
-            <div>
+            <motion.div
+              variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+              initial="hidden"
+              animate="visible"
+            >
               <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
                 {t('start')}
               </h2>
               <div className="space-y-1">
-                {startActions.map((action, index) => {
-                        const Icon = action.icon
-                        return (
-                          <motion.button
-                            key={action.id}
-                            onClick={action.action}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                {startActions.map((action) => {
+                  const Icon = action.icon
+                  return (
+                    <motion.button
+                      key={action.id}
+                      onClick={action.action}
+                      variants={variants(staggerItemLeft, portfolioSettings.showAnimations)}
                       className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-colors group flex items-center gap-3"
                       style={{
                         color: currentTheme?.colors?.blue || '#007acc',
@@ -270,30 +280,32 @@ export function WelcomeTab() {
                         style={{ color: currentTheme?.colors?.blue || '#007acc' }}
                       />
                       <span className="text-sm font-normal">{action.label}</span>
-                          </motion.button>
-                        )
-                      })}
-                    </div>
-            </div>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </motion.div>
 
             {/* Recent Section */}
             {mounted && portfolioSettings.showRecentItems && (
-            <div>
+            <motion.div
+              variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+              initial="hidden"
+              animate="visible"
+            >
               <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
                 {t('recent')}
               </h2>
               <div className="space-y-1">
                 {recentItems.length > 0 ? (
                   <>
-                        {recentItems.map((item, index) => {
-                          const Icon = item.icon
-                          return (
-                            <motion.button
-                              key={index}
-                              onClick={item.action}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.2, delay: 0.3 + index * 0.05 }}
+                    {recentItems.map((item, index) => {
+                      const Icon = item.icon
+                      return (
+                        <motion.button
+                          key={index}
+                          onClick={item.action}
+                          variants={variants(staggerItemLeft, portfolioSettings.showAnimations)}
                           className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-colors group"
                           style={{
                             fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)',
@@ -324,13 +336,11 @@ export function WelcomeTab() {
                           >
                                   {item.path}
                                 </div>
-                            </motion.button>
-                          )
-                        })}
+                        </motion.button>
+                      )
+                    })}
                     <motion.button
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2, delay: 0.3 + recentItems.length * 0.05 }}
+                      variants={variants(staggerItemLeft, portfolioSettings.showAnimations)}
                       className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-colors mt-1"
                 style={{
                         color: currentTheme?.colors?.blue || '#007acc',
@@ -354,26 +364,29 @@ export function WelcomeTab() {
                     </p>
                   </div>
                 )}
-                </div>
               </div>
+            </motion.div>
             )}
           </div>
 
           {/* Right Column - Walkthroughs */}
-          <div className="lg:col-span-1">
+          <motion.div
+            className="lg:col-span-1"
+            variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+            initial="hidden"
+            animate="visible"
+          >
             <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
               Walkthroughs
             </h2>
             <div className="space-y-3">
-              {walkthroughs.map((walkthrough, index) => {
+              {walkthroughs.map((walkthrough) => {
                 const Icon = walkthrough.icon
-                  return (
+                return (
                   <motion.button
                     key={walkthrough.id}
                     onClick={walkthrough.action}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
+                    variants={variants(staggerItem, portfolioSettings.showAnimations)}
                     className="w-full text-left p-4 bg-vscode-sidebar border border-vscode-border rounded hover:border-vscode-blue/50 transition-all group relative"
                     style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}
                     onMouseEnter={(e) => {
@@ -428,7 +441,7 @@ export function WelcomeTab() {
                 )
               })}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
