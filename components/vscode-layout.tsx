@@ -8,7 +8,7 @@ import { StatusBar } from './status-bar'
 import { ParticleBackground } from './particle-background'
 import { useAppStore } from '@/lib/store'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useMotionConfig, pageTransition } from '@/lib/motionConfig'
+import { useMotionConfig, advancedPageTransition } from '@/lib/motionConfig'
 import { WelcomeTab } from './tabs/welcome-tab'
 import { SkillsTab } from './tabs/skills-tab'
 import { ProjectsTab } from './tabs/projects-tab'
@@ -102,7 +102,7 @@ export function VSCodeLayout({ children }: { children: React.ReactNode }) {
               {portfolioSettings.showAnimations ? (
                 <motion.div
                   key={activeTabId || activeMenuItem || 'welcome'}
-                  variants={variants(pageTransition, portfolioSettings.showAnimations)}
+                  variants={variants(advancedPageTransition, portfolioSettings.showAnimations)}
                   initial="initial"
                   animate="animate"
                   exit="exit"

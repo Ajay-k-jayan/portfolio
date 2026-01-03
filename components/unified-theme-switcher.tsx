@@ -17,18 +17,17 @@ export function UnifiedThemeSwitcher() {
   const [previewTheme, setPreviewTheme] = useState<string | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
-  // Safety check - ensure themes array exists
-  const safeThemes = themes || []
-
   // Filter themes based on search and type
   const filteredThemes = useMemo(() => {
+    // Safety check - ensure themes array exists
+    const safeThemes = themes || []
     return safeThemes.filter(theme => {
       const matchesSearch = theme.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            theme.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesType = filterType === 'all' || theme.type === filterType
       return matchesSearch && matchesType
     })
-  }, [safeThemes, searchQuery, filterType])
+  }, [themes, searchQuery, filterType])
 
   const getActiveIcon = () => {
     if (!currentTheme) return Moon
@@ -38,15 +37,6 @@ export function UnifiedThemeSwitcher() {
 
   const ActiveIcon = getActiveIcon()
   
-  // Safety check for currentTheme
-  if (!currentTheme) {
-    return (
-      <div className="p-2.5 rounded-lg bg-vscode-active/50 border border-vscode-border/50">
-        <Moon size={18} className="text-vscode-text-secondary" />
-      </div>
-    )
-  }
-
   // Track mouse for parallax effect
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -57,6 +47,15 @@ export function UnifiedThemeSwitcher() {
     }
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [showSelector])
+
+  // Safety check for currentTheme
+  if (!currentTheme) {
+    return (
+      <div className="p-2.5 rounded-lg bg-vscode-active/50 border border-vscode-border/50">
+        <Moon size={18} className="text-vscode-text-secondary" />
+      </div>
+    )
+  }
 
   // Premium Theme Card with Advanced Effects
   const PremiumThemeCard = ({ theme, index }: { theme: Theme; index: number }) => {
@@ -218,11 +217,12 @@ export function UnifiedThemeSwitcher() {
                     className="w-10 h-10 rounded-xl border-2 border-white/30 shadow-lg"
                     style={{ backgroundColor: color }}
                     whileHover={{ scale: 1.2, rotate: 360, zIndex: 10 }}
-                    transition={{ type: 'spring', stiffness: 400 }}
                     animate={{
                       y: isHovered ? [0, -5, 0] : 0,
                     }}
                     transition={{
+                      type: 'spring',
+                      stiffness: 400,
                       duration: 1.5,
                       repeat: Infinity,
                       delay: idx * 0.1,
@@ -277,7 +277,7 @@ export function UnifiedThemeSwitcher() {
                   <span style={{ color: theme.colors.purple }}>const</span>{' '}
                   <span style={{ color: theme.colors.blue }}>theme</span>{' '}
                   <span style={{ color: theme.colors.text }}>=</span>{' '}
-                  <span style={{ color: theme.colors.green }}>'{theme.name}'</span>
+                  <span style={{ color: theme.colors.green }}>&apos;{theme.name}&apos;</span>
                 </motion.div>
                 <motion.div
                   variants={{
@@ -286,7 +286,7 @@ export function UnifiedThemeSwitcher() {
                   }}
                   transition={{ delay: 0.1 }}
                 >
-                  <span style={{ color: theme.colors.textSecondary }}>// {theme.description}</span>
+                  <span style={{ color: theme.colors.textSecondary }}>{/* {theme.description} */}</span>
                 </motion.div>
                 <motion.div
                   variants={{
@@ -297,7 +297,7 @@ export function UnifiedThemeSwitcher() {
                 >
                   <span style={{ color: theme.colors.orange }}>console</span>.
                   <span style={{ color: theme.colors.blue }}>log</span>(
-                  <span style={{ color: theme.colors.green }}>'Beautiful!'</span>)
+                  <span style={{ color: theme.colors.green }}>&apos;Beautiful!&apos;</span>)
                 </motion.div>
               </motion.div>
 

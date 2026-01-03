@@ -49,11 +49,26 @@ type ViewMode = 'grid' | 'list' | 'network'
 export function SkillsTab() {
   const { t } = useLanguage()
   const { portfolioSettings } = useAppStore()
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    primary: true,
-    additional: true,
-    tools: true,
-  })
+  
+  // Initialize expanded sections based on actual category names
+  const getInitialExpandedSections = () => {
+    const categories = [
+      'FRONTEND LANGUAGES',
+      'PROGRAMMING LANGUAGES',
+      'FRAMEWORKS AND LIBRARIES',
+      'VERSION CONTROL',
+      'TOOLS',
+      'AREAS OF EXPERTISE',
+    ]
+    const initial: Record<string, boolean> = {}
+    categories.forEach(cat => {
+      const key = cat.toLowerCase().replace(/\s+/g, '-')
+      initial[key] = true
+    })
+    return initial
+  }
+  
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(getInitialExpandedSections())
   const [searchQuery, setSearchQuery] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -235,7 +250,7 @@ export function SkillsTab() {
   const toggleSection = (sectionName: string) => {
     setExpandedSections((prev) => ({
       ...prev,
-      [sectionName]: !prev[sectionName],
+      [sectionName]: !(prev[sectionName] ?? true), // Default to true if not set
     }))
   }
 

@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { ExternalLink, Github, Calendar } from 'lucide-react'
 import { useAppStore } from '@/lib/store'
-import { staggerItem, useMotionConfig } from '@/lib/motionConfig'
+import { staggerItem, useMotionConfig, advancedStaggerItem, smoothFade } from '@/lib/motionConfig'
 
 interface Project {
   id: string
@@ -67,7 +67,7 @@ export function EnhancedProjectCard({ project, onCardClick, index = 0 }: Enhance
       layoutId={`project-card-${project.id}`}
       initial="hidden"
       animate="visible"
-      variants={variants(staggerItem, portfolioSettings.showAnimations)}
+      variants={variants(advancedStaggerItem, portfolioSettings.showAnimations)}
       style={{
         rotateX,
         rotateY,
@@ -76,44 +76,96 @@ export function EnhancedProjectCard({ project, onCardClick, index = 0 }: Enhance
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={() => onCardClick(project)}
-      className="group relative cursor-pointer"
-      whileHover={{ scale: 1.03, z: 50 }}
+      className="group relative cursor-pointer preserve-3d"
+      whileHover={{ scale: 1.05, z: 50, y: -8 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
     >
-      {/* Glow border effect */}
+      {/* Enhanced Glow border effect with animation */}
       <motion.div
-        className="absolute -inset-0.5 rounded-xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-300"
+        className="absolute -inset-1 rounded-xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500"
         style={{
-          background: 'linear-gradient(135deg, rgba(0, 122, 204, 0.4), rgba(0, 122, 204, 0.1))',
+          background: 'linear-gradient(135deg, rgba(0, 122, 204, 0.6), rgba(0, 122, 204, 0.2), rgba(0, 122, 204, 0.4))',
+          backgroundSize: '200% 200%',
+        }}
+        animate={{
+          backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: 'linear',
         }}
       />
       
-      {/* Card container */}
-      <div className="relative bg-vscode-sidebar border border-vscode-border rounded-xl p-5 h-full flex flex-col overflow-hidden transition-all duration-300 group-hover:border-vscode-blue/50 group-hover:shadow-2xl group-hover:shadow-vscode-blue/20">
-        {/* Project Image */}
+      {/* Additional subtle glow layer */}
+      <motion.div
+        className="absolute -inset-0.5 rounded-xl opacity-0 group-hover:opacity-60 blur-xl transition-opacity duration-500"
+        style={{
+          background: 'radial-gradient(circle, rgba(0, 122, 204, 0.4) 0%, transparent 70%)',
+        }}
+      />
+      
+      {/* Card container with enhanced effects */}
+      <div className="relative bg-vscode-sidebar border border-vscode-border rounded-xl p-5 h-full flex flex-col overflow-hidden transition-all duration-500 group-hover:border-vscode-blue/70 group-hover:shadow-2xl group-hover:shadow-vscode-blue/30 border-glow">
+        {/* Project Image with enhanced effects */}
         {project.image ? (
-          <div className="relative w-full h-48 mb-4 rounded-lg overflow-hidden">
+          <motion.div 
+            className="relative w-full h-48 mb-4 rounded-lg overflow-hidden"
+            whileHover={{ scale: 1.02 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+          >
             <motion.img
               src={project.image}
               alt={project.title}
               className="w-full h-full object-cover"
-              whileHover={{ scale: 1.1 }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
+              whileHover={{ scale: 1.15 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-vscode-sidebar/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </div>
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-t from-vscode-sidebar/90 via-vscode-sidebar/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
+            />
+            {/* Shimmer effect on hover */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
+              animate={{
+                x: ['-100%', '100%'],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                repeatDelay: 2,
+                ease: 'easeInOut',
+              }}
+            />
+          </motion.div>
         ) : (
-          <div className="relative w-full h-48 mb-4 rounded-lg bg-gradient-to-br from-vscode-blue/20 to-vscode-blue/5 flex items-center justify-center">
-            <div className="text-6xl opacity-20">💻</div>
-          </div>
+          <motion.div 
+            className="relative w-full h-48 mb-4 rounded-lg bg-gradient-to-br from-vscode-blue/20 via-vscode-blue/10 to-vscode-blue/5 flex items-center justify-center animate-gradient"
+            whileHover={{ scale: 1.02 }}
+          >
+            <motion.div 
+              className="text-6xl opacity-20"
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              💻
+            </motion.div>
+          </motion.div>
         )}
 
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <h3 className="font-bold text-vscode-text text-lg leading-tight line-clamp-2 group-hover:text-vscode-blue transition-colors">
+        {/* Header with enhanced animation */}
+        <motion.div 
+          className="flex items-start justify-between gap-2 mb-3"
+          whileHover={{ x: 2 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.h3 
+            className="font-bold text-vscode-text text-lg leading-tight line-clamp-2 group-hover:text-vscode-blue transition-colors relative z-10"
+            whileHover={{ scale: 1.02 }}
+          >
             {project.title}
-          </h3>
-        </div>
+          </motion.h3>
+        </motion.div>
 
         {/* Description */}
         <p className="text-vscode-text-secondary text-sm leading-relaxed mb-4 line-clamp-3 flex-1">

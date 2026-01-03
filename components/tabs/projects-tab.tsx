@@ -16,6 +16,7 @@ import {
 import { EnhancedProjectCard } from '@/components/projects/enhanced-project-card'
 import { ProjectDetailModal } from '@/components/projects/project-detail-modal'
 import { useScrollAnimation } from '@/hooks/useScrollAnimation'
+import { portfolioData } from '@/lib/portfolio-data'
 
 interface Project {
   id: string
@@ -29,14 +30,43 @@ interface Project {
   period?: string
 }
 
-const projects: Project[] = [
-  {
-    id: '1',
-    title: 'Aurex (Augmented Risk and Audit Analytics)',
-    description: 'Developed a cloud-based analytics platform integrating risk management, audit management, and continuous audit processes. Leveraged Angular for front-end visualization and implemented secure, responsive reporting dashboards with seamless data integration.',
-    technologies: ['Angular', 'TypeScript', 'D3.js', 'Angular Material', 'WebSockets', 'RESTful APIs'],
-    period: 'Sep 2022 – Present',
-    codePreview: `// Angular component for dashboard visualization
+
+type SortOption = 'title-asc' | 'title-desc' | 'period-desc' | 'period-asc'
+type ViewMode = 'grid' | 'list'
+
+export function ProjectsTab() {
+  const { t } = useLanguage()
+  const { portfolioSettings } = useAppStore()
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<SortOption>('period-desc')
+  const [viewMode, setViewMode] = useState<ViewMode>(portfolioSettings.gridLayout as ViewMode || 'grid')
+  const { variants } = useMotionConfig(portfolioSettings.animationSpeed)
+  
+  // Scroll-triggered animations
+  const headerRef = useScrollAnimation({ once: true, amount: 0.3 })
+  const descriptionRef = useScrollAnimation({ once: true, amount: 0.3 })
+  const gridRef = useScrollAnimation({ once: false, amount: 0.2 })
+
+  // Map portfolioData projects to Project interface (inside component for reactivity)
+  const projects: Project[] = useMemo(() => {
+    if (!portfolioData?.projects || portfolioData.projects.length === 0) {
+      return []
+    }
+    
+    return portfolioData.projects.map((project: any) => ({
+      id: project.id || '',
+      title: project.title || project.name || 'Untitled Project',
+      description: project.description || '',
+      technologies: project.technologies || [],
+      period: project.period || '',
+      githubUrl: project.githubUrl,
+      liveUrl: project.liveUrl || project.url,
+      codePreview: project.codePreview,
+      image: project.image,
+      // Add code preview for Aurex project
+      ...(project.id === '1' && {
+        codePreview: `// Angular component for dashboard visualization
 import { Component, OnInit } from '@angular/core';
 import { DashboardService } from './dashboard.service';
 
@@ -57,25 +87,9 @@ export class AurexDashboardComponent implements OnInit {
       .subscribe(data => this.updateVisualizations(data));
   }
 }`,
-  },
-]
-
-type SortOption = 'title-asc' | 'title-desc' | 'period-desc' | 'period-asc'
-type ViewMode = 'grid' | 'list'
-
-export function ProjectsTab() {
-  const { t } = useLanguage()
-  const { portfolioSettings } = useAppStore()
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<SortOption>('period-desc')
-  const [viewMode, setViewMode] = useState<ViewMode>(portfolioSettings.gridLayout as ViewMode || 'grid')
-  const { variants } = useMotionConfig(portfolioSettings.animationSpeed)
-  
-  // Scroll-triggered animations
-  const headerRef = useScrollAnimation({ once: true, amount: 0.3 })
-  const descriptionRef = useScrollAnimation({ once: true, amount: 0.3 })
-  const gridRef = useScrollAnimation({ once: false, amount: 0.2 })
+      }),
+    }))
+  }, [])
 
   // Filter and sort projects
   const filteredAndSortedProjects = useMemo(() => {
@@ -119,7 +133,7 @@ export function ProjectsTab() {
     })
 
     return sorted
-  }, [searchQuery, sortBy])
+  }, [projects, searchQuery, sortBy])
 
   return (
       <motion.div 

@@ -699,6 +699,7 @@ export function AdvancedAIAssistant({ onClose }: { onClose: () => void }) {
     }
 
     return { content, suggestions, quickActions, navigateTo, intent, sentiment }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recognizeIntent, extractEntities, analyzeSentiment, detectVisitorProfile, customizeTone])
 
   // NLG: Response Generators

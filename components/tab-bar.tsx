@@ -8,8 +8,6 @@ export function TabBar() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useAppStore()
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({})
 
-  if (tabs.length === 0) return null
-
   // Keyboard navigation for tabs
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -26,6 +24,8 @@ export function TabBar() {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [tabs, setActiveTab])
+
+  if (tabs.length === 0) return null
 
   const handleKeyDown = (e: React.KeyboardEvent, tabId: string) => {
     if (e.key === 'Enter' || e.key === ' ') {

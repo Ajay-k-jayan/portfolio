@@ -45,9 +45,10 @@ export const portfolioData = {
       id: '1',
       name: 'Aurex (Augmented Risk and Audit Analytics)',
       title: 'Aurex (Augmented Risk and Audit Analytics)',
-      description: 'Cloud-based platform that integrates risk management, audit management, and audit analytics',
+      description: 'Developed a cloud-based analytics platform integrating risk management, audit management, and continuous audit processes. Leveraged Angular for front-end visualization and implemented secure, responsive reporting dashboards with seamless data integration.',
       period: 'Sep 2022 – Present',
-      technologies: ['Angular', 'TypeScript', 'D3.js', 'WebSockets'],
+      technologies: ['Angular', 'TypeScript', 'D3.js', 'Angular Material', 'WebSockets', 'RESTful APIs'],
+      githubUrl: 'https://github.com/Ajay-k-jayan',
     },
   ],
   education: {

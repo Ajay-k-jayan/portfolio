@@ -18,7 +18,13 @@ import {
   staggerContainer, 
   staggerItemLeft, 
   staggerItem,
-  useMotionConfig 
+  useMotionConfig,
+  advancedStaggerContainer,
+  advancedStaggerItem,
+  smoothFade,
+  magneticHover,
+  zoomFade,
+  slideFadeRotate
 } from '@/lib/motionConfig'
 
 export function WelcomeTab() {
@@ -165,6 +171,7 @@ export function WelcomeTab() {
     }
     
     return items
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recentlySelected, setActiveMenuItem])
 
   // Walkthroughs - VS Code style cards
@@ -223,79 +230,124 @@ export function WelcomeTab() {
   ]
 
   return (
-    <div className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto">
+    <motion.div 
+      className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto"
+      variants={variants(smoothFade, portfolioSettings.showAnimations)}
+      initial="hidden"
+      animate="visible"
+    >
       {/* VS Code Welcome Screen Design */}
       <div className="max-w-7xl mx-auto p-6">
-        {/* Welcome Header */}
+        {/* Welcome Header with Advanced Animation */}
         <motion.div
-          variants={variants(slideDown, portfolioSettings.showAnimations)}
+          variants={variants(slideFadeRotate, portfolioSettings.showAnimations)}
           initial="hidden"
           animate="visible"
-          className="mb-12"
+          className="mb-12 relative"
         >
-          <h1 className="text-4xl font-normal text-vscode-text mb-2" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
+          {/* Glow effect behind header */}
+          <motion.div
+            className="absolute -inset-4 bg-vscode-blue/10 blur-3xl rounded-full opacity-0"
+            animate={{
+              opacity: [0, 0.3, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+          <h1 className="text-4xl font-normal text-vscode-text mb-2 relative z-10" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
             {t('welcomeToPortfolio')} {portfolioData.profile.name}&apos;s Portfolio
           </h1>
-          <p className="text-base text-vscode-text-secondary" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
+          <motion.p 
+            className="text-base text-vscode-text-secondary relative z-10" 
+            style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}
+            variants={variants(smoothFade, portfolioSettings.showAnimations)}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.2 }}
+          >
             {portfolioData.profile.subtitle}
-          </p>
+          </motion.p>
         </motion.div>
 
         {/* Main Two-Column Layout - VS Code Style */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Left Column - Start & Recent */}
           <div className="lg:col-span-2 space-y-10">
-            {/* Start Section */}
+            {/* Start Section with Advanced Animations */}
             <motion.div
-              variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+              variants={variants(advancedStaggerContainer, portfolioSettings.showAnimations)}
               initial="hidden"
               animate="visible"
             >
-              <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
+              <motion.h2 
+                className="text-2xl font-normal text-vscode-text mb-6" 
+                style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}
+                variants={variants(smoothFade, portfolioSettings.showAnimations)}
+              >
                 {t('start')}
-              </h2>
+              </motion.h2>
               <div className="space-y-1">
-                {startActions.map((action) => {
+                {startActions.map((action, index) => {
                   const Icon = action.icon
                   return (
                     <motion.button
                       key={action.id}
                       onClick={action.action}
-                      variants={variants(staggerItemLeft, portfolioSettings.showAnimations)}
-                      className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-colors group flex items-center gap-3"
+                      variants={variants(advancedStaggerItem, portfolioSettings.showAnimations)}
+                      custom={index}
+                      className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-all group flex items-center gap-3 relative overflow-hidden"
                       style={{
                         color: currentTheme?.colors?.blue || '#007acc',
                         fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)',
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--vscode-hover, rgba(255,255,255,0.1))'
+                      whileHover={{ 
+                        scale: 1.02,
+                        x: 4,
+                        transition: { duration: 0.2 }
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                      }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <Icon 
-                        size={18} 
-                        className="flex-shrink-0"
-                        style={{ color: currentTheme?.colors?.blue || '#007acc' }}
+                      {/* Hover glow effect */}
+                      <motion.div
+                        className="absolute inset-0 bg-vscode-blue/5 opacity-0"
+                        whileHover={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
                       />
-                      <span className="text-sm font-normal">{action.label}</span>
+                      <motion.div
+                        variants={variants(magneticHover, portfolioSettings.showAnimations)}
+                        whileHover="hover"
+                      >
+                        <Icon 
+                          size={18} 
+                          className="flex-shrink-0 relative z-10"
+                          style={{ color: currentTheme?.colors?.blue || '#007acc' }}
+                        />
+                      </motion.div>
+                      <span className="text-sm font-normal relative z-10">{action.label}</span>
                     </motion.button>
                   )
                 })}
               </div>
             </motion.div>
 
-            {/* Recent Section */}
+            {/* Recent Section with Advanced Animations */}
             {mounted && portfolioSettings.showRecentItems && (
             <motion.div
-              variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+              variants={variants(advancedStaggerContainer, portfolioSettings.showAnimations)}
               initial="hidden"
               animate="visible"
             >
-              <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
+              <motion.h2 
+                className="text-2xl font-normal text-vscode-text mb-6" 
+                style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}
+                variants={variants(smoothFade, portfolioSettings.showAnimations)}
+              >
                 {t('recent')}
-              </h2>
+              </motion.h2>
               <div className="space-y-1">
                 {recentItems.length > 0 ? (
                   <>
@@ -305,56 +357,73 @@ export function WelcomeTab() {
                         <motion.button
                           key={index}
                           onClick={item.action}
-                          variants={variants(staggerItemLeft, portfolioSettings.showAnimations)}
-                          className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-colors group"
+                          variants={variants(advancedStaggerItem, portfolioSettings.showAnimations)}
+                          custom={index}
+                          className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-all group relative overflow-hidden"
                           style={{
                             fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)',
                           }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = 'var(--vscode-hover, rgba(255,255,255,0.1))'
+                          whileHover={{ 
+                            scale: 1.02,
+                            x: 4,
+                            transition: { duration: 0.2 }
                           }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent'
-                          }}
+                          whileTap={{ scale: 0.98 }}
                         >
-                          <div className="flex items-center gap-3 mb-0.5">
-                            <Icon 
-                              size={16} 
-                              className="flex-shrink-0"
-                              style={{ color: currentTheme?.colors?.blue || '#007acc' }}
-                            />
+                          {/* Hover glow effect */}
+                          <motion.div
+                            className="absolute inset-0 bg-vscode-blue/5 opacity-0"
+                            whileHover={{ opacity: 1 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                          <div className="flex items-center gap-3 mb-0.5 relative z-10">
+                            <motion.div
+                              variants={variants(magneticHover, portfolioSettings.showAnimations)}
+                              whileHover="hover"
+                            >
+                              <Icon 
+                                size={16} 
+                                className="flex-shrink-0"
+                                style={{ color: currentTheme?.colors?.blue || '#007acc' }}
+                              />
+                            </motion.div>
                             <span 
                               className="text-sm font-normal"
                               style={{ color: currentTheme?.colors?.blue || '#007acc' }}
                             >
-                                    {item.name}
-                                  </span>
-                                </div>
+                              {item.name}
+                            </span>
+                          </div>
                           <div 
-                            className="text-xs ml-7 text-vscode-text-secondary truncate"
+                            className="text-xs ml-7 text-vscode-text-secondary truncate relative z-10"
                             style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}
                           >
-                                  {item.path}
-                                </div>
+                            {item.path}
+                          </div>
                         </motion.button>
                       )
                     })}
                     <motion.button
-                      variants={variants(staggerItemLeft, portfolioSettings.showAnimations)}
-                      className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-colors mt-1"
-                style={{
+                      variants={variants(advancedStaggerItem, portfolioSettings.showAnimations)}
+                      className="w-full text-left px-3 py-2.5 rounded hover:bg-vscode-hover transition-all mt-1 relative overflow-hidden"
+                      style={{
                         color: currentTheme?.colors?.blue || '#007acc',
                         fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)',
                       }}
                       onClick={() => setActiveMenuItem('file-explore')}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--vscode-hover, rgba(255,255,255,0.1))'
+                      whileHover={{ 
+                        scale: 1.02,
+                        x: 4,
+                        transition: { duration: 0.2 }
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent'
-                      }}
+                      whileTap={{ scale: 0.98 }}
                     >
-                      <span className="text-sm font-normal">{t('more')}</span>
+                      <motion.div
+                        className="absolute inset-0 bg-vscode-blue/5 opacity-0"
+                        whileHover={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                      <span className="text-sm font-normal relative z-10">{t('more')}</span>
                     </motion.button>
                   </>
                 ) : (
@@ -369,33 +438,46 @@ export function WelcomeTab() {
             )}
           </div>
 
-          {/* Right Column - Walkthroughs */}
+          {/* Right Column - Walkthroughs with Advanced Animations */}
           <motion.div
             className="lg:col-span-1"
-            variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+            variants={variants(advancedStaggerContainer, portfolioSettings.showAnimations)}
             initial="hidden"
             animate="visible"
           >
-            <h2 className="text-2xl font-normal text-vscode-text mb-6" style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}>
+            <motion.h2 
+              className="text-2xl font-normal text-vscode-text mb-6" 
+              style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}
+              variants={variants(smoothFade, portfolioSettings.showAnimations)}
+            >
               Walkthroughs
-            </h2>
+            </motion.h2>
             <div className="space-y-3">
-              {walkthroughs.map((walkthrough) => {
+              {walkthroughs.map((walkthrough, index) => {
                 const Icon = walkthrough.icon
                 return (
                   <motion.button
                     key={walkthrough.id}
                     onClick={walkthrough.action}
-                    variants={variants(staggerItem, portfolioSettings.showAnimations)}
-                    className="w-full text-left p-4 bg-vscode-sidebar border border-vscode-border rounded hover:border-vscode-blue/50 transition-all group relative"
+                    variants={variants(advancedStaggerItem, portfolioSettings.showAnimations)}
+                    custom={index}
+                    className="w-full text-left p-4 bg-vscode-sidebar border border-vscode-border rounded hover:border-vscode-blue/50 transition-all group relative overflow-hidden"
                     style={{ fontFamily: 'var(--vscode-font-family, "Segoe UI", sans-serif)' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(0, 122, 204, 0.5)'
+                    whileHover={{ 
+                      scale: 1.03,
+                      y: -2,
+                      borderColor: 'rgba(0, 122, 204, 0.5)',
+                      boxShadow: '0 10px 30px rgba(0, 122, 204, 0.2)',
+                      transition: { duration: 0.2 }
                     }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'var(--vscode-border, rgba(255,255,255,0.1))'
-                    }}
+                    whileTap={{ scale: 0.98 }}
                   >
+                    {/* Glow effect on hover */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-vscode-blue/10 via-vscode-blue/5 to-transparent opacity-0"
+                      whileHover={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
                     {/* Star icon for highlighted items */}
                     {walkthrough.highlighted && (
                       <div 
@@ -413,30 +495,35 @@ export function WelcomeTab() {
               </div>
             )}
 
-                    <div className="flex items-start gap-3 pr-8">
-                      <div 
+                    <div className="flex items-start gap-3 pr-8 relative z-10">
+                      <motion.div 
                         className={`p-2 rounded flex-shrink-0 ${
                           walkthrough.highlighted ? 'bg-vscode-blue/20' : 'bg-vscode-active'
                         }`}
+                        whileHover={{ 
+                          scale: 1.1,
+                          rotate: [0, -5, 5, 0],
+                          transition: { duration: 0.3 }
+                        }}
                       >
                         <Icon 
                           size={18} 
-                style={{
+                          style={{
                             color: walkthrough.highlighted 
                               ? (currentTheme?.colors?.blue || '#007acc')
                               : 'var(--vscode-text-secondary, #858585)'
                           }}
                         />
-                  </div>
+                      </motion.div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-normal mb-1 text-vscode-text group-hover:text-vscode-blue transition-colors">
                           {walkthrough.title}
                         </h3>
                         <p className="text-xs leading-relaxed text-vscode-text-secondary">
                           {walkthrough.description}
-                  </p>
-                </div>
-              </div>
+                        </p>
+                      </div>
+                    </div>
                   </motion.button>
                 )
               })}
@@ -444,6 +531,6 @@ export function WelcomeTab() {
           </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

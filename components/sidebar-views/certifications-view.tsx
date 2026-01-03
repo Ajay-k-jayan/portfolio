@@ -249,7 +249,7 @@ export function CertificationsView() {
             <div className="flex items-center gap-1 ml-4">
               <ViewSwitcher
                 viewMode={viewMode}
-                onViewChange={(mode) => setViewMode(mode)}
+                onViewChange={(mode) => setViewMode(mode as ViewMode)}
                 options="grid-list"
               />
             </div>

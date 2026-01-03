@@ -94,7 +94,7 @@ const fileStructure: FileItem[] = [
       {
         name: 'assets',
         type: 'folder',
-        icon: <Image size={16} />,
+        icon: <Image size={16} aria-label="Assets folder" />,
         children: [
           {
             name: 'resume.pdf',
@@ -274,7 +274,7 @@ export function FileExplorer() {
               content: (
                 <CodeViewer
                   language={profileFile.language || 'plaintext'}
-                  code={profileFile.code}
+                  code={profileFile.code || ''}
                 />
               ),
             })

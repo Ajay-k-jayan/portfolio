@@ -65,7 +65,7 @@ export default function NotFound() {
                   Page Not Found
                 </h2>
                 <p className="text-base md:text-lg text-vscode-text-secondary max-w-xl mx-auto">
-                  The page you're looking for doesn't exist or has been moved.
+                  The page you&apos;re looking for doesn&apos;t exist or has been moved.
                 </p>
               </motion.div>
 

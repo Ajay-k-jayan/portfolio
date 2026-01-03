@@ -389,6 +389,346 @@ export const getVariants = (
 }
 
 /**
+ * Advanced Page Transition with Blur
+ * Smooth fade with blur effect for page changes
+ */
+export const advancedPageTransition: Variants = {
+  initial: {
+    opacity: 0,
+    y: 30,
+    scale: 0.96,
+    filter: 'blur(10px)',
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: {
+      ...baseTransition,
+      duration: 0.6,
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -20,
+    scale: 0.98,
+    filter: 'blur(8px)',
+    transition: {
+      ...fastTransition,
+      duration: 0.3,
+    },
+  },
+}
+
+/**
+ * Magnetic Hover Effect
+ * For interactive elements that respond to mouse
+ */
+export const magneticHover: Variants = {
+  rest: {
+    scale: 1,
+    rotate: 0,
+  },
+  hover: {
+    scale: 1.05,
+    rotate: [0, -2, 2, -2, 0],
+    transition: {
+      type: 'spring',
+      stiffness: 400,
+      damping: 17,
+    },
+  },
+  tap: {
+    scale: 0.95,
+  },
+}
+
+/**
+ * Glow Pulse Animation
+ * For elements that need a glowing effect
+ */
+export const glowPulse: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.8,
+  },
+  visible: {
+    opacity: [0.5, 1, 0.5],
+    scale: [1, 1.05, 1],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: 'easeInOut',
+    },
+  },
+}
+
+/**
+ * Shimmer Effect
+ * For loading states and highlights
+ */
+export const shimmer: Variants = {
+  hidden: {
+    opacity: 0,
+    x: -100,
+  },
+  visible: {
+    opacity: [0, 1, 0],
+    x: [0, 200, 0],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: 'linear',
+    },
+  },
+}
+
+/**
+ * Advanced Stagger Container with Enhanced Timing
+ */
+export const advancedStaggerContainer: Variants = {
+  hidden: {
+    opacity: 0,
+  },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.15,
+      when: 'beforeChildren',
+    },
+  },
+  exit: {
+    opacity: 0,
+    transition: {
+      staggerChildren: 0.03,
+      staggerDirection: -1,
+    },
+  },
+}
+
+/**
+ * Advanced Stagger Item with Multiple Properties
+ */
+export const advancedStaggerItem: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+    scale: 0.9,
+    filter: 'blur(8px)',
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: {
+      ...baseTransition,
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -20,
+    scale: 0.95,
+    filter: 'blur(4px)',
+    transition: {
+      ...fastTransition,
+      duration: 0.2,
+    },
+  },
+}
+
+/**
+ * Parallax Effect
+ * For depth and layering
+ */
+export const parallax: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 50,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      ...slowTransition,
+      duration: 0.8,
+    },
+  },
+}
+
+/**
+ * Glassmorphism Fade
+ * For glass-like effects
+ */
+export const glassmorphism: Variants = {
+  hidden: {
+    opacity: 0,
+    backdropFilter: 'blur(0px)',
+    scale: 0.95,
+  },
+  visible: {
+    opacity: 1,
+    backdropFilter: 'blur(10px)',
+    scale: 1,
+    transition: {
+      ...baseTransition,
+      duration: 0.6,
+    },
+  },
+}
+
+/**
+ * Smooth Fade Transition
+ * Ultra-smooth fade with scale
+ */
+export const smoothFade: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.98,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    transition: {
+      duration: 0.3,
+      ease: [0.55, 0.06, 0.68, 0.19],
+    },
+  },
+}
+
+/**
+ * Elastic Bounce
+ * Playful bounce effect
+ */
+export const elasticBounce: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.3,
+    y: -50,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: 'spring',
+      stiffness: 500,
+      damping: 25,
+      mass: 1,
+    },
+  },
+}
+
+/**
+ * Slide Fade with Rotation
+ * Advanced slide with subtle rotation
+ */
+export const slideFadeRotate: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 30,
+    rotateX: -15,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    transition: {
+      ...baseTransition,
+      duration: 0.6,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -20,
+    rotateX: 15,
+    transition: fastTransition,
+  },
+}
+
+/**
+ * Zoom Fade
+ * Zoom in with fade
+ */
+export const zoomFade: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.8,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      ...baseTransition,
+      duration: 0.5,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 1.1,
+    transition: fastTransition,
+  },
+}
+
+/**
+ * Flip Animation
+ * 3D flip effect
+ */
+export const flip: Variants = {
+  hidden: {
+    opacity: 0,
+    rotateY: -90,
+  },
+  visible: {
+    opacity: 1,
+    rotateY: 0,
+    transition: {
+      ...baseTransition,
+      duration: 0.6,
+    },
+  },
+  exit: {
+    opacity: 0,
+    rotateY: 90,
+    transition: fastTransition,
+  },
+}
+
+/**
+ * Wave Animation
+ * For sequential reveal
+ */
+export const wave: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+  },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.1,
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  }),
+}
+
+/**
  * Hook to get animation configuration
  */
 export const useMotionConfig = (animationSpeed?: 'fast' | 'normal' | 'slow') => {

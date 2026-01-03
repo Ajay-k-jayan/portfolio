@@ -15,13 +15,19 @@ import { portfolioData } from '@/lib/portfolio-data'
 import { ViewSwitcher } from '@/components/ui/view-switcher'
 import { useLanguage } from '@/contexts/language-context'
 import { 
-  pageTransition, 
+  advancedPageTransition, 
   staggerContainer, 
   staggerItem,
   staggerItemLeft,
   slideUp,
   slideDown,
-  useMotionConfig 
+  useMotionConfig,
+  advancedStaggerContainer,
+  advancedStaggerItem,
+  smoothFade,
+  magneticHover,
+  zoomFade,
+  slideFadeRotate
 } from '@/lib/motionConfig'
 
 interface GitHubData {
@@ -350,32 +356,52 @@ export const ContactTab = memo(function ContactTab() {
   return (
     <motion.div 
       className="h-full w-full bg-vscode-bg text-vscode-text overflow-auto"
-      variants={variants(pageTransition, portfolioSettings.showAnimations)}
+      variants={variants(advancedPageTransition, portfolioSettings.showAnimations)}
       initial="initial"
       animate="animate"
       exit="exit"
     >
       <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-6">
+        {/* Header with Advanced Animations */}
+        <motion.div 
+          className="mb-6"
+          variants={variants(smoothFade, portfolioSettings.showAnimations)}
+          initial="hidden"
+          animate="visible"
+        >
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-3xl font-bold text-vscode-text flex items-center gap-2">
-                  <MessageSquare className="text-vscode-blue" size={20} />
+              <motion.div 
+                className="flex items-center gap-3 mb-1"
+                variants={variants(slideFadeRotate, portfolioSettings.showAnimations)}
+              >
+                <motion.h1 
+                  className="text-3xl font-bold text-vscode-text flex items-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <motion.div
+                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <MessageSquare className="text-vscode-blue" size={20} />
+                  </motion.div>
                   {t('contactAndSocialMedia')}
-                </h1>
-                <div className="relative">
-                  <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm">
+                </motion.h1>
+                <motion.div 
+                  className="relative"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                >
+                  <div className="flex items-center justify-center min-w-[24px] h-6 px-1.5 bg-vscode-blue rounded-full shadow-sm glow-blue">
                     <span className="text-xs font-bold text-white">
                       {totalItems}
                     </span>
                   </div>
                   <motion.div
-                    className="absolute inset-0 bg-vscode-blue rounded-full"
+                    className="absolute inset-0 bg-vscode-blue rounded-full animate-glow-pulse"
                     animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.3, 0, 0.3],
+                      scale: [1, 1.3, 1],
+                      opacity: [0.4, 0, 0.4],
                     }}
                     transition={{
                       duration: 2,
@@ -383,11 +409,15 @@ export const ContactTab = memo(function ContactTab() {
                       ease: "easeInOut"
                     }}
                   />
-                </div>
-              </div>
-              <p className="text-sm text-vscode-text-secondary">
+                </motion.div>
+              </motion.div>
+              <motion.p 
+                className="text-sm text-vscode-text-secondary"
+                variants={variants(smoothFade, portfolioSettings.showAnimations)}
+                transition={{ delay: 0.2 }}
+              >
                 Browse contact methods, social platforms, and professional information organized by category
-              </p>
+              </motion.p>
             </div>
             <div className="flex items-center gap-1 ml-4">
               <ViewSwitcher
@@ -397,7 +427,7 @@ export const ContactTab = memo(function ContactTab() {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Search Bar */}
         <motion.div 
@@ -451,10 +481,10 @@ export const ContactTab = memo(function ContactTab() {
           </button>
         </div>
 
-        {/* Contact Categories */}
+        {/* Contact Categories with Advanced Animations */}
         <motion.div 
           className="space-y-6"
-          variants={variants(staggerContainer, portfolioSettings.showAnimations)}
+          variants={variants(advancedStaggerContainer, portfolioSettings.showAnimations)}
           initial="hidden"
           animate="visible"
         >
@@ -483,7 +513,7 @@ export const ContactTab = memo(function ContactTab() {
                 <motion.div 
                   key={category.name}
                   className="mb-5"
-                  variants={variants(staggerItem, portfolioSettings.showAnimations)}
+                  variants={variants(advancedStaggerItem, portfolioSettings.showAnimations)}
                 >
                   <button
                     onClick={(e) => {
@@ -543,11 +573,19 @@ export const ContactTab = memo(function ContactTab() {
                                     }
                                   }}
                                   aria-label={`${item.name}: ${item.description}`}
-                                  variants={variants(staggerItem, portfolioSettings.showAnimations)}
-                                  className="group relative overflow-hidden rounded-lg border border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/50 hover:bg-vscode-hover transition-all p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-2"
-                                  whileHover={{ scale: 1.02, y: -2 }}
+                                  variants={variants(advancedStaggerItem, portfolioSettings.showAnimations)}
+                                  className="group relative overflow-hidden rounded-lg border border-vscode-border bg-vscode-sidebar hover:border-vscode-blue/70 hover:bg-vscode-hover transition-all p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-vscode-blue focus-visible:ring-offset-2 border-glow"
+                                  whileHover={{ scale: 1.05, y: -4, rotateY: 2 }}
                                   whileTap={{ scale: 0.98 }}
+                                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
                                 >
+                                  {/* Enhanced glow effect */}
+                                  <motion.div
+                                    className="absolute -inset-0.5 rounded-lg opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500"
+                                    style={{
+                                      background: 'linear-gradient(135deg, rgba(0, 122, 204, 0.4), rgba(0, 122, 204, 0.1))',
+                                    }}
+                                  />
                                   <div className="flex items-start gap-3">
                                     <div className={`p-2.5 rounded-lg ${item.bgColor} flex-shrink-0`}>
                                       <Icon size={24} className={item.iconColor} />
