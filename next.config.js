@@ -2,7 +2,28 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['github.com', 'via.placeholder.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.jsdelivr.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.simpleicons.org',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'github.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        pathname: '/**',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
   },
   // Optimize build performance
@@ -17,8 +38,8 @@ const nextConfig = {
   // Performance optimizations
   poweredByHeader: false,
   compress: true,
-  // Optimize output
-  output: 'standalone',
+  // Optimize output - only use standalone in production
+  ...(process.env.NODE_ENV === 'production' ? { output: 'standalone' } : {}),
 }
 
 module.exports = nextConfig

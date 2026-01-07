@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Image from 'next/image'
 import { ChevronDown, ChevronRight, Settings, Clock, Star, CheckCircle2, Search, X, Filter, SortAsc, SortDesc, Download, Award, TrendingUp, Sparkles, Zap, Target, Layers, Grid3x3, List, Info, LayoutGrid, LayoutList, Code, Heart, Network } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { skillWebsites } from '@/lib/skill-websites'
@@ -335,12 +336,14 @@ export function SkillsTab() {
     
     if (imageUrl && !imageError) {
       return (
-        <img
+        <Image
           src={imageUrl}
           alt={`${skillName} logo`}
+          width={64}
+          height={64}
           className="w-full h-full object-contain"
           onError={() => setImageError(true)}
-          loading="lazy"
+          unoptimized
           style={{ filter: 'none' }}
         />
       )
